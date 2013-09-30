@@ -13,7 +13,7 @@ namespace PRISMS
     /// Base classes for functions that can be hard-coded,
     ///   then shared and used elsewhere
 
-    template< template<class> class Container, class InType, class OutType>
+    template< InType, OutType, VarContainer, IndexContainer>
     class PFunctionWriter
     {
     public:

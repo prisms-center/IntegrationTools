@@ -16,6 +16,7 @@
 //#include<istream>
 //#include<cstdlib>
 #include<cstring>
+#include<vector>
 //#include<cmath>
 //#include<stdlib.h>
 //#include<stdio.h>
@@ -24,28 +25,8 @@
 //#include<sstream>
 //#include "../../external/MersenneTwister/MersenneTwister.h"
 
-//using namespace std;
-
-
-#include "BP_Vec.hh"
-//#include "BP_GVec.h"
-//#include "BP_Parse.cc"
-//#include "BP_zParse.h"
-//#include "BP_StopWatch.h"
-//#include "BP_RVG.h"
-//#include "BP_coords.h"
-//#include "BP_Comb.h"
-//#include "BP_useful.h"
-//#include "BP_Plot.h"
-
-using namespace BP;
-
 #include "Poly.hh"
 
-using namespace PRISMS;
-
-//using namespace std;
-//using namespace GiNaC;
 
 class Class
 {
@@ -62,19 +43,16 @@ public:
     }
 };
 
-int main(int argc, char *argv[])
-//int main()
+template<typename T>
+std::ostream& operator<<(std::ostream &sout, const std::vector<T> &v)
 {
+    for( int i=0; i<v.size(); i++)
+        sout << v[i] << " ";
+    return sout;
+}
 
-    /*
-    BP_Vec<string> args;
-    for( int i=0; i<argc; i++)
-    {
-    	cout << argv[i] << " ";
-    	args.add( string(argv[i]));
-    }
-    cout << endl;
-    */
+int main(int argc, char *argv[])
+{
 
     Class A;
 
@@ -85,39 +63,39 @@ int main(int argc, char *argv[])
     A = b;
 
 
-    BP_Vec<double> var;
-    var.add(2.1);
+    std::vector<double> var;
+    var.push_back(2.1);
 
-    Quadratic<BP_Vec> fq;
+    PRISMS::Quadratic<std::vector<double>, std::vector<int> > fq;
 
     std::cout << fq.name() << "  " << fq(var) << std::endl;
 
 
 
-    Cubic<BP_Vec> fc;
+    PRISMS::Cubic<std::vector<double>, std::vector<int> > fc;
 
     std::cout << fc.name() << "  " << fc(var) << std::endl;
 
 
 
-    PBaseFunction<BP_Vec, double, double> *g;
+    PRISMS::PBaseFunction<double, double, std::vector<double>, std::vector<int> > *g;
 
     g = fq.clone();
 
     std::cout << (*g).name() << "  " << (*g)(var) << std::endl;
 
 
-    Quadratic<BP_Vec> *k;
+    PRISMS::Quadratic<std::vector<double>, std::vector<int> > *k;
 
     k = fq.clone();
 
     std::cout << (*k).name() << "  " << (*k)(var) << std::endl;
 
 
-    PFunction<BP_Vec, double, double> h;
+    PRISMS::PFunction<double, double, std::vector<double>, std::vector<int> > h;
     h.set(k);
     std::cout << h.name() << "  " << h(var) << std::endl;
-    h = Cubic<BP_Vec>();
+    h = PRISMS::Cubic<std::vector<double>, std::vector<int> >();
     std::cout << h.name() << "  " << h(var) << std::endl;
 
 

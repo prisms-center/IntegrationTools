@@ -11,22 +11,22 @@ namespace PRISMS
 
     /// Real valued symbolic functions
 
-    template< template<class> class Container>
-    class PComplexSymFunction : public PBaseFunction< Container, complex<double>, complex<double> >
+    template< class VarContainer, class IndexContainer>
+    class PComplexSymFunction : public PBaseFunction< std::complex<double>, std::complex<double>, VarContainer, IndexContainer >
     {
         GiNaC::ex _e;
         std::vector< GiNaC::symbol> _sym;
 
-        complex<double> _val;
-        std::vector< complex<double> > _grad;
-        std::vector< std::vector< complex<double> > > _hess;
+        std::complex<double> _val;
+        std::vector< std::complex<double> > _grad;
+        std::vector< std::vector< std::complex<double> > > _hess;
 
     public:
 
         // ----------------------------------------------------------
         //   Non-Inherited:
 
-        void set(const std::string &name, const Container<GiNaC::symbol> &sym, const GiNaC::ex &e)
+        void set(const std::string &name, const std::vector<GiNaC::symbol> &sym, const GiNaC::ex &e)
         {
             _sym.clear();
             _sym.resize(_sym.size());
@@ -52,34 +52,34 @@ namespace PRISMS
         // ----------------------------------------------------------
         //   Inherited:
 
-        using PBaseFunction< Container, complex<double>, complex<double> >::_name;
-        using PBaseFunction< Container, complex<double>, complex<double> >::_var_name;
+        using PBaseFunction< std::complex<double>, std::complex<double>, VarContainer, IndexContainer >::_name;
+        using PBaseFunction< std::complex<double>, std::complex<double>, VarContainer, IndexContainer >::_var_name;
 
-        virtual PComplexSymFunction<Container> *clone() const
+        virtual PComplexSymFunction<VarContainer, IndexContainer> *clone() const
         {
-            return new PComplexSymFunction<Container>(*this);
+            return new PComplexSymFunction<VarContainer, IndexContainer>(*this);
         };
 
         // ----------------------------------------------------------
         // Use these functions if you want to evaluate a single value
-        complex<double> operator()(const Container< complex<double> > &var) const;
-        complex<double> grad(const Container< complex<double> > &var, int di) const;
-        complex<double> hess(const Container< complex<double> > &var, int di, int dj) const;
+        std::complex<double> operator()(const VarContainer &var) const;
+        std::complex<double> grad(const VarContainer &var, int di) const;
+        std::complex<double> hess(const VarContainer &var, int di, int dj) const;
 
         // ----------------------------------------------------------
         // Use these functions to evaluate several values, then use 'get' methods to access results
-        //virtual void eval(const Container< complex<double> > &var);
-        //virtual void eval_grad( const Container< complex<double> > &var);
-        //virtual void eval_hess( const Container< complex<double> > &var);
+        //virtual void eval(const VarContainer &var);
+        //virtual void eval_grad( const VarContainer &var);
+        //virtual void eval_hess( const VarContainer &var);
 
-        //virtual complex<double> operator()() const;
-        //virtual complex<double> grad(int di) const;
-        //virtual complex<double> hess(int di, int dj) const;
+        //virtual std::complex<double> operator()() const;
+        //virtual std::complex<double> grad(int di) const;
+        //virtual std::complex<double> hess(int di, int dj) const;
 
     };
 
-    template< template<class> class Container>
-    complex<double> PComplexSymFunction<Container>::operator()(const Container< complex<double> > &var) const
+    template< class VarContainer, class IndexContainer>
+    std::complex<double> PComplexSymFunction<VarContainer, IndexContainer>::operator()(const VarContainer &var) const
     {
         GiNaC::exmap m;
         for(int i = 0; i < var.size(); i++)
@@ -91,13 +91,13 @@ namespace PRISMS
         std::cout << m << std::endl;
         std::cout << _e.subs(m) << std::endl;
 
-        return complex<double>(GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(_e.real_part().subs(m))).to_double(),
+        return std::complex<double>(GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(_e.real_part().subs(m))).to_double(),
                                GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(_e.imag_part().subs(m))).to_double());
     }
 
 
-    template< template<class> class Container>
-    complex<double> PComplexSymFunction<Container>::grad(const Container< complex<double> > &var, int di) const
+    template< class VarContainer, class IndexContainer>
+    std::complex<double> PComplexSymFunction<VarContainer, IndexContainer>::grad(const VarContainer &var, int di) const
     {
         GiNaC::ex de = _e.diff(_sym[di]);
 
@@ -110,12 +110,12 @@ namespace PRISMS
         std::cout << m << std::endl;
         std::cout << "de: " << de << " :: " << de.subs(m) << std::endl;
 
-        return complex<double>(GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.real_part().subs(m))).to_double(),
+        return std::complex<double>(GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.real_part().subs(m))).to_double(),
                                GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.imag_part().subs(m))).to_double());
     };
 
-    template< template<class> class Container>
-    complex<double> PComplexSymFunction<Container>::hess(const Container< complex<double> > &var, int di, int dj) const
+    template< class VarContainer, class IndexContainer>
+    std::complex<double> PComplexSymFunction<VarContainer, IndexContainer>::hess(const VarContainer &var, int di, int dj) const
     {
         GiNaC::ex de = _e.diff(_sym[di]).diff(_sym[dj]);
 
@@ -128,19 +128,19 @@ namespace PRISMS
         std::cout << m << std::endl;
         std::cout << "de: " << de << " :: " << de.subs(m) << std::endl;
 
-        return complex<double>(GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.real_part().subs(m))).to_double(),
+        return std::complex<double>(GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.real_part().subs(m))).to_double(),
                                GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.imag_part().subs(m))).to_double());
     };
 
     // ----------------------------------------------------------
     // Use these functions to evaluate several values, then use 'get' methods to access results
-    //virtual void eval(const Container< complex<double> > &var);
-    //virtual void eval_grad( const Container< complex<double> > &var);
-    //virtual void eval_hess( const Container< complex<double> > &var);
+    //virtual void eval(const VarContainer &var);
+    //virtual void eval_grad( const VarContainer &var);
+    //virtual void eval_hess( const VarContainer &var);
 
-    //virtual complex<double> operator()() const;
-    //virtual complex<double> grad(int di) const;
-    //virtual complex<double> hess(int di, int dj) const;
+    //virtual std::complex<double> operator()() const;
+    //virtual std::complex<double> grad(int di) const;
+    //virtual std::complex<double> hess(int di, int dj) const;
 
 }
 

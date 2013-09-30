@@ -12,7 +12,7 @@ namespace PRISMS
     /// Base classes for functions that can be hard-coded,
     ///   then shared and used elsewhere
 
-    template< template<class> class Container, class InType, class OutType>
+    template< class InType, class OutType, class VarContainer, class IndexContainer>
     class PBaseFunction
     {
     public:
@@ -34,39 +34,39 @@ namespace PRISMS
             return;
         };
 
-        virtual PBaseFunction<Container, InType, OutType> *clone() const
+        virtual PBaseFunction<InType, OutType, VarContainer, IndexContainer> *clone() const
         {
-            return new PBaseFunction<Container, InType, OutType>(*this);
+            return new PBaseFunction<InType, OutType, VarContainer, IndexContainer>(*this);
         };
 
         // ----------------------------------------------------------
         // Use these functions if you want to evaluate a single value
-        virtual OutType operator()(const Container<InType> &var) const
+        virtual OutType operator()(const VarContainer &var) const
         {
-            undefined("OutType operator()(const Container<InType> &var)");
+            undefined("OutType operator()(const VarContainer &var)");
         };
-        virtual OutType grad(const Container<InType> &var, int di) const
+        virtual OutType grad(const VarContainer &var, int di) const
         {
-            undefined("OutType grad(const Container<InType> &var, int di)");
+            undefined("OutType grad(const VarContainer &var, int di)");
         };
-        virtual OutType hess(const Container<InType> &var, int di, int dj) const
+        virtual OutType hess(const VarContainer &var, int di, int dj) const
         {
-            undefined("OutType hess(const Container<InType> &var, int di, int dj)");
+            undefined("OutType hess(const VarContainer &var, int di, int dj)");
         };
 
         // ----------------------------------------------------------
         // Use these functions to evaluate several values, then use 'get' methods to access results
-        virtual void eval(const Container<InType> &var)
+        virtual void eval(const VarContainer &var)
         {
-            undefined("void eval()(const Container<InType> &var)");
+            undefined("void eval()(const VarContainer &var)");
         };
-        virtual void eval_grad(const Container<InType> &var)
+        virtual void eval_grad(const VarContainer &var)
         {
-            undefined("void eval_grad( const Container<InType> &var)");
+            undefined("void eval_grad( const VarContainer &var)");
         };
-        virtual void eval_hess(const Container<InType> &var)
+        virtual void eval_hess(const VarContainer &var)
         {
-            undefined("void eval_hess( const Container<InType> &var)");
+            undefined("void eval_hess( const VarContainer &var)");
         };
 
         virtual OutType operator()() const
@@ -89,48 +89,48 @@ namespace PRISMS
         // Use these functions if you want to evaluate a single value
 
         //   use unrolled index
-        virtual OutType basis(int term, const Container<InType> &var) const
+        virtual OutType basis(int term, const VarContainer &var) const
         {
-            undefined("OutType basis(int term, const Container<InType> &var)");
+            undefined("OutType basis(int term, const VarContainer &var)");
         };
-        virtual OutType basis_grad(int term, const Container<InType> &var, int di) const
+        virtual OutType basis_grad(int term, const VarContainer &var, int di) const
         {
-            undefined("OutType basis_grad(int term, const Container<InType> &var, int di)");
+            undefined("OutType basis_grad(int term, const VarContainer &var, int di)");
         };
-        virtual OutType basis_hess(int term, const Container<InType> &var, int di, int dj) const
+        virtual OutType basis_hess(int term, const VarContainer &var, int di, int dj) const
         {
-            undefined("OutType basis_hess(int term, const Container<InType> &var, int di, int dj)");
+            undefined("OutType basis_hess(int term, const VarContainer &var, int di, int dj)");
         };
 
         //   or use tensor indices
-        virtual OutType basis(const Container<int> &term, const Container<InType> &var) const
+        virtual OutType basis(const IndexContainer &term, const VarContainer &var) const
         {
-            undefined("OutType basis(const Container<int> &term, const Container<InType> &var)");
+            undefined("OutType basis(const IndexContainer &term, const VarContainer &var)");
         };
-        virtual OutType basis_grad(const Container<int> &term, const Container<InType> &var, int di) const
+        virtual OutType basis_grad(const IndexContainer &term, const VarContainer &var, int di) const
         {
-            undefined("OutType basis_grad(const Container<int> &term, const Container<InType> &var, int di)");
+            undefined("OutType basis_grad(const IndexContainer &term, const VarContainer &var, int di)");
         };
-        virtual OutType basis_hess(const Container<int> &term, const Container<InType> &var, int di, int dj) const
+        virtual OutType basis_hess(const IndexContainer &term, const VarContainer &var, int di, int dj) const
         {
-            undefined("OutType basis_hess(const Container<int> &term, const Container<InType> &var, int di, int dj)");
+            undefined("OutType basis_hess(const IndexContainer &term, const VarContainer &var, int di, int dj)");
         };
 
         // ----------------------------------------------------------
         // Use these functions to evaluate all basis functions,
         //   then use 'get' methods to access results.
 
-        virtual void eval_basis(const Container<InType> &var)
+        virtual void eval_basis(const VarContainer &var)
         {
-            undefined("void eval_basis( const Container<InType> &var)");
+            undefined("void eval_basis( const VarContainer &var)");
         };
-        virtual void eval_basis_grad(const Container<InType> &var)
+        virtual void eval_basis_grad(const VarContainer &var)
         {
-            undefined("void eval_basis_grad( const Container<InType> &var)");
+            undefined("void eval_basis_grad( const VarContainer &var)");
         };
-        virtual void eval_basis_hess(const Container<InType> &var)
+        virtual void eval_basis_hess(const VarContainer &var)
         {
-            undefined("void eval_basis_hess( const Container<InType> &var)");
+            undefined("void eval_basis_hess( const VarContainer &var)");
         };
 
         //   use unrolled index
@@ -148,17 +148,17 @@ namespace PRISMS
         };
 
         //   or use tensor indices
-        virtual OutType basis(const Container<int> &term) const
+        virtual OutType basis(const IndexContainer &term) const
         {
-            undefined("OutType basis(const Container<int> &term)");
+            undefined("OutType basis(const IndexContainer &term)");
         };
-        virtual OutType basis_grad(const Container<int> &term, int di) const
+        virtual OutType basis_grad(const IndexContainer &term, int di) const
         {
-            undefined("OutType basis_grad(const Container<int> &term, int di)");
+            undefined("OutType basis_grad(const IndexContainer &term, int di)");
         };
-        virtual OutType basis_hess(const Container<int> &term, int di, int dj) const
+        virtual OutType basis_hess(const IndexContainer &term, int di, int dj) const
         {
-            undefined("OutType basis_hess(const Container<int> &term, int di, int dj)");
+            undefined("OutType basis_hess(const IndexContainer &term, int di, int dj)");
         };
 
     private:
@@ -174,8 +174,8 @@ namespace PRISMS
 
 
 
-    template< template<class> class Container, class InType, class OutType>
-    class PFunction : public PBaseFunction<Container, InType, OutType>
+    template< class InType, class OutType, class VarContainer, class IndexContainer>
+    class PFunction : public PBaseFunction<InType, OutType, VarContainer, IndexContainer>
     {
     public:
 
@@ -186,30 +186,30 @@ namespace PRISMS
 
         // ----------------------------------------------------------
         // Use these functions if you want to evaluate a single value
-        OutType operator()(const Container<InType> &var) const
+        OutType operator()(const VarContainer &var) const
         {
             return (*ptr)(var);
         };
-        OutType grad(const Container<InType> &var, int di) const
+        OutType grad(const VarContainer &var, int di) const
         {
             return (*ptr).grad(var, di);
         };
-        OutType hess(const Container<InType> &var, int di, int dj) const
+        OutType hess(const VarContainer &var, int di, int dj) const
         {
             return (*ptr).hess(var, di, dj);
         };
 
         // ----------------------------------------------------------
         // Use these functions to evaluate several values, then use 'get' methods to access results
-        void eval(const Container<InType> &var)
+        void eval(const VarContainer &var)
         {
             return (*ptr).eval(var);
         };
-        void eval_grad(const Container<InType> &var)
+        void eval_grad(const VarContainer &var)
         {
             return (*ptr).eval_grad(var);
         };
-        void eval_hess(const Container<InType> &var)
+        void eval_hess(const VarContainer &var)
         {
             return (*ptr).eval_hess(var);
         };
@@ -235,29 +235,29 @@ namespace PRISMS
         // Use these functions if you want to evaluate a single value
 
         //   use unrolled index
-        virtual OutType basis(int term, const Container<InType> &var) const
+        virtual OutType basis(int term, const VarContainer &var) const
         {
             return (*ptr).basis(term, var);
         };
-        virtual OutType basis_grad(int term, const Container<InType> &var, int di) const
+        virtual OutType basis_grad(int term, const VarContainer &var, int di) const
         {
             return (*ptr).basis_grad(term, var, di);
         };
-        virtual OutType basis_hess(int term, const Container<InType> &var, int di, int dj) const
+        virtual OutType basis_hess(int term, const VarContainer &var, int di, int dj) const
         {
             return (*ptr).basis_hess(term, var, di, dj);
         };
 
         //   or use tensor indices
-        virtual OutType basis(const Container<int> &term, const Container<InType> &var) const
+        virtual OutType basis(const IndexContainer &term, const VarContainer &var) const
         {
             return (*ptr).basis(term, var);
         };
-        virtual OutType basis_grad(const Container<int> &term, const Container<InType> &var, int di) const
+        virtual OutType basis_grad(const IndexContainer &term, const VarContainer &var, int di) const
         {
             return (*ptr).basis_grad(term, var, di);
         };
-        virtual OutType basis_hess(const Container<int> &term, const Container<InType> &var, int di, int dj) const
+        virtual OutType basis_hess(const IndexContainer &term, const VarContainer &var, int di, int dj) const
         {
             return (*ptr).basis_hess(term, var, di, dj);
         };
@@ -266,15 +266,15 @@ namespace PRISMS
         // Use these functions to evaluate all basis functions,
         //   then use 'get' methods to access results.
 
-        virtual void eval_basis(const Container<InType> &var)
+        virtual void eval_basis(const VarContainer &var)
         {
             (*ptr).eval_basis(var);
         };
-        virtual void eval_basis_grad(const Container<InType> &var)
+        virtual void eval_basis_grad(const VarContainer &var)
         {
             (*ptr).eval_basis_grad(var);
         };
-        virtual void eval_basis_hess(const Container<InType> &var)
+        virtual void eval_basis_hess(const VarContainer &var)
         {
             (*ptr).eval_basis_hess(var);
         };
@@ -294,15 +294,15 @@ namespace PRISMS
         };
 
         //   or use tensor indices
-        virtual OutType basis(const Container<int> &term) const
+        virtual OutType basis(const IndexContainer &term) const
         {
             return (*ptr).basis(term);
         };
-        virtual OutType basis_grad(const Container<int> &term, int di) const
+        virtual OutType basis_grad(const IndexContainer &term, int di) const
         {
             return (*ptr).basis_grad(term, di);
         };
-        virtual OutType basis_hess(const Container<int> &term, int di, int dj) const
+        virtual OutType basis_hess(const IndexContainer &term, int di, int dj) const
         {
             return (*ptr).basis_hess(term, di, dj);
         };
@@ -310,9 +310,9 @@ namespace PRISMS
 
         // PFunction unique members ------------------------------------------
 
-        PBaseFunction<Container, InType, OutType> *clone() const
+        PBaseFunction<InType, OutType, VarContainer, IndexContainer> *clone() const
         {
-            return new PBaseFunction<Container, InType, OutType>(*ptr);
+            return new PBaseFunction<InType, OutType, VarContainer, IndexContainer>(*ptr);
         };
 
         PFunction &operator=(const PFunction &RHS)
@@ -333,7 +333,7 @@ namespace PRISMS
             return *this;
         }
 
-        PFunction &set(const PBaseFunction<Container, InType, OutType> *RHS)
+        PFunction &set(const PBaseFunction<InType, OutType, VarContainer, IndexContainer> *RHS)
         {
             if(ptr != NULL)
                 delete ptr;
@@ -360,7 +360,7 @@ namespace PRISMS
         };
 
     private:
-        PBaseFunction<Container, InType, OutType> *ptr;
+        PBaseFunction<InType, OutType, VarContainer, IndexContainer> *ptr;
 
     };
 

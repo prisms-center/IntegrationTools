@@ -10,8 +10,8 @@ namespace PRISMS
 
     /// Real valued symbolic functions
 
-    template< template<class> class Container>
-    class PRealSymFunction : public PBaseFunction< Container, double, double>
+    template<class VarContainer, class IndexContainer>
+    class PRealSymFunction : public PBaseFunction<double, double, VarContainer, IndexContainer>
     {
         GiNaC::ex _e;
         std::vector< GiNaC::symbol> _sym;
@@ -25,7 +25,7 @@ namespace PRISMS
         // ----------------------------------------------------------
         //   Non-Inherited:
 
-        void set(const std::string &name, const Container<GiNaC::symbol> &sym, const GiNaC::ex &e)
+        void set(const std::string &name, const std::vector<GiNaC::symbol> &sym, const GiNaC::ex &e)
         {
             _sym.clear();
             _sym.resize(_sym.size());
@@ -51,25 +51,25 @@ namespace PRISMS
         // ----------------------------------------------------------
         //   Inherited:
 
-        using PBaseFunction< Container, double, double>::_name;
-        using PBaseFunction< Container, double, double>::_var_name;
+        using PBaseFunction<double, double, VarContainer, IndexContainer>::_name;
+        using PBaseFunction<double, double, VarContainer, IndexContainer>::_var_name;
 
-        virtual PRealSymFunction<Container> *clone() const
+        virtual PRealSymFunction<VarContainer, IndexContainer> *clone() const
         {
-            return new PRealSymFunction<Container>(*this);
+            return new PRealSymFunction<VarContainer, IndexContainer>(*this);
         };
 
         // ----------------------------------------------------------
         // Use these functions if you want to evaluate a single value
-        double operator()(const Container<double> &var) const;
-        double grad(const Container<double> &var, int di) const;
-        double hess(const Container<double> &var, int di, int dj) const;
+        double operator()(const VarContainer &var) const;
+        double grad(const VarContainer &var, int di) const;
+        double hess(const VarContainer &var, int di, int dj) const;
 
         // ----------------------------------------------------------
         // Use these functions to evaluate several values, then use 'get' methods to access results
-        //virtual void eval(const Container<double> &var);
-        //virtual void eval_grad( const Container<double> &var);
-        //virtual void eval_hess( const Container<double> &var);
+        //virtual void eval(const VarContainer &var);
+        //virtual void eval_grad( const VarContainer &var);
+        //virtual void eval_hess( const VarContainer &var);
 
         //virtual double operator()() const;
         //virtual double grad(int di) const;
@@ -77,8 +77,8 @@ namespace PRISMS
 
     };
 
-    template< template<class> class Container>
-    double PRealSymFunction<Container>::operator()(const Container<double> &var) const
+    template<class VarContainer, class IndexContainer>
+    double PRealSymFunction<VarContainer, IndexContainer>::operator()(const VarContainer &var) const
     {
         GiNaC::exmap m;
         for(int i = 0; i < var.size(); i++)
@@ -94,8 +94,8 @@ namespace PRISMS
     }
 
 
-    template< template<class> class Container>
-    double PRealSymFunction<Container>::grad(const Container<double> &var, int di) const
+    template<class VarContainer, class IndexContainer>
+    double PRealSymFunction<VarContainer, IndexContainer>::grad(const VarContainer &var, int di) const
     {
         GiNaC::ex de = _e.diff(_sym[di]);
 
@@ -111,8 +111,8 @@ namespace PRISMS
         return GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.subs(m))).to_double();
     };
 
-    template< template<class> class Container>
-    double PRealSymFunction<Container>::hess(const Container<double> &var, int di, int dj) const
+    template<class VarContainer, class IndexContainer>
+    double PRealSymFunction<VarContainer, IndexContainer>::hess(const VarContainer &var, int di, int dj) const
     {
         GiNaC::ex de = _e.diff(_sym[di]).diff(_sym[dj]);
 
@@ -130,9 +130,9 @@ namespace PRISMS
 
     // ----------------------------------------------------------
     // Use these functions to evaluate several values, then use 'get' methods to access results
-    //virtual void eval(const Container<double> &var);
-    //virtual void eval_grad( const Container<double> &var);
-    //virtual void eval_hess( const Container<double> &var);
+    //virtual void eval(const VarContainer &var);
+    //virtual void eval_grad( const VarContainer &var);
+    //virtual void eval_hess( const VarContainer &var);
 
     //virtual double operator()() const;
     //virtual double grad(int di) const;
