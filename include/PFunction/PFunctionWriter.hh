@@ -6,14 +6,12 @@
 #include<iostream>
 #include<vector>
 
-
 namespace PRISMS
 {
 
     /// Base classes for functions that can be hard-coded,
     ///   then shared and used elsewhere
 
-    template< InType, OutType, VarContainer, IndexContainer>
     class PFunctionWriter
     {
     public:
@@ -22,43 +20,62 @@ namespace PRISMS
         std::vector<std::string> _var_name;
         std::vector<std::string> _var_description;
         
-        std::string intype;
-        std::string outtype;
+        std::string _basic_indent;
         
-        std::string f;
-        std::vector<std::string> grad;
-        std::vector< std::vector<std::string> > hess;
+        std::string _intype;
+        std::string _outtype;
         
-        std::vector<std::string> basis;
-        std::vector< std::vector<std::string> > grad_basis;
-        std::vector< std::vector< std::vector<std::string> > > hess_basis;
+        bool _write_f;
+        std::string _f;
+        
+        bool _write_grad;
+        std::vector<std::string> _grad;
+        
+        bool _write_hess;
+        std::vector< std::vector<std::string> > _hess;
+        
+        std::vector<std::string> _basis;
+        std::vector< std::vector<std::string> > _grad_basis;
+        std::vector< std::vector< std::vector<std::string> > > _hess_basis;
         
         // Constructor initializes strings to call 'undefined' message
         PFunctionWriter(const std::string &name);
         
-        // After construction, need to set strings
-        //   set by passing in strings
-        void set_this_and_that();
-        //
-        //   or set by reading an input file
-        void input_file(const std::string &infilename);
+        // After construction, need to set things
+        void set_basic_indent(std::string basic_indent);
+        void set_types(std::string intype, std::string outtype);
+        void f_on();
+        void f_off();
+        void grad_on();
+        void grad_off();
+        void hess_on();
+        void hess_off();
+        void set_var( const std::vector< std::string> &var_name, const std::vector< std::string> &var_description);
         
-        // After setting, then write the new PFunction:
-        write( const std::string &outfilename);
-        write( std::ostream &sout);
+        // Write the PFuntion
+        //   Different styles are possible:
+        
+        void sym_writer( std::string f, std::ostream &sout);
+        void sym2code_writer( const std::string &f, std::ostream &sout);
+        void code_writer( 
+          const std::string &json_str, 
+          std::ostream &sout);
+        void code_writer( 
+          const std::string &f, 
+          const std::vector<std::string> &grad,
+          const std::vector<std::vector< std::string> > &hess,
+          std::ostream &sout);
+        void code_writer( 
+          std::ostream &sout);
+        void autodiff_writer( std::ostream &sout);
+        void series_writer( std::ostream &sout);
 
     private:
-        std::string undefined(std::string declaration) const
-        {
-            // also need to consider indents...
         
-            std::string s;
-            s = "virtual " + declaration + "\n" +
-                "{\n" + 
-                "undefined(\""  + declaration + "\");\n" +
-                "};\n\n";
-            return s;
-        }
+        
+        std::string undefined(std::string declaration) const;
+        
+        std::string indent(int step) const;
 
     };
 
