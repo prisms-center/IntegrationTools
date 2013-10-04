@@ -28,21 +28,6 @@
 #include "Poly.hh"
 
 
-class Class
-{
-public:
-    template<typename T>
-    void operator=(T &variable)
-    {
-        std::cout << "is it not a pointer! " << std::endl;
-    }
-    template<typename T>
-    void operator=(T *&variable)
-    {
-        std::cout << "is it a pointer! " << std::endl;
-    }
-};
-
 template<typename T>
 std::ostream& operator<<(std::ostream &sout, const std::vector<T> &v)
 {
@@ -51,18 +36,10 @@ std::ostream& operator<<(std::ostream &sout, const std::vector<T> &v)
     return sout;
 }
 
+
 int main(int argc, char *argv[])
 {
-
-    Class A;
-
-    double a;
-    double *b;
-
-    A = a;
-    A = b;
-
-
+    
     std::vector<double> var;
     var.push_back(2.1);
 

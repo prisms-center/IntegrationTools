@@ -39,8 +39,6 @@ namespace PRISMS
                 _sym.push_back(sym[i]);
                 _sym[i] = sym[i];
                 _var_name.push_back(_sym[i].get_name());
-                std::cout << "PComplexSymFunction::sym i: " << i << "  sym: " << _sym[i] << "  _var_name: " << _var_name[i] << std::endl;
-
             }
 
             _name = name;
@@ -66,16 +64,6 @@ namespace PRISMS
         std::complex<double> grad(const VarContainer &var, int di) const;
         std::complex<double> hess(const VarContainer &var, int di, int dj) const;
 
-        // ----------------------------------------------------------
-        // Use these functions to evaluate several values, then use 'get' methods to access results
-        //virtual void eval(const VarContainer &var);
-        //virtual void eval_grad( const VarContainer &var);
-        //virtual void eval_hess( const VarContainer &var);
-
-        //virtual std::complex<double> operator()() const;
-        //virtual std::complex<double> grad(int di) const;
-        //virtual std::complex<double> hess(int di, int dj) const;
-
     };
 
     template< class VarContainer, class IndexContainer>
@@ -83,14 +71,8 @@ namespace PRISMS
     {
         GiNaC::exmap m;
         for(int i = 0; i < var.size(); i++)
-        {
-            std::cout << "i: " << var[i] << "  " << _sym[i] << std::endl;
             m[_sym[i]] = var[i].real() + var[i].imag() * GiNaC::I;
-        }
-
-        std::cout << m << std::endl;
-        std::cout << _e.subs(m) << std::endl;
-
+        
         return std::complex<double>(GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(_e.real_part().subs(m))).to_double(),
                                GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(_e.imag_part().subs(m))).to_double());
     }
@@ -103,13 +85,8 @@ namespace PRISMS
 
         GiNaC::exmap m;
         for(int i = 0; i < var.size(); i++)
-        {
-            std::cout << "i: " << var[i] << "  " << _sym[i] << std::endl;
             m[_sym[i]] = var[i].real() + var[i].imag() * GiNaC::I;
-        }
-        std::cout << m << std::endl;
-        std::cout << "de: " << de << " :: " << de.subs(m) << std::endl;
-
+        
         return std::complex<double>(GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.real_part().subs(m))).to_double(),
                                GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.imag_part().subs(m))).to_double());
     };
@@ -121,26 +98,11 @@ namespace PRISMS
 
         GiNaC::exmap m;
         for(int i = 0; i < var.size(); i++)
-        {
-            std::cout << "i: " << var[i] << "  " << _sym[i] << std::endl;
             m[_sym[i]] = var[i].real() + var[i].imag() * GiNaC::I;
-        }
-        std::cout << m << std::endl;
-        std::cout << "de: " << de << " :: " << de.subs(m) << std::endl;
-
+        
         return std::complex<double>(GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.real_part().subs(m))).to_double(),
                                GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.imag_part().subs(m))).to_double());
     };
-
-    // ----------------------------------------------------------
-    // Use these functions to evaluate several values, then use 'get' methods to access results
-    //virtual void eval(const VarContainer &var);
-    //virtual void eval_grad( const VarContainer &var);
-    //virtual void eval_hess( const VarContainer &var);
-
-    //virtual std::complex<double> operator()() const;
-    //virtual std::complex<double> grad(int di) const;
-    //virtual std::complex<double> hess(int di, int dj) const;
 
 }
 

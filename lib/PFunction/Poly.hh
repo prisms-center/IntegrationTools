@@ -84,42 +84,6 @@ namespace PRISMS
             return hess_val;
         };
 
-
-        // Functions for evaluating basis functions & their derivatives:
-
-        // ----------------------------------------------------------
-        // Use these functions if you want to evaluate a single value
-
-        //   use unrolled index
-        //virtual double basis(int term, const VarContainer &var) const {undefined("double basis(int term, const VarContainer &var)");};
-        //virtual double basis_grad(int term, const VarContainer &var, int di) const {undefined("double basis_grad(int term, const VarContainer &var, int di)");};
-        //virtual double basis_hess(int term, const VarContainer &var, int di, int dj) const {undefined("double basis_hess(int term, const VarContainer &var, int di, int dj)");};
-
-        //   or use tensor indices
-        //virtual double basis(const IndexContainer &term, const VarContainer &var) const {undefined("double basis(const IndexContainer &term, const VarContainer &var)");};
-        //virtual double basis_grad(const IndexContainer &term, const VarContainer &var, int di) const {undefined("double basis_grad(const IndexContainer &term, const VarContainer &var, int di)");};
-        //virtual double basis_hess(const IndexContainer &term, const VarContainer &var, int di, int dj) const {undefined("double basis_hess(const IndexContainer &term, const VarContainer &var, int di, int dj)");};
-
-        // ----------------------------------------------------------
-        // Use these functions to evaluate all basis functions,
-        //   then use 'get' methods to access results.
-
-        //virtual void eval_basis( const VarContainer &var) {undefined("void eval_basis( const VarContainer &var)");};
-        //virtual void eval_basis_grad( const VarContainer &var) {undefined("void eval_basis_grad( const VarContainer &var)");};
-        //virtual void eval_basis_hess( const VarContainer &var) {undefined("void eval_basis_hess( const VarContainer &var)");};
-
-        //   use unrolled index
-        //virtual double basis(int term) const {undefined("double basis(int term)");};
-        //virtual double basis_grad(int term, int di) const {undefined("double basis_grad(int term, int di)");};
-        //virtual double basis_hess(int term, int di, int dj) const {undefined("double basis_hess(int term, int di, int dj)");};
-
-        //   or use tensor indices
-        //virtual double basis(const IndexContainer &term) const {undefined("double basis(const IndexContainer &term)");};
-        //virtual double basis_grad(const IndexContainer &term, int di) const {undefined("double basis_grad(const IndexContainer &term, int di)");};
-        //virtual double basis_hess(const IndexContainer &term, int di, int dj) const {undefined("double basis_hess(const IndexContainer &term, int di, int dj)");};
-
-
-
     };
 
 
@@ -200,41 +164,6 @@ namespace PRISMS
         {
             return hess_val;
         };
-
-
-        // Functions for evaluating basis functions & their derivatives:
-
-        // ----------------------------------------------------------
-        // Use these functions if you want to evaluate a single value
-
-        //   use unrolled index
-        //virtual double basis(int term, const VarContainer &var) const {undefined("double basis(int term, const VarContainer &var)");};
-        //virtual double basis_grad(int term, const VarContainer &var, int di) const {undefined("double basis_grad(int term, const VarContainer &var, int di)");};
-        //virtual double basis_hess(int term, const VarContainer &var, int di, int dj) const {undefined("double basis_hess(int term, const VarContainer &var, int di, int dj)");};
-
-        //   or use tensor indices
-        //virtual double basis(const IndexContainer &term, const VarContainer &var) const {undefined("double basis(const IndexContainer &term, const VarContainer &var)");};
-        //virtual double basis_grad(const IndexContainer &term, const VarContainer &var, int di) const {undefined("double basis_grad(const IndexContainer &term, const VarContainer &var, int di)");};
-        //virtual double basis_hess(const IndexContainer &term, const VarContainer &var, int di, int dj) const {undefined("double basis_hess(const IndexContainer &term, const VarContainer &var, int di, int dj)");};
-
-        // ----------------------------------------------------------
-        // Use these functions to evaluate all basis functions,
-        //   then use 'get' methods to access results.
-
-        //virtual void eval_basis( const VarContainer &var) {undefined("void eval_basis( const VarContainer &var)");};
-        //virtual void eval_basis_grad( const VarContainer &var) {undefined("void eval_basis_grad( const VarContainer &var)");};
-        //virtual void eval_basis_hess( const VarContainer &var) {undefined("void eval_basis_hess( const VarContainer &var)");};
-
-        //   use unrolled index
-        //virtual double basis(int term) const {undefined("double basis(int term)");};
-        //virtual double basis_grad(int term, int di) const {undefined("double basis_grad(int term, int di)");};
-        //virtual double basis_hess(int term, int di, int dj) const {undefined("double basis_hess(int term, int di, int dj)");};
-
-        //   or use tensor indices
-        //virtual double basis(const IndexContainer &term) const {undefined("double basis(const IndexContainer &term)");};
-        //virtual double basis_grad(const IndexContainer &term, int di) const {undefined("double basis_grad(const IndexContainer &term, int di)");};
-        //virtual double basis_hess(const IndexContainer &term, int di, int dj) const {undefined("double basis_hess(const IndexContainer &term, int di, int dj)");};
-
 
 
     };

@@ -19,6 +19,8 @@ namespace PRISMS
 
         std::string _name;
         std::vector<std::string> _var_name;
+        
+        virtual ~PBaseFunction(){};
 
         std::string name()
         {
@@ -88,21 +90,21 @@ namespace PRISMS
         // ----------------------------------------------------------
         // Use these functions if you want to evaluate a single value
 
-        //   use unrolled index
-        virtual OutType basis(int term, const VarContainer &var) const
+        //   use basis index and term index for individual basis function
+        virtual OutType basis(int bindex, int term, const VarContainer &var) const
         {
-            undefined("OutType basis(int term, const VarContainer &var)");
+            undefined("OutType basis(int bindex, int term, const VarContainer &var)");
         };
-        virtual OutType basis_grad(int term, const VarContainer &var, int di) const
+        virtual OutType basis_grad(int bindex, int term, const VarContainer &var, int di) const
         {
-            undefined("OutType basis_grad(int term, const VarContainer &var, int di)");
+            undefined("OutType basis_grad(int bindex, int term, const VarContainer &var, int di)");
         };
-        virtual OutType basis_hess(int term, const VarContainer &var, int di, int dj) const
+        virtual OutType basis_hess(int bindex, int term, const VarContainer &var, int di, int dj) const
         {
-            undefined("OutType basis_hess(int term, const VarContainer &var, int di, int dj)");
+            undefined("OutType basis_hess(int bindex, int term, const VarContainer &var, int di, int dj)");
         };
 
-        //   or use tensor indices
+        //   or use tensor indices to evaluate basis function product
         virtual OutType basis(const IndexContainer &term, const VarContainer &var) const
         {
             undefined("OutType basis(const IndexContainer &term, const VarContainer &var)");
@@ -133,21 +135,21 @@ namespace PRISMS
             undefined("void eval_basis_hess( const VarContainer &var)");
         };
 
-        //   use unrolled index
-        virtual OutType basis(int term) const
+        //   use basis index and term index for individual basis function
+        virtual OutType basis(int bindex, int term) const
         {
-            undefined("OutType basis(int term)");
+            undefined("OutType basis(int bindex, int term)");
         };
-        virtual OutType basis_grad(int term, int di) const
+        virtual OutType basis_grad(int bindex, int term, int di) const
         {
-            undefined("OutType basis_grad(int term, int di)");
+            undefined("OutType basis_grad(int bindex, int term, int di)");
         };
-        virtual OutType basis_hess(int term, int di, int dj) const
+        virtual OutType basis_hess(int bindex, int term, int di, int dj) const
         {
-            undefined("OutType basis_hess(int term, int di, int dj)");
+            undefined("OutType basis_hess(int bindex, int term, int di, int dj)");
         };
 
-        //   or use tensor indices
+        //   or use tensor indices to evaluate basis function product
         virtual OutType basis(const IndexContainer &term) const
         {
             undefined("OutType basis(const IndexContainer &term)");
@@ -170,9 +172,7 @@ namespace PRISMS
         }
 
     };
-
-
-
+    
 
     template< class InType, class OutType, class VarContainer, class IndexContainer>
     class PFunction : public PBaseFunction<InType, OutType, VarContainer, IndexContainer>
@@ -235,17 +235,17 @@ namespace PRISMS
         // Use these functions if you want to evaluate a single value
 
         //   use unrolled index
-        virtual OutType basis(int term, const VarContainer &var) const
+        virtual OutType basis(int bindex, int term, const VarContainer &var) const
         {
-            return (*ptr).basis(term, var);
+            return (*ptr).basis(bindex, term, var);
         };
-        virtual OutType basis_grad(int term, const VarContainer &var, int di) const
+        virtual OutType basis_grad(int bindex, int term, const VarContainer &var, int di) const
         {
-            return (*ptr).basis_grad(term, var, di);
+            return (*ptr).basis_grad(bindex, term, var, di);
         };
-        virtual OutType basis_hess(int term, const VarContainer &var, int di, int dj) const
+        virtual OutType basis_hess(int bindex, int term, const VarContainer &var, int di, int dj) const
         {
-            return (*ptr).basis_hess(term, var, di, dj);
+            return (*ptr).basis_hess(bindex, term, var, di, dj);
         };
 
         //   or use tensor indices
@@ -280,17 +280,17 @@ namespace PRISMS
         };
 
         //   use unrolled index
-        virtual OutType basis(int term) const
+        virtual OutType basis(int bindex, int term) const
         {
-            return (*ptr).basis(term);
+            return (*ptr).basis(bindex, term);
         };
-        virtual OutType basis_grad(int term, int di) const
+        virtual OutType basis_grad(int bindex, int term, int di) const
         {
-            return (*ptr).basis_grad(term, di);
+            return (*ptr).basis_grad(bindex, term, di);
         };
-        virtual OutType basis_hess(int term, int di, int dj) const
+        virtual OutType basis_hess(int bindex, int term, int di, int dj) const
         {
-            return (*ptr).basis_hess(term, di, dj);
+            return (*ptr).basis_hess(bindex, term, di, dj);
         };
 
         //   or use tensor indices
