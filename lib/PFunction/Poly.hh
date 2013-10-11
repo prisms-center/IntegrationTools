@@ -25,7 +25,7 @@ namespace PRISMS
         double val;
         double grad_val;
         double hess_val;
-
+        
         Quadratic()
         {
             _name = "Quadratic";
@@ -43,15 +43,15 @@ namespace PRISMS
 
         // ----------------------------------------------------------
         // Use these functions if you want to evaluate a single value
-        virtual double operator()(const VarContainer &var) const
+        virtual double operator()(const VarContainer &var)
         {
             return a + b * var[0] + c * var[0] * var[0];
         };
-        virtual double grad(const VarContainer &var, int di) const
+        virtual double grad(const VarContainer &var, int di)
         {
             return b + 2.0 * c * var[0];
         };
-        virtual double hess(const VarContainer &var, int di, int dj) const
+        virtual double hess(const VarContainer &var, int di, int dj)
         {
             return 2.0 * c;
         };
@@ -124,15 +124,15 @@ namespace PRISMS
 
         // ----------------------------------------------------------
         // Use these functions if you want to evaluate a single value
-        virtual double operator()(const VarContainer &var) const
+        virtual double operator()(const VarContainer &var) 
         {
             return a + b * var[0] + c * var[0] * var[0] + d * var[0] * var[0] * var[0];
         };
-        virtual double grad(const VarContainer &var, int di) const
+        virtual double grad(const VarContainer &var, int di) 
         {
             return b + 2.0 * c * var[0] + 3.0 * d * var[0] * var[0];
         };
-        virtual double hess(const VarContainer &var, int di, int dj) const
+        virtual double hess(const VarContainer &var, int di, int dj) 
         {
             return 2.0 * c + 6.0 * d * var[0];
         };

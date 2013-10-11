@@ -60,16 +60,16 @@ namespace PRISMS
 
         // ----------------------------------------------------------
         // Use these functions if you want to evaluate a single value
-        double operator()(const VarContainer &var) const;
-        double grad(const VarContainer &var, int di) const;
-        double hess(const VarContainer &var, int di, int dj) const;
+        double operator()(const VarContainer &var);
+        double grad(const VarContainer &var, int di);
+        double hess(const VarContainer &var, int di, int dj);
 
     };
     
     
 
     template<class VarContainer, class IndexContainer>
-    double PRealSymFunction<VarContainer, IndexContainer>::operator()(const VarContainer &var) const
+    double PRealSymFunction<VarContainer, IndexContainer>::operator()(const VarContainer &var)
     {
         GiNaC::exmap m;
         for(int i = 0; i < var.size(); i++)
@@ -80,7 +80,7 @@ namespace PRISMS
 
 
     template<class VarContainer, class IndexContainer>
-    double PRealSymFunction<VarContainer, IndexContainer>::grad(const VarContainer &var, int di) const
+    double PRealSymFunction<VarContainer, IndexContainer>::grad(const VarContainer &var, int di)
     {
         GiNaC::ex de = _e.diff(_sym[di]);
 
@@ -92,7 +92,7 @@ namespace PRISMS
     };
 
     template<class VarContainer, class IndexContainer>
-    double PRealSymFunction<VarContainer, IndexContainer>::hess(const VarContainer &var, int di, int dj) const
+    double PRealSymFunction<VarContainer, IndexContainer>::hess(const VarContainer &var, int di, int dj)
     {
         GiNaC::ex de = _e.diff(_sym[di]).diff(_sym[dj]);
 
@@ -107,20 +107,16 @@ namespace PRISMS
     
     
     
-    class PRealSymBasisFunction : public PBasisFunction<double, double>
+    class PRealSymBasisFunction : public PSimpleFunction<double, double>
     {
         public:
         GiNaC::ex _e;
         GiNaC::symbol _var;
-        using PBasisFunction<double, double>::_val;
+        using PSimpleFunction<double, double>::_val;
         
         // Reminder, inherited from PSymBasisFunction<double, double>:
         //double operator()( const double &var){ _val = eval(var); return _val;};
         //double operator()(){ return _val;};
-        
-        PRealSymBasisFunction()
-        {
-        };
         
         PRealSymBasisFunction( GiNaC::symbol var, GiNaC::ex e)
         {
@@ -129,7 +125,7 @@ namespace PRISMS
         };
         
         private:
-        virtual double eval( const double &var)
+        virtual double eval( const double &var) const
         { 
             return GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(_e.subs(_var == var))).to_double();
         };
@@ -143,34 +139,67 @@ namespace PRISMS
     ///
     ///   For instance, simple polynomials:  phi_i(x) = x^i;
     ///
-    class PRealSymBasisFunctionFactory : public PBasisFunctionFactory<double, double>
+    class PRealSymBasisSet : public PBasisSet<double, double>
     {
         public:
         GiNaC::ex _e;           // expression defining the basis functions = f( _var, _i)
         GiNaC::symbol _var;     // variable
         GiNaC::symbol _i;       // index of basis function
         
-        PRealSymBasisFunctionFactory( const GiNaC::symbol &index, const GiNaC::symbol &var, const GiNaC::ex &e)
+        PRealSymBasisSet( int N, const GiNaC::symbol &index, const GiNaC::symbol &var, const GiNaC::ex &e)
+        : PBasisSet<double,double>(N)
         {
             _e = e;
             _var = var;
             _i = index;
         };
         
-        virtual PRealSymBasisFunction* new_basis_function( int term) const
+        virtual PRealSymBasisSet* clone()
+        {
+            return new PRealSymBasisSet(*this);
+        };
+        
+        virtual PRealSymBasisFunction* clone_basis_function( int term) const
         {
             return new PRealSymBasisFunction( _var, _e.subs(_i == term));
         };
         
-        virtual PRealSymBasisFunction* new_basis_grad_function( int term)const
+        virtual PRealSymBasisFunction* clone_grad_basis_function( int term)const
         {
             return new PRealSymBasisFunction( _var, _e.subs(_i == term).diff(_var) );
         };
         
-        virtual PRealSymBasisFunction* new_basis_hess_function( int term)const
+        virtual PRealSymBasisFunction* clone_hess_basis_function( int term)const
         {
             return new PRealSymBasisFunction( _var, _e.subs(_i == term).diff(_var, 2));
         };
+        
+        private:
+        
+        // ----------------------------------------------------------
+        // Use these functions if you want to evaluate a single value
+        virtual double eval(int term, const double &var)
+        {
+            PRealSymBasisFunction* bf = clone_basis_function(term);
+            double result = (*bf)(var);
+            delete bf;
+            return result;
+        };
+        virtual double eval_grad(int term, const double &var)
+        {
+            PRealSymBasisFunction* bf = clone_grad_basis_function(term);
+            double result = (*bf)(var);
+            delete bf;
+            return result;
+        };
+        virtual double hess(int term, const double &var)
+        {
+            PRealSymBasisFunction* bf = clone_hess_basis_function(term);
+            double result = (*bf)(var);
+            delete bf;
+            return result;
+        };
+        
         
     };
     
@@ -183,7 +212,7 @@ namespace PRISMS
     ///      phi_1(x) = x;
     ///      phi_n(x) = 2*x*phi_n-1(x) - phi_n-2(x); with d = 2
     ///
-    class PRealSymRecursBasisFunctionFactory : public PBasisFunctionFactory<double, double>
+    class PRealSymRecursBasisSet : public PBasisSet<double, double>
     {
         public:
         std::vector< GiNaC::ex> _phi;  // generated basis functions
@@ -203,7 +232,7 @@ namespace PRISMS
         ///   GiNaC::ex phi_sym[2] = {phi0, phi1};
         ///   GiNaC::ex phi_init[2] = {1, x};
         ///   GiNaC::ex e_gen = 2*x*phi1 - phi0;
-        ///   PRealSymBasisFunctionFactory chebyshev_factory( depth, x, phi_sym, phi_init, e_gen);
+        ///   PRealSymBasisSet chebyshev_factory( depth, x, phi_sym, phi_init, e_gen);
         ///   
         ///   int N = 100;
         ///   std::vector<PRealSymBasisFunction*> chebyshev;
@@ -217,40 +246,78 @@ namespace PRISMS
         ///   for( int i = 0; i < chebyshev.size; i++)
         ///     delete chebyshev[i];
         ///
-        PRealSymRecursBasisFunctionFactory( int depth, const GiNaC::symbol &var, GiNaC::symbol *phi_sym, GiNaC::ex *phi_init, const GiNaC::ex &e_gen)
+        PRealSymRecursBasisSet( int N, const GiNaC::symbol &var, const std::vector<GiNaC::symbol> &phi_sym, const std::vector<GiNaC::ex> &phi_init, const GiNaC::ex &e_gen)
+        : PBasisSet<double,double>(N)
         {
             _e_gen = e_gen;
             _var = var;
             
-            _phi_sym.resize(depth);
-            _phi.resize(depth);
+            _phi_sym.resize(phi_sym.size());
+            _phi.resize(phi_sym.size());
             
-            for( int i=0; i<depth; i++)
+            for( int i=0; i<phi_sym.size(); i++)
             {
                 _phi_sym[i] = phi_sym[i];
                 _phi[i] = phi_init[i];
             }
         };
         
-        virtual PRealSymBasisFunction* new_basis_function( int term)
+        //PRealSymBasisSet( const PRealSymBasisSet &RHS)
+        //{
+        //    something
+        //};
+
+        virtual PRealSymRecursBasisSet* clone()
+        {
+            return new PRealSymRecursBasisSet(*this);
+        };
+        
+        virtual PRealSymBasisFunction* clone_basis_function( int term)
         {
             generate_up_to(term);
             return new PRealSymBasisFunction( _var, _phi[term]);
         };
         
-        virtual PRealSymBasisFunction* new_basis_grad_function( int term)
+        virtual PRealSymBasisFunction* clone_grad_basis_function( int term)
         {
             generate_up_to(term);
             return new PRealSymBasisFunction( _var, _phi[term].diff(_var) );
         };
         
-        virtual PRealSymBasisFunction* new_basis_hess_function( int term)
+        virtual PRealSymBasisFunction* clone_hess_basis_function( int term)
         {
             generate_up_to(term);
             return new PRealSymBasisFunction( _var, _phi[term].diff(_var, 2));
         };
         
+        
         private:
+        
+        // ----------------------------------------------------------
+        // Use these functions if you want to evaluate a single value
+        virtual double eval(int term, const double &var)
+        {
+            PRealSymBasisFunction* bf = clone_basis_function(term);
+            double result = (*bf)(var);
+            delete bf;
+            return result;
+        };
+        virtual double eval_grad(int term, const double &var)
+        {
+            PRealSymBasisFunction* bf = clone_grad_basis_function(term);
+            double result = (*bf)(var);
+            delete bf;
+            return result;
+        };
+        virtual double eval_hess(int term, const double &var)
+        {
+            PRealSymBasisFunction* bf = clone_hess_basis_function(term);
+            double result = (*bf)(var);
+            delete bf;
+            return result;
+        };
+        
+
         
         void generate_up_to( int term)
         {

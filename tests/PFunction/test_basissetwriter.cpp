@@ -25,7 +25,7 @@
 //#include<sstream>
 //#include "../../external/MersenneTwister/MersenneTwister.h"
 
-#include "PFunctionWriter.hh"
+#include "PBasisSetWriter.hh"
 
 
 template<typename T>
@@ -40,27 +40,21 @@ std::ostream& operator<<(std::ostream &sout, const std::vector<T> &v)
 int main(int argc, char *argv[])
 {
     
-    PRISMS::PFunctionWriter writer("MyFunc");
+    PRISMS::PBasisSetWriter writer("MyBasisSet", "Chebyshev Polynomials, up to 30");
     
-    std::vector<std::string> var_name;
-      var_name.push_back("c");
-      var_name.push_back("grad");
-      var_name.push_back("x");
-      var_name.push_back("y");
+    std::vector<std::string> phi_init;
+      phi_init.push_back("1");
+      phi_init.push_back("x");
     
-    std::vector<std::string> var_desc;
-      var_desc.push_back("concentration");
-      var_desc.push_back("concentration gradient");
-      var_desc.push_back("x");
-      var_desc.push_back("y");
-    
-    writer.set_var( var_name, var_desc);
+    std::vector<std::string> phi_sym;
+      phi_sym.push_back("phi0");
+      phi_sym.push_back("phi1");
     
     std::ofstream outfile;
-    outfile.open("MyFunc.hh");
+    outfile.open("MyBasisSet.hh");
     
-    //writer.sym2code("2*c^4 + 2*c^2 + grad*2", outfile);
-    writer.sym2code("2*c^4*x^3*y^2 + 2*c^2*exp(x*y) + x*y^5*grad*2", outfile);
+    writer.sym2code( "2*x*phi1 - phi0", "x",  phi_init, phi_sym, 30, outfile);
+        
 
     return 0;
 }

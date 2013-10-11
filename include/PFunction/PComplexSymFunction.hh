@@ -60,14 +60,14 @@ namespace PRISMS
 
         // ----------------------------------------------------------
         // Use these functions if you want to evaluate a single value
-        std::complex<double> operator()(const VarContainer &var) const;
-        std::complex<double> grad(const VarContainer &var, int di) const;
-        std::complex<double> hess(const VarContainer &var, int di, int dj) const;
+        std::complex<double> operator()(const VarContainer &var);
+        std::complex<double> grad(const VarContainer &var, int di);
+        std::complex<double> hess(const VarContainer &var, int di, int dj);
 
     };
 
     template< class VarContainer, class IndexContainer>
-    std::complex<double> PComplexSymFunction<VarContainer, IndexContainer>::operator()(const VarContainer &var) const
+    std::complex<double> PComplexSymFunction<VarContainer, IndexContainer>::operator()(const VarContainer &var)
     {
         GiNaC::exmap m;
         for(int i = 0; i < var.size(); i++)
@@ -79,7 +79,7 @@ namespace PRISMS
 
 
     template< class VarContainer, class IndexContainer>
-    std::complex<double> PComplexSymFunction<VarContainer, IndexContainer>::grad(const VarContainer &var, int di) const
+    std::complex<double> PComplexSymFunction<VarContainer, IndexContainer>::grad(const VarContainer &var, int di)
     {
         GiNaC::ex de = _e.diff(_sym[di]);
 
@@ -92,7 +92,7 @@ namespace PRISMS
     };
 
     template< class VarContainer, class IndexContainer>
-    std::complex<double> PComplexSymFunction<VarContainer, IndexContainer>::hess(const VarContainer &var, int di, int dj) const
+    std::complex<double> PComplexSymFunction<VarContainer, IndexContainer>::hess(const VarContainer &var, int di, int dj)
     {
         GiNaC::ex de = _e.diff(_sym[di]).diff(_sym[dj]);
 
