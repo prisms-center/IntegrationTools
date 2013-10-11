@@ -9,8 +9,7 @@
 namespace PRISMS
 {
 
-    /// Base classes for functions that can be hard-coded,
-    ///   then shared and used elsewhere
+    /// Class used to write PFunction classes
 
     class PFunctionWriter
     {
@@ -34,15 +33,17 @@ namespace PRISMS
         bool _write_hess;
         std::vector< std::vector<std::string> > _hess;
         
-        std::vector<std::string> _basis;
-        std::vector< std::vector<std::string> > _grad_basis;
-        std::vector< std::vector< std::vector<std::string> > > _hess_basis;
+        //std::vector<std::string> _basis;
+        //std::vector< std::vector<std::string> > _grad_basis;
+        //std::vector< std::vector< std::vector<std::string> > > _hess_basis;
         
         // Constructor initializes strings to call 'undefined' message
         PFunctionWriter(const std::string &name);
         
         // After construction, need to set things
         void set_basic_indent(std::string basic_indent);
+        void set_intype(std::string intype);
+        void set_outtype(std::string outtype);
         void set_types(std::string intype, std::string outtype);
         void f_on();
         void f_off();
@@ -53,30 +54,34 @@ namespace PRISMS
         void set_var( const std::vector< std::string> &var_name, const std::vector< std::string> &var_description);
         
         // Write the PFuntion
-        //   Different styles are possible:
+        //   Different styles are be possible:
         
-        void sym_writer( std::string f, std::ostream &sout);
-        void sym2code_writer( const std::string &f, std::ostream &sout);
-        void code_writer( 
-          const std::string &json_str, 
-          std::ostream &sout);
-        void code_writer( 
+        void sym2code( const std::string &f, std::ostream &sout);
+        
+        void code( 
           const std::string &f, 
           const std::vector<std::string> &grad,
           const std::vector<std::vector< std::string> > &hess,
           std::ostream &sout);
-        void code_writer( 
-          std::ostream &sout);
-        void autodiff_writer( std::ostream &sout);
-        void series_writer( std::ostream &sout);
+        
+        // TODO:
+        //void sym( std::string f, std::ostream &sout);
+        //void code(  const std::string &json_str, std::ostream &sout);
+        //void autodiff_writer( std::ostream &sout);
+        //void series_writer( std::ostream &sout);
 
     private:
         
-        
-        std::string undefined(std::string declaration) const;
-        
         std::string indent(int step) const;
-
+        
+        void write_basis_function(int I, const std::string &name, const std::string &f, std::ostream &sout) const;
+        
+        // use polymorphic basis functions
+        void code_poly( std::ostream &sout);
+        
+        // use if/else statements
+        void code_ifelse( std::ostream &sout);
+        
     };
 
 }

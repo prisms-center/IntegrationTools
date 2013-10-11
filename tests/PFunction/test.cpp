@@ -77,7 +77,6 @@ int main(int argc, char *argv[])
 
 
     delete g;
-    delete k;
-
+    
     return 0;
 }

@@ -5,47 +5,184 @@
 #include<cstring>
 #include<iostream>
 #include<vector>
+#include<limits>
+
+#include "PFunction.hh"
 
 namespace PRISMS
 {
-    
+    /// Evaluate basis functions and their derivatives. Store and access the results.
+    ///
     template< class InType, class OutType>
-    class PBasisFunction
+    class PBasisSet
     {
         public:
-        OutType _val;
         
-        OutType operator()( const InType &var){ _val = eval(var); return _val;};
-        OutType operator()(){ return _val;};
+        std::string _name;
+        std::string _description;
         
-        private:
-        virtual OutType eval( const InType &var){ undefined("OutType eval( const InType &var)");};
+        std::vector<OutType> _val;
+        std::vector<OutType> _grad_val;
+        std::vector<OutType> _hess_val;
         
+        std::string name() const
+        {
+            return _name;
+        };
+        std::string description() const
+        {
+            return _description;
+        };
+        int size() const
+        {
+            return _val.size();
+        };
+        
+        PBasisSet( int N)
+        {
+            resize(N);
+        };
+        
+        virtual void resize( int N)
+        {
+            _val.resize(N);
+            _grad_val.resize(N);
+            _hess_val.resize(N);
+        };
+        
+        virtual ~PBasisSet()
+        {
+        
+        };
+        
+        virtual int max_size()
+        {
+            // default to (essentially) no limit
+            return std::numeric_limits<int>::max();
+        };
+        
+        virtual PBasisSet<InType,OutType>* clone()
+        {
+            return new PBasisSet<InType, OutType>(*this);
+        };
+        
+        virtual PSimpleFunction<InType, OutType>* clone_basis_function( int term)
+        {
+            undefined("PSimpleFunction<InType, OutType>* PBasisSet::clone_basis_function( int term)");
+        };
+        virtual PSimpleFunction<InType, OutType>* clone_grad_basis_function( int term)
+        {
+            undefined("PSimpleFunction<InType, OutType>* PBasisSet::clone_grad_basis_function( int term)");
+        };
+        virtual PSimpleFunction<InType, OutType>* clone_hess_basis_function( int term)
+        {
+            undefined("PSimpleFunction<InType, OutType>* PBasisSet::clone_hess_basis_function( int term)");
+        };
+        
+        // ----------------------------------------------------------
+        // Use these functions if you want to evaluate a single value
+        OutType operator()(int term, const InType &var)
+        {
+            return _val[term] = eval(term, var);
+        };
+        OutType grad(int term, const InType &var)
+        {
+            return _grad_val[term] = eval_grad(term, var);
+        };
+        OutType hess(int term, const InType &var)
+        {
+            return _hess_val[term] = eval_hess(term, var);
+        };
+        
+
+        // ----------------------------------------------------------
+        // Use these functions to evaluate several values, then use 'get' methods to access results
+        
+        // By default, evaluate each individual term one-by-one. 
+        // These are virtual so derived classes may implement more efficient methods.
+        //    Returns vector containing results
+        virtual const std::vector<OutType>& eval(const InType &var)
+        {
+            for( int i=0; i<_val.size(); i++)
+                (*this)(i,var);
+            return _val;
+        };
+        virtual const std::vector<OutType>& eval_grad(const InType &var)
+        {
+            for( int i=0; i<_val.size(); i++)
+                (*this).grad(i,var);
+            return _grad_val;
+        };
+        virtual const std::vector<OutType>& eval_hess(const InType &var)
+        {
+            for( int i=0; i<_val.size(); i++)
+                (*this).hess(i,var);
+            return _hess_val;
+        };
+
+        // Getters for individual terms
+        OutType operator()(int term) const
+        {
+            return _val[term];
+        };
+        OutType grad(int term) const
+        {
+            return _grad_val[term];
+        };
+        OutType hess(int term) const
+        {
+            return _hess_val[term];
+        };
+        
+        // Getters returning vector containing all terms
+        const std::vector<OutType>& operator()() const
+        {
+            return _val;
+        };
+        const std::vector<OutType>& grad() const
+        {
+            return _grad_val;
+        };
+        const std::vector<OutType>& hess() const
+        {
+            return _hess_val;
+        };
+
+    private:
+        
+        /// ----------------------------------------------------------
+        /// !!! Derived classes must define these functions !!!
+        ///   Usually this is done using PBasisSetWriter
+        virtual OutType eval(int term, const InType &var)
+        {
+            undefined("OutType PBasisSet::eval(int term, const InType &var)");
+        };
+        virtual OutType eval_grad(int term, const InType &var)
+        {
+            undefined("OutType PBasisSet::eval_grad(int term, const InType &var)");
+        };
+        virtual OutType eval_hess(int term, const InType &var)
+        {
+            undefined("OutType PBasisSet::eval_hess(int term, const InType &var)");
+        };
+    
         void undefined(std::string fname) const
         {
-            std::cout << "Error. In PBasisFunction." << std::endl;
+            std::cout << "Error. In PBasisSet '" << _name << "'." << std::endl;
             std::cout << "   The member function '" << fname << "' has not been defined." << std::endl;
             exit(1);
         }
     };
     
     
-    
-    template< class InType, class OutType>
-    class PBasisFunctionFactory
-    {
-        public:
-        virtual PBasisFunction<InType, OutType>* new_basis_function( int term) =0;
-        virtual PBasisFunction<InType, OutType>* new_basis_grad_function( int term) =0;
-        virtual PBasisFunction<InType, OutType>* new_basis_hess_function( int term) =0;
-    };
+    /// Should I do a PBasisSet smart pointer class like PFunction?
     
     
     /// This class is for a series function that is the tensor product of indepedent bases
     ///
     ///   Example for order-3 tensor:
     ///
-    ///    f(x,y,z) = sum_i sum_j sum_k T_ijk * phi_xi(x) * phi_yj(y) * phi_zk(z)
+    ///    f(x,y,z) = sum_i sum_j sum_k T_ijk * phix_i(x) * phiy_j(y) * phiz_k(z)
     ///
     ///    summations run from i to _dim[i]
     ///    x, y, z are independent variables (dx/dy = 0, etc.)
@@ -54,8 +191,8 @@ namespace PRISMS
     class PSeriesFunction : public PBaseFunction<InType, OutType, VarContainer, IndexContainer>
     {
     public:
-        using PBaseFunction<double, double, VarContainer, IndexContainer>::_name;
-        using PBaseFunction<double, double, VarContainer, IndexContainer>::_var_name;
+        using PBaseFunction<InType, OutType, VarContainer, IndexContainer>::_name;
+        using PBaseFunction<InType, OutType, VarContainer, IndexContainer>::_var_name;
         
         // tensor info
         std::vector< int > _dim;                        // number of basis functions in each basis set
@@ -67,25 +204,26 @@ namespace PRISMS
         OutType _identity_val;
         OutType _zero_val;
         
-        // individual basis functions & derivatives
-        std::vector< std::vector< PBasisFunction<InType,OutType>* > > _basis;
-        std::vector< std::vector< PBasisFunction<InType,OutType>* > > _basis_grad;
-        std::vector< std::vector< PBasisFunction<InType,OutType>* > > _basis_hess;
+        // basis sets
+        std::vector< PBasisSet<InType, OutType>* > _basis_set;
         
         // evaluated values
         OutType _val;
         std::vector<OutType> _grad_val;
         std::vector< std::vector< OutType> > _hess_val;
         
-        PSeriesFunction()
+        PSeriesFunction(OutType zero, OutType identity)
         {
-        
+            _zero_val = zero;
+            _identity_val = identity;
         };
         
-        PSeriesFunction( OutType zero, InType identity, const IndexContainer &basis_dim, 
-                  std::vector<PBasisFunctionFactory<InType,OutType>* > basis_factories) 
+        PSeriesFunction( OutType zero, OutType identity, const std::vector<PBasisSet<InType,OutType>* > &basis_set) 
         {
-            set( zero, identity, basis_dim, basis_factories);
+            _zero_val = zero;
+            _identity_val = identity;
+
+            set(basis_set);
         };
         
         virtual ~PSeriesFunction()
@@ -95,27 +233,10 @@ namespace PRISMS
         
         void clear()
         {
-            for( int i=0; i<_basis.size(); i++)
-            for( int j=0; j<_basis[i].size(); j++)
-            {
-                delete _basis[i][j];
-            }
+            for( int i=0; i<_basis_set.size(); i++)
+                delete _basis_set[i];
+            _basis_set.clear();
             
-            for( int i=0; i<_basis_grad.size(); i++)
-            for( int j=0; j<_basis_grad[i].size(); j++)
-            {
-                delete _basis_grad[i][j];
-            }
-            
-            for( int i=0; i<_basis_hess.size(); i++)
-            for( int j=0; j<_basis_hess[i].size(); j++)
-            {
-                delete _basis_hess[i][j];
-            }
-            
-            _basis.clear();
-            _basis_grad.clear();
-            _basis_hess.clear();
             _coeff_tensor.clear();
             _dim.clear();
             _unroll.clear();
@@ -124,54 +245,29 @@ namespace PRISMS
             
         }
         
-        /// generate the PSeriesFunction
-        ///   basis_dim is the number of terms in each basis
-        ///   'factories' are arrays of length basis_dim.size() of PBasisFunctionFactory objects 
+        /// generate the PSeriesFunction, by cloning 'basis_set' and resizing everything to match
         ///
-        void set( OutType zero, InType identity, const IndexContainer &basis_dim, 
-                  std::vector<PBasisFunctionFactory<InType,OutType>* > basis_factories)
+        void set( const std::vector<PBasisSet<InType,OutType>* > &basis_set)
         {
             clear();
             
-            _zero_val = zero;
-            _identity_val = identity;
-
-            _order = basis_dim.size();
-            
-            if( basis_factories.size() != _order )
-            {    
-                std::cout << "Error in PSeriesFunction::set." << std::endl;
-                std::cout << "  basis_factories.size() != basis_dim.size()" << std::endl;
-                exit(1);
-            }
+            _order = basis_set.size();
+            _basis_set.resize(basis_set.size());
             
             _dim.resize( _order );
-            _basis.resize( _order );
-            _basis_grad.resize( _order );
-            _basis_hess.resize( _order );
             
             _grad_val.resize( _order );
             _hess_val.resize( _order );
             
             for( int i=0; i<_order; i++)
             {
-                _dim[i] = basis_dim[i];
-                _basis[i].resize( basis_dim[i], NULL);
-                _basis_grad[i].resize( basis_dim[i], NULL);
-                _basis_hess[i].resize( basis_dim[i], NULL);
-                
-                // Construct basis functions (& grad & hess)
-                for( int j=0; j<_dim[i]; j++)
-                {
-                    _basis[i][j] = basis_factories[i]->new_basis_function(j);
-                    _basis_grad[i][j] = basis_factories[i]->new_basis_grad_function(j);
-                    _basis_hess[i][j] = basis_factories[i]->new_basis_hess_function(j);
-                }
-                
+                _dim[i] = (*basis_set[i]).size();
                 _hess_val[i].resize( _order );
+                _basis_set[i] = basis_set[i]->clone();
             }
             
             generate_unroll();
+            
             _volume = _dim[0]*_unroll[0];
             _coeff_tensor.resize(_volume);
             
@@ -189,7 +285,7 @@ namespace PRISMS
         
         int dim(int i) const
         {
-            return _dim[i];
+            return (*_basis_set[i]).size();
         }
         
         OutType& coeff( int i)
@@ -244,13 +340,11 @@ namespace PRISMS
             {
                 if( i == di)
                 {   
-                    for( int j=0; j<_dim[i]; j++)
-                        (*_basis_grad[i][j])(var[i]);
+                    (*_basis_set[i]).eval_grad(var[i]);
                 }
                 else
                 {
-                    for( int j=0; j<_dim[i]; j++)
-                        (*_basis[i][j])(var[i]);
+                    (*_basis_set[i]).eval(var[i]);
                 }
             }
             
@@ -268,18 +362,16 @@ namespace PRISMS
                     if( di == dj)
                     {
                         for( int j=0; j<_dim[i]; j++)
-                            (*_basis_hess[i][j])(var[i]);
+                            (*_basis_set[i]).eval_hess(var[i]);
                     }
                     else
                     {
-                        for( int j=0; j<_dim[i]; j++)
-                            (*_basis_grad[i][j])(var[i]);
+                        (*_basis_set[i]).eval_grad(var[i]);
                     }
                 }
                 else
                 {
-                    for( int j=0; j<_dim[i]; j++)
-                        (*_basis[i][j])(var[i]);
+                    (*_basis_set[i]).eval(var[i]);
                 }
             }
             
@@ -338,15 +430,15 @@ namespace PRISMS
         //   use basis index and term index for individual basis function
         virtual OutType basis(int bindex, int term, const VarContainer &var)
         {
-            return (*_basis[bindex][term])(var[bindex]);
+            return (*_basis_set[bindex])(term,var[bindex]);
         };
         virtual OutType basis_grad(int bindex, int term, const VarContainer &var)
         {
-            return (*_basis_grad[bindex][term])(var[bindex]);
+            return (*_basis_set[bindex]).grad(term, var[bindex]);
         };
         virtual OutType basis_hess(int bindex, int term, const VarContainer &var)
         {
-            return (*_basis_hess[bindex][term])(var[bindex]);
+            return (*_basis_set[bindex]).hess(term, var[bindex]);
         };
 
         //   or use tensor indices to evaluate basis function product
@@ -355,7 +447,7 @@ namespace PRISMS
             // evaluate basis functions needed
             OutType tmp = _identity_val;
             for( int i=0; i<_order; i++)
-                tmp *= (*_basis[i][term[i]])(var[i]);
+                tmp *= (*_basis_set[i])(term[i],var[i]);
                 
             return tmp;
         };
@@ -367,11 +459,11 @@ namespace PRISMS
             {
                 if( i == di)
                 {   
-                    tmp *= (*_basis_grad[i][term[i]])(var[i]);
+                    tmp *= (*_basis_set[i]).grad(term[i], var[i]);
                 }
                 else
                 {
-                    tmp *= (*_basis[i][term[i]])(var[i]);
+                    tmp *= (*_basis_set[i])(term[i], var[i]);
                 }
             }
             
@@ -387,16 +479,16 @@ namespace PRISMS
                 {   
                     if( di == dj)
                     {
-                        tmp *= (*_basis_hess[i][term[i]])(var[i]);
+                        tmp *= (*_basis_set[i]).hess(term[i], var[i]);
                     }
                     else
                     {
-                        tmp *= (*_basis_grad[i][term[i]])(var[i]);
+                        tmp *= (*_basis_set[i]).grad(term[i], var[i]);
                     }
                 }
                 else
                 {
-                    tmp *= (*_basis[i][term[i]])(var[i]);
+                    tmp *= (*_basis_set[i])(term[i], var[i]);
                 }
             }
             
@@ -411,37 +503,34 @@ namespace PRISMS
         {
             // evaluate basis functions
             for( int i=0; i<_order; i++)
-            for( int j=0; j<_dim[i]; j++)
-                (*_basis[i][j])(var[i]);
+                (*_basis_set[i]).eval(var[i]);
             
         };
         virtual void eval_basis_grad(const VarContainer &var)
         {
             // evaluate basis grad functions
             for( int i=0; i<_order; i++)
-            for( int j=0; j<_dim[i]; j++)
-                (*_basis_grad[i][j])(var[i]);
+                (*_basis_set[i]).eval_grad(var[i]);
         };
         virtual void eval_basis_hess(const VarContainer &var)
         {
             // evaluate basis hess functions
             for( int i=0; i<_order; i++)
-            for( int j=0; j<_dim[i]; j++)
-                (*_basis_hess[i][j])(var[i]);
+                (*_basis_set[i]).eval_hess(var[i]);
         };
 
         //   use basis index and term index for individual basis function
         virtual OutType basis(int bindex, int term) const
         {
-            return (*_basis[bindex][term])();
+            return (*_basis_set[bindex])(term);
         };
         virtual OutType basis_grad(int bindex, int term, int di) const
         {
-            return (*_basis_grad[bindex][term])();
+            return (*_basis_set[bindex]).grad(term);
         };
         virtual OutType basis_hess(int bindex, int term, int di, int dj) const
         {
-            return (*_basis_hess[bindex][term])();
+            return (*_basis_set[bindex]).hess(term);
         };
 
         //   or use tensor indices to evaluate basis function product
@@ -450,7 +539,7 @@ namespace PRISMS
             // evaluate basis function product
             OutType tmp = _identity_val;
             for( int i=0; i<_order; i++)
-                tmp *= (*_basis[i][term[i]])();
+                tmp *= (*_basis_set[i])(term[i]);
                 
             return tmp;
         };
@@ -462,11 +551,11 @@ namespace PRISMS
             {
                 if( i == di)
                 {   
-                    tmp *= (*_basis_grad[i][term[i]])();
+                    tmp *= (*_basis_set[i]).grad(term[i]);
                 }
                 else
                 {
-                    tmp *= (*_basis[i][term[i]])();
+                    tmp *= (*_basis_set[i])(term[i]);
                 }
             }
             
@@ -482,16 +571,16 @@ namespace PRISMS
                 {   
                     if( di == dj)
                     {
-                        tmp *= (*_basis_hess[i][term[i]])();
+                        tmp *= (*_basis_set[i]).hess(term[i]);
                     }
                     else
                     {
-                        tmp *= (*_basis_grad[i][term[i]])();
+                        tmp *= (*_basis_set[i]).grad(term[i]);
                     }
                 }
                 else
                 {
-                    tmp *= (*_basis[i][term[i]])();
+                    tmp *= (*_basis_set[i])(term[i]);
                 }
             }
             
@@ -527,7 +616,7 @@ namespace PRISMS
                 
                 for( int j=0; j<_order; j++)
                 {
-                    tmp *= (*_basis[j][tindex[j]])();
+                    tmp *= (*_basis_set[j])(tindex[j]);
                 }
                 _val += tmp;
             }
@@ -549,11 +638,11 @@ namespace PRISMS
                 {
                     if( j == di)
                     {
-                        tmp *= (*_basis_grad[j][tindex[j]])();
+                        tmp *= (*_basis_set[j]).grad(tindex[j]);
                     }
                     else
                     {
-                        tmp *= (*_basis[j][tindex[j]])();
+                        tmp *= (*_basis_set[j])(tindex[j]);
                     }
                 }
                 
@@ -579,16 +668,16 @@ namespace PRISMS
                     {
                         if( di == dj)
                         {
-                            tmp *= (*_basis_hess[j][tindex[j]])();
+                            tmp *= (*_basis_set[j]).hess(tindex[j]);
                         }
                         else
                         {
-                            tmp *= (*_basis_grad[j][tindex[j]])();
+                            tmp *= (*_basis_set[j]).grad(tindex[j]);
                         }
                     }
                     else
                     {
-                        tmp *= (*_basis[j][tindex[j]])();
+                        tmp *= (*_basis_set[j])(tindex[j]);
                     }
                 }
                 _hess_val[di][dj] += tmp;

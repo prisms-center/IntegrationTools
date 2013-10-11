@@ -100,26 +100,33 @@ int main(int argc, char *argv[])
     
     
     // --------------------------------------------------------------------------------
-    // Test PRealSymBasisFunctionFactory:
+    // Test PRealSymBasisSet:
     {
-        std::cout << "\n\n--- Test PRealSymRecursBasisFunctionFactory --- \n\n";
+        std::cout << "\n\n--- Test PRealSymRecursBasisSet --- \n\n";
         
         // Generate 20 chebyshev polynomials
         
         // create a factory
-        int depth = 2; 
+        int N = 5; 
         GiNaC::symbol x("x"), phi0("phi0"), phi1("phi1"); 
-        GiNaC::symbol phi_sym[2] = {phi0, phi1};
-        GiNaC::ex phi_init[2] = {1, x};
+        
+        std::vector<GiNaC::symbol> phi_sym(2);
+        phi_sym[0] = phi0;
+        phi_sym[1] = phi1;
+        
+        std::vector<GiNaC::ex> phi_init(2);
+        phi_init[0] = 1;
+        phi_init[1] = x;
+        
         GiNaC::ex e_gen = 2*x*phi1 - phi0;
-        PRISMS::PRealSymRecursBasisFunctionFactory chebyshev_factory( depth, x, phi_sym, phi_init, e_gen);
+        
+        PRISMS::PRealSymRecursBasisSet chebyshev_factory( N, x, phi_sym, phi_init, e_gen);
         
         // generate basis functions
-        int N = 20;
         std::vector<PRISMS::PRealSymBasisFunction*> chebyshev;
         chebyshev.resize(N, NULL);
         for( int i = 0; i < N; i++)
-            chebyshev[i] = chebyshev_factory.new_basis_function(i);
+            chebyshev[i] = chebyshev_factory.clone_basis_function(i);
         
         // print them
         std::cout << " Chebyshev polynomials: " << std::endl;
@@ -146,20 +153,22 @@ int main(int argc, char *argv[])
         
         std::cout << "\n\n--- Test PSeriesFunction --- \n\n";
         
-        std::vector<int> basis_dim;
-        basis_dim.push_back(5);
-        basis_dim.push_back(5);
-        basis_dim.push_back(5);
-        
-        
-        std::vector< PRISMS::PBasisFunctionFactory<double, double>* > 
+                
+        std::vector< PRISMS::PBasisSet<double, double>* > 
           basis_factories;
         basis_factories.push_back(&chebyshev_factory);
         basis_factories.push_back(&chebyshev_factory);
         basis_factories.push_back(&chebyshev_factory);
-         
+        
+        
+        //std::vector< PRISMS::PBasisSet<double, double> > basis_set;
+        //basis_set.push_back(chebyshev_factory);
+        //basis_set.push_back(chebyshev_factory);
+        //basis_set.push_back(chebyshev_factory);
+        
+        
         PRISMS::PSeriesFunction<double, double, std::vector<double>, std::vector<int> > 
-          fxy( 0.0, 1.0, basis_dim, basis_factories);
+          fxy( 0.0, 1.0, basis_factories);
         
         std::cout << " Order: " << fxy._order << std::endl;
         std::cout << " dim: " << fxy._dim << std::endl;
@@ -167,7 +176,7 @@ int main(int argc, char *argv[])
         std::cout << " Tensor volume: " << fxy.volume() << std::endl;
         
         
-        std::vector<int> term(basis_dim.size());
+        std::vector<int> term(fxy.order());
         
         // set coefficients
         for( int i=0; i<fxy.volume(); i++)
