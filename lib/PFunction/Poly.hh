@@ -10,13 +10,13 @@ namespace PRISMS
     /// Base classes for functions that can be hard-coded,
     ///   then shared and used elsewhere
 
-    template<class VarContainer, class IndexContainer>
-    class Quadratic : public PBaseFunction<double, double, VarContainer, IndexContainer>
+    template<class VarContainer>
+    class Quadratic : public PFuncBase<VarContainer, double>
     {
     public:
 
-        using PBaseFunction<double, double, VarContainer, IndexContainer>::_name;
-        using PBaseFunction<double, double, VarContainer, IndexContainer>::_var_name;
+        using PFuncBase<VarContainer, double>::_name;
+        using PFuncBase<VarContainer, double>::_var_name;
 
         double a;
         double b;
@@ -36,9 +36,9 @@ namespace PRISMS
             c = 1.0;
         };
 
-        virtual Quadratic<VarContainer, IndexContainer> *clone() const
+        virtual Quadratic<VarContainer> *clone() const
         {
-            return new Quadratic<VarContainer, IndexContainer>(*this);
+            return new Quadratic<VarContainer>(*this);
         };
 
         // ----------------------------------------------------------
@@ -89,13 +89,13 @@ namespace PRISMS
 
 
 
-    template<class VarContainer, class IndexContainer>
-    class Cubic : public PBaseFunction<double, double, VarContainer, IndexContainer>
+    template<class VarContainer>
+    class Cubic : public PFuncBase<VarContainer, double>
     {
     public:
 
-        using PBaseFunction<double, double, VarContainer, IndexContainer>::_name;
-        using PBaseFunction<double, double, VarContainer, IndexContainer>::_var_name;
+        using PFuncBase<VarContainer, double>::_name;
+        using PFuncBase<VarContainer, double>::_var_name;
 
         double a;
         double b;
@@ -117,9 +117,9 @@ namespace PRISMS
             d = 1.0;
         };
 
-        virtual Cubic<VarContainer, IndexContainer> *clone() const
+        virtual Cubic<VarContainer> *clone() const
         {
-            return new Cubic<VarContainer, IndexContainer>(*this);
+            return new Cubic<VarContainer>(*this);
         };
 
         // ----------------------------------------------------------

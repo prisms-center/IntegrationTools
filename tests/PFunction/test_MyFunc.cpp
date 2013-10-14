@@ -75,8 +75,8 @@ double nonvirtual(const T &var, int di, int dj)
 int main(int argc, char *argv[])
 {
     BP::BP_StopWatch timer;
-    PRISMS::MyFunc<std::vector<double>, std::vector<int> > f;
-    PRISMS::PFunction<double, double, std::vector<double>, std::vector<int> > g;
+    PRISMS::MyFunc<std::vector<double> > f;
+    PRISMS::PFunction<std::vector<double>, double> g;
     //PRISMS::MyFunc_f<std::vector<double> > h;
     //PRISMS::MyFunc_grad_0<std::vector<double> > hgrad;
     //PRISMS::MyFunc_hess_0_0<std::vector<double> > hhess;

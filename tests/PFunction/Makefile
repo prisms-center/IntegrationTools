@@ -33,8 +33,8 @@ test_writer: test_writer.o S $(SRC)/PFunctionWriter.o
 test_writer.o: test_writer.cpp $(H)/*
 	$(CXX) -c test_writer.cpp $(CPPFLAGS)
 
-test_basissetwriter: test_basissetwriter.o S $(SRC)/PBasisSetWriter.o
-	$(CXX) test_basissetwriter.o $(SRC)/PBasisSetWriter.o -o test_basissetwriter $(CPPFLAGS) $(LDFLAGS)
+test_basissetwriter: test_basissetwriter.o S $(SRC)/PBasisSetWriter.o $(SRC)/PFunctionWriter.o
+	$(CXX) test_basissetwriter.o $(SRC)/PBasisSetWriter.o $(SRC)/PFunctionWriter.o -o test_basissetwriter $(CPPFLAGS) $(LDFLAGS)
 	./test_basissetwriter
 	
 test_basissetwriter.o: test_basissetwriter.cpp $(H)/*

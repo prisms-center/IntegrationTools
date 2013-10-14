@@ -60,7 +60,9 @@ int main(int argc, char *argv[])
     outfile.open("MyFunc.hh");
     
     //writer.sym2code("2*c^4 + 2*c^2 + grad*2", outfile);
+    writer.head(outfile);
     writer.sym2code("2*c^4*x^3*y^2 + 2*c^2*exp(x*y) + x*y^5*grad*2", outfile);
-
+    writer.foot(outfile);
+    
     return 0;
 }

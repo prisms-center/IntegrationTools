@@ -74,6 +74,9 @@ namespace PRISMS
         // TODO:
         //void code(     const std::string &json_str, std::ostream &sout);
         
+        void head( std::ostream &sout) const;
+        
+        void foot( std::ostream &sout) const;
         
 
     private:
@@ -82,7 +85,9 @@ namespace PRISMS
         
         void write_basis_function(int I, const std::string &name, const std::string &f, std::ostream &sout) const;
         
-        void code( std::ostream &sout);
+        void code( std::ostream &sout) const;
+        
+        
         
     };
 

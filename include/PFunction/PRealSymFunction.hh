@@ -11,8 +11,8 @@ namespace PRISMS
 
     /// Real valued symbolic functions
 
-    template<class VarContainer, class IndexContainer>
-    class PRealSymFunction : public PBaseFunction<double, double, VarContainer, IndexContainer>
+    template<class VarContainer>
+    class PRealSymFunction : public PFuncBase<VarContainer, double>
     {
         GiNaC::ex _e;
         std::vector< GiNaC::symbol> _sym;
@@ -50,12 +50,12 @@ namespace PRISMS
         // ----------------------------------------------------------
         //   Inherited:
 
-        using PBaseFunction<double, double, VarContainer, IndexContainer>::_name;
-        using PBaseFunction<double, double, VarContainer, IndexContainer>::_var_name;
+        using PFuncBase<VarContainer, double>::_name;
+        using PFuncBase<VarContainer, double>::_var_name;
 
-        virtual PRealSymFunction<VarContainer, IndexContainer> *clone() const
+        virtual PRealSymFunction<VarContainer> *clone() const
         {
-            return new PRealSymFunction<VarContainer, IndexContainer>(*this);
+            return new PRealSymFunction<VarContainer>(*this);
         };
 
         // ----------------------------------------------------------
@@ -68,8 +68,8 @@ namespace PRISMS
     
     
 
-    template<class VarContainer, class IndexContainer>
-    double PRealSymFunction<VarContainer, IndexContainer>::operator()(const VarContainer &var)
+    template<class VarContainer>
+    double PRealSymFunction<VarContainer>::operator()(const VarContainer &var)
     {
         GiNaC::exmap m;
         for(int i = 0; i < var.size(); i++)
@@ -79,8 +79,8 @@ namespace PRISMS
     }
 
 
-    template<class VarContainer, class IndexContainer>
-    double PRealSymFunction<VarContainer, IndexContainer>::grad(const VarContainer &var, int di)
+    template<class VarContainer>
+    double PRealSymFunction<VarContainer>::grad(const VarContainer &var, int di)
     {
         GiNaC::ex de = _e.diff(_sym[di]);
 
@@ -91,8 +91,8 @@ namespace PRISMS
         return GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.subs(m))).to_double();
     };
 
-    template<class VarContainer, class IndexContainer>
-    double PRealSymFunction<VarContainer, IndexContainer>::hess(const VarContainer &var, int di, int dj)
+    template<class VarContainer>
+    double PRealSymFunction<VarContainer>::hess(const VarContainer &var, int di, int dj)
     {
         GiNaC::ex de = _e.diff(_sym[di]).diff(_sym[dj]);
 
@@ -107,12 +107,12 @@ namespace PRISMS
     
     
     
-    class PRealSymBasisFunction : public PSimpleFunction<double, double>
+    class PRealSymBasisFunction : public PSimpleBase<double, double>
     {
         public:
         GiNaC::ex _e;
         GiNaC::symbol _var;
-        using PSimpleFunction<double, double>::_val;
+        using PSimpleBase<double, double>::_val;
         
         // Reminder, inherited from PSymBasisFunction<double, double>:
         //double operator()( const double &var){ _val = eval(var); return _val;};
@@ -139,7 +139,7 @@ namespace PRISMS
     ///
     ///   For instance, simple polynomials:  phi_i(x) = x^i;
     ///
-    class PRealSymBasisSet : public PBasisSet<double, double>
+    class PRealSymBasisSet : public PBasisSetBase<double, double>
     {
         public:
         GiNaC::ex _e;           // expression defining the basis functions = f( _var, _i)
@@ -147,14 +147,14 @@ namespace PRISMS
         GiNaC::symbol _i;       // index of basis function
         
         PRealSymBasisSet( int N, const GiNaC::symbol &index, const GiNaC::symbol &var, const GiNaC::ex &e)
-        : PBasisSet<double,double>(N)
+        : PBasisSetBase<double,double>(N)
         {
             _e = e;
             _var = var;
             _i = index;
         };
         
-        virtual PRealSymBasisSet* clone()
+        virtual PRealSymBasisSet* clone() const
         {
             return new PRealSymBasisSet(*this);
         };
@@ -212,7 +212,7 @@ namespace PRISMS
     ///      phi_1(x) = x;
     ///      phi_n(x) = 2*x*phi_n-1(x) - phi_n-2(x); with d = 2
     ///
-    class PRealSymRecursBasisSet : public PBasisSet<double, double>
+    class PRealSymRecursBasisSet : public PBasisSetBase<double, double>
     {
         public:
         std::vector< GiNaC::ex> _phi;  // generated basis functions
@@ -247,7 +247,7 @@ namespace PRISMS
         ///     delete chebyshev[i];
         ///
         PRealSymRecursBasisSet( int N, const GiNaC::symbol &var, const std::vector<GiNaC::symbol> &phi_sym, const std::vector<GiNaC::ex> &phi_init, const GiNaC::ex &e_gen)
-        : PBasisSet<double,double>(N)
+        : PBasisSetBase<double,double>(N)
         {
             _e_gen = e_gen;
             _var = var;
@@ -267,7 +267,7 @@ namespace PRISMS
         //    something
         //};
 
-        virtual PRealSymRecursBasisSet* clone()
+        virtual PRealSymRecursBasisSet* clone() const
         {
             return new PRealSymRecursBasisSet(*this);
         };

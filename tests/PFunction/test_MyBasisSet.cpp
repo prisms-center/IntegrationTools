@@ -54,23 +54,19 @@ int main(int argc, char *argv[])
     std::cout << "\n";
     
     
-    std::cout << "Test cloning:\n";
+    std::cout << "Test getting basis functions:\n";
     x = 1.0;
     for( int i = 0; i<bset.size(); i++)
     {
-        PRISMS::PSimpleFunction<double, double>* phi;
-        PRISMS::PSimpleFunction<double, double>* grad_phi;
-        PRISMS::PSimpleFunction<double, double>* hess_phi;
+        PRISMS::PSimpleFunction<double, double> phi;
+        PRISMS::PSimpleFunction<double, double> grad_phi;
+        PRISMS::PSimpleFunction<double, double> hess_phi;
         
-        phi = bset.clone_basis_function(i);
-        grad_phi = bset.clone_grad_basis_function(i);
-        hess_phi = bset.clone_hess_basis_function(i);
+        phi = bset.basis_function(i).simplefunction();
+        grad_phi = bset.basis_function(i).grad_simplefunction(0);
+        hess_phi = bset.basis_function(i).hess_simplefunction(0,0);
         
-        std::cout << "i: " << i << "  " << (*phi)(x) << "  " << (*grad_phi)(x) << "  " << (*hess_phi)(x) << std::endl;
-        
-        delete phi;
-        delete grad_phi;
-        delete hess_phi;
+        std::cout << "i: " << i << "  " << phi(x) << "  " << grad_phi(x) << "  " << hess_phi(x) << std::endl;
     }
     std::cout << bset() << std::endl;
     std::cout << "\n";

@@ -57,6 +57,7 @@ namespace PRISMS
         _name = name;
         
         // set defaults:
+        template_intype_on();
         f_on();
         grad_on();
         hess_on();
@@ -83,6 +84,16 @@ namespace PRISMS
     {
         _intype = intype;
         _outtype = outtype;
+    };
+    
+    void PFunctionWriter::template_intype_on()
+    {
+        _template_intype = true;
+    };
+    
+    void PFunctionWriter::template_intype_off()
+    {
+        _template_intype = false;
     };
     
     void PFunctionWriter::f_on()
@@ -203,6 +214,7 @@ namespace PRISMS
         }
         
         std::cout << " ------------------------------- \n";
+        
         code_poly( sout);
         
     };
@@ -224,47 +236,73 @@ namespace PRISMS
         _f = f;
         _grad = grad;
         _hess = hess;
+        
         code_poly(sout);
+        
     };
     
     void PFunctionWriter::write_basis_function(int I, const std::string &name, const std::string &f, std::ostream &sout) const
     {
-        std::string PSimpleFunctionTemplate = "PSimpleFunction< VarContainer, " + _outtype + ">";
+        std::string PSimpleBaseTemplate;
+        if( _template_intype) PSimpleBaseTemplate = "PSimpleBase< VarContainer, " + _outtype + ">";
+        else PSimpleBaseTemplate = "PSimpleBase< " + _intype + ", " + _outtype + ">";
         
-        sout << indent(I) << "template< class VarContainer>\n";
-        sout << indent(I) << "class " + name + " : public " + PSimpleFunctionTemplate + "\n";
+        if( _template_intype) sout << indent(I) << "template< class VarContainer>\n";
+        sout << indent(I) << "class " + name + " : public " + PSimpleBaseTemplate + "\n";
         sout << indent(I) << "{\n";
         I++;
-        sout << indent(I) << _outtype + " eval( const VarContainer &var) const\n";
+        if( _template_intype) sout << indent(I) << _outtype + " eval( const VarContainer &var) const\n";
+        else sout << indent(I) << _outtype + " eval( const " + _intype + " &var) const\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return " + f + ";\n";
         I--;
+        sout << indent(I) << "};\n\n";
+        I--;
+        sout << indent(I) << "public:\n\n";
+        I++;
+        
+        sout << indent(I) << name + "()\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "this->_name = \"" + name + "\";\n";
+        I--;
+        sout << indent(I) << "};\n\n";
+        
+        sout << indent(I) << name + "* clone() const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "return new " + name + "(*this);\n";
+        I--;
         sout << indent(I) << "};\n";
+        
         I--;
         sout << indent(I) << "};\n\n";
     };
     
     // use polymorphic basis functions
     void PFunctionWriter::code_poly( 
-      std::ostream &sout)
+      std::ostream &sout) const
     {
-        int I = 0;
-        std::string PBaseFunctionTemplate = "PBaseFunction<" + _intype + ", " + _outtype + ", VarContainer, IndexContainer>";
-        std::string PSimpleFunctionTemplate = "PSimpleFunction< VarContainer, " + _outtype + ">";
+        int I = 1;
         
-        // write date this was written
-        
-        sout << indent(I) << "// created: " << now() << "\n\n";
-        
-        // write include guards & namespace
-        sout << indent(I) << "#ifndef " + _name + "_HH\n"; 
-        sout << indent(I) << "#define " + _name + "_HH\n\n"; 
-        sout << indent(I) << "#include <cmath>\n";
-        sout << indent(I) << "#include \"PFunction.hh\"\n\n";
-        sout << indent(I) << "namespace PRISMS\n"; 
-        sout << indent(I) << "{\n";
-        I++;
+        std::string PFuncBaseTemplate, PSimpleBaseTemplate, PSimpleFunctionTemplate, instring, instringtemp;
+        if( _template_intype)
+        {
+            PFuncBaseTemplate = "PFuncBase< VarContainer, " + _outtype + ">";
+            PSimpleBaseTemplate = "PSimpleBase< VarContainer, " + _outtype + ">";
+            PSimpleFunctionTemplate = "PSimpleFunction< VarContainer, " + _outtype + ">";
+            instring = "VarContainer";
+            instringtemp = "<VarContainer>";
+        }
+        else
+        {
+            PFuncBaseTemplate = "PFuncBase< " + _intype + ", " + _outtype + ">";
+            PSimpleBaseTemplate = "PSimpleBase< " + _intype + ", " + _outtype + ">";
+            PSimpleFunctionTemplate = "PSimpleFunction< " + _intype + ", " + _outtype + ">";
+            instring = _intype;
+            instringtemp = "";
+        }
         
         // write function classes for f, grad_f, hess_f
         if( _write_f)
@@ -285,21 +323,21 @@ namespace PRISMS
         
         
         // write class header
-        sout << indent(I) << "template<class VarContainer, class IndexContainer>\n";
-        sout << indent(I) << "class " + _name + " : public " + PBaseFunctionTemplate + "\n";
+        if( _template_intype) sout << indent(I) << "template<class VarContainer>\n";
+        sout << indent(I) << "class " + _name + " : public " + PFuncBaseTemplate + "\n";
         sout << indent(I) << "{\n";
         
         
         // write members
         sout << indent(I) << "public:\n";
         I++;
-        sout << indent(I) << "using " + PBaseFunctionTemplate + "::_name;\n";
-        sout << indent(I) << "using " + PBaseFunctionTemplate + "::_var_name;\n";
-        sout << indent(I) << "using " + PBaseFunctionTemplate + "::_var_description;\n";
+        sout << indent(I) << "using " + PFuncBaseTemplate + "::_name;\n";
+        sout << indent(I) << "using " + PFuncBaseTemplate + "::_var_name;\n";
+        sout << indent(I) << "using " + PFuncBaseTemplate + "::_var_description;\n";
         sout << indent(I) << "\n";
-        sout << indent(I) << PSimpleFunctionTemplate + " *_val;\n";
-        sout << indent(I) << PSimpleFunctionTemplate + " **_grad_val;\n";
-        sout << indent(I) << PSimpleFunctionTemplate + " ***_hess_val;\n";
+        sout << indent(I) << PSimpleBaseTemplate + " *_val;\n";
+        sout << indent(I) << PSimpleBaseTemplate + " **_grad_val;\n";
+        sout << indent(I) << PSimpleBaseTemplate + " ***_hess_val;\n";
         sout << indent(I) << "\n";
         
         
@@ -371,30 +409,53 @@ namespace PRISMS
         
         
         // write clone
-        sout << indent(I) << _name + "<VarContainer, IndexContainer>* clone() const\n";
+        sout << indent(I) << _name + instringtemp + "* clone() const\n";
         sout << indent(I) << "{\n";
         I++;
-        sout << indent(I) << "return new " + _name + "<VarContainer, IndexContainer>(*this);\n";
+        sout << indent(I) << "return new " + _name + instringtemp + "(*this);\n";
+        I--;
+        sout << indent(I) << "};\n\n";
+        
+        // write simplefunction getter
+        sout << indent(I) << PSimpleFunctionTemplate + " simplefunction() const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "return " + PSimpleFunctionTemplate + "( *_val );\n";
+        I--;
+        sout << indent(I) << "};\n\n";
+        
+        sout << indent(I) << PSimpleFunctionTemplate + " grad_simplefunction(int di) const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "return " + PSimpleFunctionTemplate + "( *_grad_val[di] );\n";
+        I--;
+        sout << indent(I) << "};\n\n";
+        
+        sout << indent(I) << PSimpleFunctionTemplate + " hess_simplefunction(int di, int dj) const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "return " + PSimpleFunctionTemplate + "( *_hess_val[di][dj] );\n";
         I--;
         sout << indent(I) << "};\n\n";
         
         
+        
         // write operators
-        sout << indent(I) << _outtype + " operator()(const VarContainer &var)\n";
+        sout << indent(I) << _outtype + " operator()(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return (*_val)(var);\n";
         I--;
         sout << indent(I) << "};\n\n";
         
-        sout << indent(I) << _outtype + " grad(const VarContainer &var, int di)\n";
+        sout << indent(I) << _outtype + " grad(const " + instring + " &var, int di)\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return (*_grad_val[di])(var);\n";
         I--;
         sout << indent(I) << "};\n\n";
         
-        sout << indent(I) << _outtype + " hess(const VarContainer &var, int di, int dj)\n";
+        sout << indent(I) << _outtype + " hess(const " + instring + " &var, int di, int dj)\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return (*_hess_val[di][dj])(var);\n";
@@ -403,14 +464,14 @@ namespace PRISMS
         
         
         // write evals
-        sout << indent(I) << "void eval(const VarContainer &var)\n";
+        sout << indent(I) << "void eval(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "(*_val)(var);\n";
         I--;
         sout << indent(I) << "};\n\n";
         
-        sout << indent(I) << "void eval_grad(const VarContainer &var)\n";
+        sout << indent(I) << "void eval_grad(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
         for( int i=0; i<_var_name.size(); i++)
@@ -418,7 +479,7 @@ namespace PRISMS
         I--;
         sout << indent(I) << "};\n\n";
         
-        sout << indent(I) << "void eval_hess(const VarContainer &var)\n";
+        sout << indent(I) << "void eval_hess(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
         for( int i=0; i<_var_name.size(); i++)
@@ -467,24 +528,24 @@ namespace PRISMS
         if( _write_f)
         {
             sout << indent(I) << "\n";
-            sout << indent(I) << "_val = new " + _name + "_f<VarContainer>();\n";
+            sout << indent(I) << "_val = new " + _name + "_f" + instringtemp + "();\n";
         }
         if( _write_grad)
         {
             sout << indent(I) << "\n";
-            sout << indent(I) << "_grad_val = new " + PSimpleFunctionTemplate + "*[" + itos(_var_name.size()) + "];\n";
+            sout << indent(I) << "_grad_val = new " + PSimpleBaseTemplate + "*[" + itos(_var_name.size()) + "];\n";
             for( int i=0; i<_var_name.size(); i++)
-                sout << indent(I) << "_grad_val[" + itos(i) + "] = new " +_name + "_grad_" + itos(i) + "<VarContainer>();\n";
+                sout << indent(I) << "_grad_val[" + itos(i) + "] = new " +_name + "_grad_" + itos(i) + instringtemp + "();\n";
         }
         if( _write_hess)
         {
             sout << indent(I) << "\n";
-            sout << indent(I) << "_hess_val = new " + PSimpleFunctionTemplate + "**[" + itos(_var_name.size()) + "];\n";
+            sout << indent(I) << "_hess_val = new " + PSimpleBaseTemplate + "**[" + itos(_var_name.size()) + "];\n";
             for( int i=0; i<_var_name.size(); i++)
-                sout << indent(I) << "_hess_val[" + itos(i) + "] = new " + PSimpleFunctionTemplate + "*[" + itos(_var_name.size()) + "];\n";
+                sout << indent(I) << "_hess_val[" + itos(i) + "] = new " + PSimpleBaseTemplate + "*[" + itos(_var_name.size()) + "];\n";
             for( int i=0; i<_var_name.size(); i++)
             for( int j=0; j<_var_name.size(); j++)
-                sout << indent(I) << "_hess_val[" + itos(i) + "][" + itos(j) + "] = new " +_name + "_hess_" + itos(i) + "_" + itos(j) + "<VarContainer>();\n";
+                sout << indent(I) << "_hess_val[" + itos(i) + "][" + itos(j) + "] = new " +_name + "_hess_" + itos(i) + "_" + itos(j) + instringtemp + "();\n";
         }
         I--;
         sout << indent(I) << "};\n\n";
@@ -494,48 +555,60 @@ namespace PRISMS
         I--;
         sout << indent(I) << "};\n";
         
-        // close namespace
-        I--;
-        sout << indent(I) << "}\n";
         
-        // finish
-        sout << indent(I) << "#endif\n";
     };
     
     // use if/else statements
     void PFunctionWriter::code_ifelse( 
-      std::ostream &sout)
+      std::ostream &sout) const
     {
         int I = 0;
-        std::string PBaseFunctionTemplate = "PBaseFunction<" + _intype + ", " + _outtype + ", VarContainer, IndexContainer>";
-        std::string PSimpleFunctionTemplate = "PSimpleFunction< VarContainer, " + _outtype + ">";
-        
-        // write date this was written
-        
-        sout << indent(I) << "// created: " << now() << "\n\n";
-        
-        // write include guards & namespace
-        sout << indent(I) << "#ifndef " + _name + "_HH\n"; 
-        sout << indent(I) << "#define " + _name + "_HH\n\n"; 
-        sout << indent(I) << "#include <cmath>\n";
-        sout << indent(I) << "#include \"PFunction.hh\"\n\n";
-        sout << indent(I) << "namespace PRISMS\n"; 
-        sout << indent(I) << "{\n";
-        I++;
-        
+        std::string PFuncBaseTemplate, PSimpleBaseTemplate, PSimpleFunctionTemplate, instring, instringtemp;
+        if( _template_intype)
+        {
+            PFuncBaseTemplate = "PFuncBase< VarContainer, " + _outtype + ">";
+            PSimpleBaseTemplate = "PSimpleBase< VarContainer, " + _outtype + ">";
+            PSimpleFunctionTemplate = "PSimpleFunction< VarContainer, " + _outtype + ">";
+            instring = "VarContainer";
+            instringtemp = "<VarContainer>";
+        }
+        else
+        {
+            PFuncBaseTemplate = "PFuncBase< " + _intype + ", " + _outtype + ">";
+            PSimpleBaseTemplate = "PSimpleBase< " + _intype + ", " + _outtype + ">";
+            PSimpleFunctionTemplate = "PSimpleFunction< " + _intype + ", " + _outtype + ">";
+            instring = _intype;
+            instringtemp = "";
+        }
+        // write function classes for f, grad_f, hess_f
+        if( _write_f)
+        {
+            write_basis_function(I, _name + "_f", _f, sout);
+        }
+        if( _write_grad)
+        {
+            for( int i=0; i<_var_name.size(); i++)
+                write_basis_function(I, _name + "_grad_" + itos(i), _grad[i], sout);
+        }
+        if( _write_hess)
+        {
+            for( int i=0; i<_var_name.size(); i++)
+            for( int j=0; j<_var_name.size(); j++)
+                write_basis_function(I, _name + "_hess_" + itos(i) + "_" + itos(j), _hess[i][j], sout);
+        }
         
         // write class header
-        sout << indent(I) << "template<class VarContainer, class IndexContainer>\n";
-        sout << indent(I) << "class " + _name + " : public " + PBaseFunctionTemplate + "\n";
+        if( _template_intype) sout << indent(I) << "template<class VarContainer>\n";
+        sout << indent(I) << "class " + _name + " : public " + PFuncBaseTemplate + "\n";
         sout << indent(I) << "{\n";
         
         
         // write members
         sout << indent(I) << "public:\n";
         I++;
-        sout << indent(I) << "using " + PBaseFunctionTemplate + "::_name;\n";
-        sout << indent(I) << "using " + PBaseFunctionTemplate + "::_var_name;\n";
-        sout << indent(I) << "using " + PBaseFunctionTemplate + "::_var_description;\n";
+        sout << indent(I) << "using " + PFuncBaseTemplate + "::_name;\n";
+        sout << indent(I) << "using " + PFuncBaseTemplate + "::_var_name;\n";
+        sout << indent(I) << "using " + PFuncBaseTemplate + "::_var_description;\n";
         sout << indent(I) << "\n";
         sout << indent(I) << _outtype + " _val;\n";
         sout << indent(I) << _outtype + " *_grad_val;\n";
@@ -580,6 +653,7 @@ namespace PRISMS
             for( int j=0; j<_var_name.size(); j++)
                 sout << indent(I) << "_hess_val[" + itos(i) + "][" + itos(j) + "] = RHS._hess_val[" + itos(i) + "][" + itos(j) + "];\n";
         }
+        sout << indent(I) << "return *this;\n";
         I--;
         sout << indent(I) << "}\n\n";
         
@@ -603,23 +677,79 @@ namespace PRISMS
         
         
         // write clone
-        sout << indent(I) << _name + "<VarContainer, IndexContainer>* clone() const\n";
+        sout << indent(I) << _name + instringtemp + "* clone() const\n";
         sout << indent(I) << "{\n";
         I++;
-        sout << indent(I) << "return new " + _name + "<VarContainer, IndexContainer>(*this);\n";
+        sout << indent(I) << "return new " + _name + instringtemp + "(*this);\n";
+        I--;
+        sout << indent(I) << "};\n\n";
+        
+        
+        // write simplefunction getter
+        sout << indent(I) << PSimpleFunctionTemplate + " simplefunction() const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "return " + PSimpleFunctionTemplate + "(" + _name + "_f());\n";
+        I--;
+        sout << indent(I) << "};\n\n";
+        
+        sout << indent(I) << PSimpleFunctionTemplate + " grad_simplefunction(int di) const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        for( int i=0; i<_var_name.size(); i++)
+        {
+            if( i == 0)
+                sout << indent(I) << "if( di == " << i << " )\n";
+            else
+                sout << indent(I) << "else if( di == " << i << " )\n";
+            sout << indent(I) << "{\n";
+            I++;
+            sout << indent(I) << "return " + PSimpleFunctionTemplate + "(" + _name + "_grad_" + itos(i) + "());\n";
+            I--;
+            sout << indent(I) << "}\n";
+        }
+        I--;
+        sout << indent(I) << "};\n\n";
+        
+        sout << indent(I) << PSimpleFunctionTemplate + " hess_simplefunction(int di, int dj) const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        for( int i=0; i<_var_name.size(); i++)
+        {
+            if( i == 0)
+                sout << indent(I) << "if( di == " << i << " )\n";
+            else
+                sout << indent(I) << "else if( di == " << i << " )\n";
+            sout << indent(I) << "{\n";
+            I++;
+            for( int j=0; j<_var_name.size(); j++)
+            {
+                if( j == 0)
+                    sout << indent(I) << "if( dj == " << j << " )\n";
+                else
+                    sout << indent(I) << "else if( dj == " << j << " )\n";
+                sout << indent(I) << "{\n";
+                I++;
+                sout << indent(I) << "return " + PSimpleFunctionTemplate + "(" + _name + "_hess_" + itos(i) + "_" + itos(j) + "());\n";
+                I--;
+                sout << indent(I) << "}\n";
+            }
+            I--;
+            sout << indent(I) << "}\n";
+        }
         I--;
         sout << indent(I) << "};\n\n";
         
         
         // write operators
-        sout << indent(I) << _outtype + " operator()(const VarContainer &var)\n";
+        sout << indent(I) << _outtype + " operator()(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return _val = " + _f + ";\n";
         I--;
         sout << indent(I) << "};\n\n";
         
-        sout << indent(I) << _outtype + " grad(const VarContainer &var, int di)\n";
+        sout << indent(I) << _outtype + " grad(const " + instring + " &var, int di)\n";
         sout << indent(I) << "{\n";
         I++;
         for( int i=0; i<_var_name.size(); i++)
@@ -637,7 +767,7 @@ namespace PRISMS
         I--;
         sout << indent(I) << "};\n\n";
         
-        sout << indent(I) << _outtype + " hess(const VarContainer &var, int di, int dj)\n";
+        sout << indent(I) << _outtype + " hess(const " + instring + " &var, int di, int dj)\n";
         sout << indent(I) << "{\n";
         I++;
         for( int i=0; i<_var_name.size(); i++)
@@ -668,14 +798,14 @@ namespace PRISMS
         
         
         // write evals
-        sout << indent(I) << "void eval(const VarContainer &var)\n";
+        sout << indent(I) << "void eval(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "_val = " + _f + ";\n";
         I--;
         sout << indent(I) << "};\n\n";
         
-        sout << indent(I) << "void eval_grad(const VarContainer &var)\n";
+        sout << indent(I) << "void eval_grad(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
         for( int i=0; i<_var_name.size(); i++)
@@ -683,7 +813,7 @@ namespace PRISMS
         I--;
         sout << indent(I) << "};\n\n";
         
-        sout << indent(I) << "void eval_hess(const VarContainer &var)\n";
+        sout << indent(I) << "void eval_hess(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
         for( int i=0; i<_var_name.size(); i++)
@@ -750,12 +880,6 @@ namespace PRISMS
         I--;
         sout << indent(I) << "};\n";
         
-        // close namespace
-        I--;
-        sout << indent(I) << "}\n";
-        
-        // finish
-        sout << indent(I) << "#endif\n";
     };
     
     /*
@@ -782,6 +906,35 @@ namespace PRISMS
         for( int i=0; i<step; i++)
             tmp += _basic_indent;
         return tmp;
+    };
+    
+    void PFunctionWriter::head( std::ostream &sout) const
+    {
+        int I = 0;
+        
+        // write date this was written
+        
+        sout << indent(I) << "// created: " << now() << "\n\n";
+        
+        // write include guards & namespace
+        sout << indent(I) << "#ifndef " + _name + "_HH\n"; 
+        sout << indent(I) << "#define " + _name + "_HH\n\n"; 
+        sout << indent(I) << "#include <cmath>\n";
+        sout << indent(I) << "#include \"PFunction.hh\"\n\n";
+        sout << indent(I) << "namespace PRISMS\n"; 
+        sout << indent(I) << "{\n";
+        I++;
+        
+    };
+    
+    void PFunctionWriter::foot( std::ostream &sout) const
+    {
+        // close namespace
+        sout << indent(0) << "}\n";
+        
+        // finish
+        sout << indent(0) << "#endif\n";
+        
     };
 
 }
