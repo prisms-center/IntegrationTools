@@ -1,7 +1,7 @@
 /*
- *  bffw.cpp
+ *  bsw.cpp
  *
- *  Basis Function Factory Writer
+ *  Basis Set Writer
  *
  *
  *  Created by Brian Puchala.
@@ -27,7 +27,7 @@
 //#include<time.h>
 //#include<sstream>
 
-#include "PFunctionWriter.hh"
+#include "PBasisSetWriter.hh"
 
 
 
@@ -46,8 +46,9 @@ const size_t ERROR_UNHANDLED_EXCEPTION = 2;
 int main(int argc, char *argv[])
 {
     // input variables
-    std::string name, location, intype, outtype, sym;
-    std::vector< std::string> var_name, var_desc;
+    int max;
+    std::string name, description, location, intype, outtype, var, e_gen, index;
+    std::vector< std::string> sym, init;
     
     namespace po = boost::program_options;
     namespace fs = boost::filesystem;
@@ -59,13 +60,17 @@ int main(int argc, char *argv[])
         /// Set command line options using boost program_options
         po::options_description desc("Options"); 
         desc.add_options() 
-          ("name,n", po::value<std::string>(&name)->required(), "Function name") 
-          ("location,l", po::value<std::string>(&location)->default_value("."), "Location to write function") 
-          ("intype,i", po::value<std::string>(&intype), "Function input type") 
-          ("outtype,o", po::value<std::string>(&outtype), "Function output type") 
-          ("sym", po::value<std::string>(&sym)->required()  , "Symbolic expression") 
-          ("var,v", po::value<std::vector<std::string> >(&var_name)->multitoken()->required(), "Variable names")
-          ("description,d", po::value<std::vector<std::string> >(&var_desc)->multitoken()->required(), "Variable descriptions")
+          ("name,n", po::value<std::string>(&name)->required(), "Basis set name") 
+          ("description,d", po::value<std::string>(&description)->required(), "Basis set description") 
+          ("location,l", po::value<std::string>(&location)->default_value("."), "Location to write basis set") 
+          ("intype,i", po::value<std::string>(&intype), "Basis set input type") 
+          ("outtype,o", po::value<std::string>(&outtype), "Basis set output type")
+          ("var,v", po::value<std::string>(&var)->required(), "Variable symbol")
+          ("index", po::value<std::string>(&index), "Index symbol")
+          ("expression,e", po::value<std::string>(&e_gen)->required(), "Generating expression")
+          ("sym", po::value<std::vector<std::string> >(&sym)->multitoken(), "Symbols for previous basis functions") 
+          ("init", po::value<std::vector<std::string> >(&init)->multitoken(), "Initial basis functions")
+          ("max,m", po::value<int>(&max)->required(), "Max size of basis set")
           ("grad", "Include gradient calculation")
           ("hess", "Include Hessian calculation");
         
@@ -82,7 +87,23 @@ int main(int argc, char *argv[])
             std::cout << "fw: Function Writer Usage" << std::endl 
                       << desc << std::endl; 
             return SUCCESS; 
-            } 
+            }
+            
+            if( vm.count("index") )
+            {
+                if( vm.count("init") || vm.count("sym") )
+                {
+                    throw po::error("Error writing basis set. Either set (--index) or (--init and --sym).");
+                }
+            }
+            else
+            {
+                if( !(vm.count("init") && vm.count("sym")) )
+                {
+                    //desc = "Error writing basis set. Either set (--index) or (--init and --sym).";
+                    throw po::error("Error writing basis set. Either set (--index) or (--init and --sym).");
+                }
+            }
 
             po::notify(vm); // throws on error, so do after help in case 
                           // there are any problems 
@@ -103,9 +124,11 @@ int main(int argc, char *argv[])
     } 
     
     
+    
+    
     // How can I check for UK variables or constants?
     
-    PRISMS::PFunctionWriter writer(name);
+    PRISMS::PBasisSetWriter writer(name, description);
     std::ofstream outfile;
     
     fs::path fileloc(location);
@@ -115,16 +138,23 @@ int main(int argc, char *argv[])
     
     outfile.open( fileloc.c_str() );
     
-    writer.set_var( var_name, var_desc);
     
     if( vm.count("intype") ) writer.set_intype( intype );
     if( vm.count("outtype") )writer.set_outtype( outtype );
     vm.count("grad") ? writer.grad_on() : writer.grad_off();
     vm.count("hess") ? writer.hess_on() : writer.hess_off();
     
-    if( vm.count("sym") )
+    if( vm.count("index"))
+        writer.sym2code(e_gen, var, index, max, outfile);
+    else
     {
-        writer.sym2code( sym , outfile);
+        std::cout << "e_gen: " << e_gen << std::endl;
+        std::cout << "var: " << var << std::endl;
+        std::cout << "init: " << init << std::endl;
+        std::cout << "sym: " << sym << std::endl;
+        std::cout << "max: " << max << std::endl;
+        
+        writer.sym2code(e_gen, var, init, sym, max, outfile);
     }
     
     return 0;

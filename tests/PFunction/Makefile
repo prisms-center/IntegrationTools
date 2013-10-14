@@ -51,7 +51,7 @@ test_MyBasisSet: test_MyBasisSet.cpp MyBasisSet.hh $(H)/* test_basissetwriter
 
 
 S: FORCE
-	cd $(SRC) && $(MAKE)
+	cd $(SRC); make test
 
 FORCE:
 	
