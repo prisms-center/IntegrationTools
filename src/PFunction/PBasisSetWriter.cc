@@ -130,7 +130,75 @@ namespace PRISMS
         _grad.clear();
         _hess.clear();
         
+        // create a symbolic basis set
         
+        // create GiNaC symbols & expression parser
+        GiNaC::symbol symvar("var"), symindex("i");
+        GiNaC::symtab table;
+        table[ var] = symvar;
+        table[ index] = symindex;
+        GiNaC::parser reader(table);
+        
+        // create generating GiNaC expression
+        GiNaC::ex e_gen = reader(f);
+        
+        // create recursive symbolic basis set
+        PRISMS::PRealSymBasisSet bset( N, symindex, symvar, e_gen);
+        
+        // generate phi
+        if( _write_phi)
+        {
+            for( int i=0; i<N; i++)
+            {
+                PRISMS::PRealSymBasisFunction* bf;
+                bf = bset.clone_basis_function(i);
+                
+                std::ostringstream ss;
+                ss << GiNaC::csrc_double << bf->_e;    
+                
+                _phi.push_back( ss.str());
+                
+                delete bf;
+            }
+        }
+        
+        // generate grad
+        if( _write_grad)
+        {
+            for( int i=0; i<N; i++)
+            {
+                PRISMS::PRealSymBasisFunction* bf;
+                bf = bset.clone_grad_basis_function(i);
+                
+                std::ostringstream ss;
+                ss << GiNaC::csrc_double << bf->_e;    
+                
+                _grad.push_back( ss.str());
+                
+                delete bf;
+            }
+        }
+        
+        // generate hess
+        if( _write_hess)
+        {
+            for( int i=0; i<N; i++)
+            {
+                PRISMS::PRealSymBasisFunction* bf;
+                bf = bset.clone_hess_basis_function(i);
+                
+                std::ostringstream ss;
+                ss << GiNaC::csrc_double << bf->_e;    
+                
+                _hess.push_back( ss.str());
+                
+                delete bf;
+            }
+        }
+        
+        head(sout);
+        code(sout);
+        foot(sout);
         
     };
     
