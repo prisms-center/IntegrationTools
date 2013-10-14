@@ -798,14 +798,14 @@ namespace PRISMS
         
         
         // write evals
-        sout << indent(I) << "void eval(const " + instring + " &var)\n";
+        sout << indent(I) << "void operator()(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "_val = " + _f + ";\n";
         I--;
         sout << indent(I) << "};\n\n";
         
-        sout << indent(I) << "void eval_grad(const " + instring + " &var)\n";
+        sout << indent(I) << "void grad(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
         for( int i=0; i<_var_name.size(); i++)
@@ -813,7 +813,7 @@ namespace PRISMS
         I--;
         sout << indent(I) << "};\n\n";
         
-        sout << indent(I) << "void eval_hess(const " + instring + " &var)\n";
+        sout << indent(I) << "void hess(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
         for( int i=0; i<_var_name.size(); i++)

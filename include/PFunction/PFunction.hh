@@ -221,7 +221,7 @@ namespace PRISMS
         // Use these functions to evaluate several values, then use 'get' methods to access results
         virtual void eval(const VarContainer &var)
         {
-            undefined("void eval()(const VarContainer &var)");
+            undefined("void eval_grad( const VarContainer &var)");
         };
         virtual void eval_grad(const VarContainer &var)
         {
@@ -335,10 +335,10 @@ namespace PRISMS
         {
             return _hess_val[di][dj](var);
         };
-
+        
         void eval(const VarContainer &var)
         {
-            _val(var);
+            (*this)(var);
         };
 
         void eval_grad(const VarContainer &var)
