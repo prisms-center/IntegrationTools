@@ -123,7 +123,9 @@ int main(int argc, char *argv[])
     
     if( vm.count("sym") )
     {
+        writer.head(outfile);
         writer.sym2code( sym , outfile);
+        writer.foot(outfile);
     }
     
     return 0;

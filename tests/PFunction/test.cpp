@@ -43,36 +43,36 @@ int main(int argc, char *argv[])
     std::vector<double> var;
     var.push_back(2.1);
 
-    PRISMS::Quadratic<std::vector<double>, std::vector<int> > fq;
+    PRISMS::Quadratic<std::vector<double> > fq;
 
     std::cout << fq.name() << "  " << fq(var) << std::endl;
 
 
 
-    PRISMS::Cubic<std::vector<double>, std::vector<int> > fc;
+    PRISMS::Cubic<std::vector<double> > fc;
 
     std::cout << fc.name() << "  " << fc(var) << std::endl;
 
 
 
-    PRISMS::PBaseFunction<double, double, std::vector<double>, std::vector<int> > *g;
+    PRISMS::PFuncBase<std::vector<double>, double > *g;
 
     g = fq.clone();
 
     std::cout << (*g).name() << "  " << (*g)(var) << std::endl;
 
 
-    PRISMS::Quadratic<std::vector<double>, std::vector<int> > *k;
+    PRISMS::Quadratic<std::vector<double> > *k;
 
     k = fq.clone();
 
     std::cout << (*k).name() << "  " << (*k)(var) << std::endl;
 
 
-    PRISMS::PFunction<double, double, std::vector<double>, std::vector<int> > h;
+    PRISMS::PFunction<std::vector<double>, double > h;
     h.set(k);
     std::cout << h.name() << "  " << h(var) << std::endl;
-    h = PRISMS::Cubic<std::vector<double>, std::vector<int> >();
+    h = PRISMS::Cubic<std::vector<double> >();
     std::cout << h.name() << "  " << h(var) << std::endl;
 
 

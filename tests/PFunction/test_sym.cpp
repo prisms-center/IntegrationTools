@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 
         std::cout << "f = " << e << std::endl;
 
-        PRISMS::PRealSymFunction<std::vector<double>, std::vector<int> > f;
+        PRISMS::PRealSymFunction<std::vector<double> > f;
         f.set("f", sym, e);
         
         std::cout << "\nEvaluate at x == " << var[0] << ", y == " << var[1] << ": " << std::endl;
@@ -84,10 +84,10 @@ int main(int argc, char *argv[])
         sym.push_back(x);
         sym.push_back(y);
 
-        PRISMS::PComplexSymFunction<std::vector<std::complex<double> >, std::vector<int> > g1;
+        PRISMS::PComplexSymFunction<std::vector<std::complex<double> > > g1;
         g1.set("g", sym, e);
 
-        PRISMS::PFunction<std::complex<double>, std::complex<double>, std::vector<std::complex<double> >, std::vector<int> > g;
+        PRISMS::PFunction<std::vector<std::complex<double> >, std::complex<double> > g;
         g = g1;
         
         std::cout << "\nEvaluate at x == " << complex_var[0] << ", y == " << complex_var[1] << ": " << std::endl;
@@ -154,17 +154,20 @@ int main(int argc, char *argv[])
         std::cout << "\n\n--- Test PSeriesFunction --- \n\n";
         
                 
-        std::vector< PRISMS::PBasisSet<double, double>* > 
+        std::vector< PRISMS::PBasisSet<double, double> > 
           basis_factories;
-        basis_factories.push_back(&chebyshev_factory);
-        basis_factories.push_back(&chebyshev_factory);
-        basis_factories.push_back(&chebyshev_factory);
+        basis_factories.push_back(chebyshev_factory);
+        basis_factories.push_back(chebyshev_factory);
+        basis_factories.push_back(chebyshev_factory);
         
         
         //std::vector< PRISMS::PBasisSet<double, double> > basis_set;
         //basis_set.push_back(chebyshev_factory);
         //basis_set.push_back(chebyshev_factory);
         //basis_set.push_back(chebyshev_factory);
+        
+        
+        std::cout << "Constructing PSeriesFunction..." << std::endl;
         
         
         PRISMS::PSeriesFunction<double, double, std::vector<double>, std::vector<int> > 

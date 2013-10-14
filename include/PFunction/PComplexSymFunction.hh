@@ -11,8 +11,8 @@ namespace PRISMS
 
     /// Real valued symbolic functions
 
-    template< class VarContainer, class IndexContainer>
-    class PComplexSymFunction : public PBaseFunction< std::complex<double>, std::complex<double>, VarContainer, IndexContainer >
+    template< class VarContainer>
+    class PComplexSymFunction : public PFuncBase< VarContainer, std::complex<double> >
     {
         GiNaC::ex _e;
         std::vector< GiNaC::symbol> _sym;
@@ -50,12 +50,12 @@ namespace PRISMS
         // ----------------------------------------------------------
         //   Inherited:
 
-        using PBaseFunction< std::complex<double>, std::complex<double>, VarContainer, IndexContainer >::_name;
-        using PBaseFunction< std::complex<double>, std::complex<double>, VarContainer, IndexContainer >::_var_name;
+        using PFuncBase< VarContainer, std::complex<double> >::_name;
+        using PFuncBase< VarContainer, std::complex<double> >::_var_name;
 
-        virtual PComplexSymFunction<VarContainer, IndexContainer> *clone() const
+        virtual PComplexSymFunction<VarContainer> *clone() const
         {
-            return new PComplexSymFunction<VarContainer, IndexContainer>(*this);
+            return new PComplexSymFunction<VarContainer>(*this);
         };
 
         // ----------------------------------------------------------
@@ -66,8 +66,8 @@ namespace PRISMS
 
     };
 
-    template< class VarContainer, class IndexContainer>
-    std::complex<double> PComplexSymFunction<VarContainer, IndexContainer>::operator()(const VarContainer &var)
+    template< class VarContainer>
+    std::complex<double> PComplexSymFunction<VarContainer>::operator()(const VarContainer &var)
     {
         GiNaC::exmap m;
         for(int i = 0; i < var.size(); i++)
@@ -78,8 +78,8 @@ namespace PRISMS
     }
 
 
-    template< class VarContainer, class IndexContainer>
-    std::complex<double> PComplexSymFunction<VarContainer, IndexContainer>::grad(const VarContainer &var, int di)
+    template< class VarContainer>
+    std::complex<double> PComplexSymFunction<VarContainer>::grad(const VarContainer &var, int di)
     {
         GiNaC::ex de = _e.diff(_sym[di]);
 
@@ -91,8 +91,8 @@ namespace PRISMS
                                GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.imag_part().subs(m))).to_double());
     };
 
-    template< class VarContainer, class IndexContainer>
-    std::complex<double> PComplexSymFunction<VarContainer, IndexContainer>::hess(const VarContainer &var, int di, int dj)
+    template< class VarContainer>
+    std::complex<double> PComplexSymFunction<VarContainer>::hess(const VarContainer &var, int di, int dj)
     {
         GiNaC::ex de = _e.diff(_sym[di]).diff(_sym[dj]);
 

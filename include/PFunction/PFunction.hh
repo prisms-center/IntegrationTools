@@ -15,31 +15,142 @@ namespace PRISMS
     /// A simple expression evaluator
     ///
     template< class VarContainer, class OutType>
-    class PSimpleFunction
+    class PSimpleBase
     {
         public:
+        std::string _name;
         OutType _val;
         
         OutType operator()( const VarContainer &var){ return _val = eval(var);};
         OutType operator()() const { return _val;};
         
+        void is_derived_from_PSimpleBase() const
+        {
+            return;
+        };
+        
+        virtual PSimpleBase<VarContainer, OutType>* clone() const
+        {
+            return new PSimpleBase<VarContainer, OutType>(*this);
+        }
+        
         private:
-        virtual OutType eval( const VarContainer &var) const { undefined("OutType eval( const InType &var)");};
+        virtual OutType eval( const VarContainer &var) const { undefined("OutType eval( const VarContainer &var)");};
         
         void undefined(std::string fname) const
         {
-            std::cout << "Error. In PSimpleFunction." << std::endl;
+            std::cout << "Error in PSimpleBase '" << _name << "'." << std::endl;
             std::cout << "   The member function '" << fname << "' has not been defined." << std::endl;
             exit(1);
         }
     };
     
+    
+    template< class VarContainer, class OutType>
+    class PSimpleFunction 
+    {
+    private:
+        PSimpleBase<VarContainer,OutType> *ptr;
+
+    public:
+
+        std::string name() const
+        {
+            return (*ptr).name();
+        };
+        
+
+        // ----------------------------------------------------------
+        // Use this function if you want to evaluate,
+        //   return and store result
+        OutType operator()(const VarContainer &var)
+        {
+            return (*ptr)(var);
+        };
+
+        // ----------------------------------------------------------
+        // Then use 'get' methods to access results later
+        void eval(const VarContainer &var)
+        {
+            (*ptr)(var);
+        };
+
+        OutType operator()() const
+        {
+            return (*ptr)();
+        };
+
+        // PFunction unique members ------------------------------------------
+
+        PSimpleFunction& operator=(const PSimpleFunction &RHS)
+        {
+            if(ptr != NULL)
+                delete ptr;
+            ptr = RHS.ptr->clone();
+            return *this;
+        };
+
+        template<class T> 
+        PSimpleFunction& operator=(const T &RHS)
+        {
+            RHS.is_derived_from_PSimpleBase();
+
+            if(ptr != NULL)
+                delete ptr;
+            ptr = RHS.clone();
+            return *this;
+        };
+
+        // If you use this, PSimpleFunction becomes the 'owner' of the function RHS points to
+        //    and it will delete it
+        PSimpleFunction& set( PSimpleBase<VarContainer,OutType> *RHS)
+        {
+            if(RHS == NULL)
+            {
+                std::cout << "Error in PSimpleFunction::set. RHS == NULL." << std::endl;
+                exit(1);
+            }
+            if(ptr != NULL)
+                delete ptr;
+            ptr = RHS;
+            return *this;
+        }
+        
+        PSimpleFunction()
+        {
+            ptr = NULL;
+        }
+
+        PSimpleFunction(const PSimpleFunction &RHS)
+        {
+            if( RHS.ptr != NULL)
+                ptr = RHS.ptr->clone();
+            else 
+                ptr = NULL;
+        }
+        
+        template<class T> PSimpleFunction(const T &RHS)
+        {
+            RHS.is_derived_from_PSimpleBase();
+
+            ptr = RHS.clone();
+            
+        };
+
+        ~PSimpleFunction()
+        {
+            if(ptr != NULL)
+                delete ptr;
+        };
 
     
-    /// A Base class for a function, including grad & hess & basis sets
-    ///
-    template< class InType, class OutType, class VarContainer, class IndexContainer>
-    class PBaseFunction
+    };
+
+    
+    /// A Base class for a function, including grad & hess
+    /// 
+    template< class VarContainer, class OutType>
+    class PFuncBase
     {
     public:
 
@@ -47,11 +158,15 @@ namespace PRISMS
         std::vector<std::string> _var_name;
         std::vector<std::string> _var_description;
         
-        virtual ~PBaseFunction(){};
+        virtual ~PFuncBase(){};
 
         std::string name()
         {
             return _name;
+        };
+        int size() const
+        {
+            return _var_name.size();
         };
         std::string var_name(int i)
         {
@@ -62,14 +177,29 @@ namespace PRISMS
             return _var_description[i];
         };
 
-        void is_derived_from_PBaseFunction() const
+        void is_derived_from_PFuncBase() const
         {
             return;
         };
 
-        virtual PBaseFunction<InType, OutType, VarContainer, IndexContainer> *clone() const
+        virtual PFuncBase<VarContainer, OutType> *clone() const
         {
-            return new PBaseFunction<InType, OutType, VarContainer, IndexContainer>(*this);
+            return new PFuncBase<VarContainer, OutType>(*this);
+        };
+        
+        virtual PSimpleFunction<VarContainer, OutType> simplefunction() const
+        {
+            undefined("PSimpleFunction<VarContainer, OutType> simplefunction() const");
+        };
+        
+        virtual PSimpleFunction<VarContainer, OutType> grad_simplefunction(int di) const
+        {
+            undefined("PSimpleFunction<VarContainer, OutType> grad_simplefunction() const");
+        };
+        
+        virtual PSimpleFunction<VarContainer, OutType> hess_simplefunction(int di, int dj) const
+        {
+            undefined("PSimpleFunction<VarContainer, OutType> hess_simplefunction(int di, int dj) const");
         };
 
         // ----------------------------------------------------------
@@ -115,114 +245,154 @@ namespace PRISMS
             undefined("OutType hess(int di, int dj)");
         };
 
-
-        // Functions for evaluating basis functions & their derivatives:
-
-        // ----------------------------------------------------------
-        // Use these functions if you want to evaluate a single value
-
-        //   use basis index and term index for individual basis function
-        virtual OutType basis(int bindex, int term, const VarContainer &var)
-        {
-            undefined("OutType basis(int bindex, int term, const VarContainer &var)");
-        };
-        virtual OutType basis_grad(int bindex, int term, const VarContainer &var, int di)
-        {
-            undefined("OutType basis_grad(int bindex, int term, const VarContainer &var, int di)");
-        };
-        virtual OutType basis_hess(int bindex, int term, const VarContainer &var, int di, int dj)
-        {
-            undefined("OutType basis_hess(int bindex, int term, const VarContainer &var, int di, int dj)");
-        };
-
-        //   or use tensor indices to evaluate basis function product
-        virtual OutType basis(const IndexContainer &term, const VarContainer &var)
-        {
-            undefined("OutType basis(const IndexContainer &term, const VarContainer &var)");
-        };
-        virtual OutType basis_grad(const IndexContainer &term, const VarContainer &var, int di)
-        {
-            undefined("OutType basis_grad(const IndexContainer &term, const VarContainer &var, int di)");
-        };
-        virtual OutType basis_hess(const IndexContainer &term, const VarContainer &var, int di, int dj)
-        {
-            undefined("OutType basis_hess(const IndexContainer &term, const VarContainer &var, int di, int dj)");
-        };
-
-        // ----------------------------------------------------------
-        // Use these functions to evaluate all basis functions,
-        //   then use 'get' methods to access results.
-
-        virtual void eval_basis(const VarContainer &var)
-        {
-            undefined("void eval_basis( const VarContainer &var)");
-        };
-        virtual void eval_basis_grad(const VarContainer &var)
-        {
-            undefined("void eval_basis_grad( const VarContainer &var)");
-        };
-        virtual void eval_basis_hess(const VarContainer &var)
-        {
-            undefined("void eval_basis_hess( const VarContainer &var)");
-        };
-
-        //   use basis index and term index for individual basis function
-        virtual OutType basis(int bindex, int term) const
-        {
-            undefined("OutType basis(int bindex, int term)");
-        };
-        virtual OutType basis_grad(int bindex, int term, int di) const
-        {
-            undefined("OutType basis_grad(int bindex, int term, int di)");
-        };
-        virtual OutType basis_hess(int bindex, int term, int di, int dj) const
-        {
-            undefined("OutType basis_hess(int bindex, int term, int di, int dj)");
-        };
-
-        //   or use tensor indices to evaluate basis function product
-        virtual OutType basis(const IndexContainer &term) const
-        {
-            undefined("OutType basis(const IndexContainer &term)");
-        };
-        virtual OutType basis_grad(const IndexContainer &term, int di) const
-        {
-            undefined("OutType basis_grad(const IndexContainer &term, int di)");
-        };
-        virtual OutType basis_hess(const IndexContainer &term, int di, int dj) const
-        {
-            undefined("OutType basis_hess(const IndexContainer &term, int di, int dj)");
-        };
-
     private:
         void undefined(std::string fname) const
         {
-            std::cout << "Error. In PBaseFunction '" << _name << "'." << std::endl;
+            std::cout << "Error in PFuncBase '" << _name << "'." << std::endl;
             std::cout << "   The member function '" << fname << "' has not been defined." << std::endl;
             exit(1);
         }
 
     };
     
-    /// A class that contains a ptr to a PBaseFunction
-    ///   - essentially a smart ptr class
-    ///   - same interface as PBaseFunction
-    ///   - allows for using PBaseFunctions polymorphically 
+    
+    template<class VarContainer, class OutType>
+    class PFlexFunction : public PFuncBase< VarContainer, OutType>
+    {
+    public:
+        using PFuncBase< VarContainer, OutType>::_name;
+        using PFuncBase< VarContainer, OutType>::_var_name;
+        using PFuncBase< VarContainer, OutType>::_var_description;
+        
+        PSimpleFunction< VarContainer, OutType> _val;
+        std::vector< PSimpleFunction< VarContainer, OutType> > _grad_val;
+        std::vector< std::vector< PSimpleFunction< VarContainer, OutType> > > _hess_val;
+        
+        PFlexFunction()
+        {
+            
+        }
+
+        PFlexFunction(const PFlexFunction &RHS )
+        {
+            _name = RHS._name;
+            _var_name = RHS._var_name;
+            _var_description = RHS._var_description;
+            
+            _val = RHS._val;
+            _grad_val = RHS._grad_val;
+            _hess_val = RHS._hess_val;
+        }
+
+        PFlexFunction& operator=(const PFlexFunction &RHS )
+        {
+            _name = RHS._name;
+            _var_name = RHS._var_name;
+            _var_description = RHS._var_description;
+            
+            _val = RHS._val;
+            _grad_val = RHS._grad_val;
+            _hess_val = RHS._hess_val;
+            
+        }
+
+        ~PFlexFunction()
+        {
+            
+        };
+
+        PFlexFunction<VarContainer, OutType>* clone() const
+        {
+            return new PFlexFunction<VarContainer, OutType>(*this);
+        };
+
+        PSimpleFunction< VarContainer, OutType> simplefunction() const
+        {
+            return  _val;
+        };
+
+        PSimpleFunction< VarContainer, OutType> grad_simplefunction(int di) const
+        {
+            return _grad_val[di];
+        };
+
+        PSimpleFunction< VarContainer, OutType> hess_simplefunction(int di, int dj) const
+        {
+            return _hess_val[di][dj];
+        };
+
+        OutType operator()(const VarContainer &var)
+        {
+            return _val(var);
+        };
+
+        OutType grad(const VarContainer &var, int di)
+        {
+            return _grad_val[di](var);
+        };
+
+        OutType hess(const VarContainer &var, int di, int dj)
+        {
+            return _hess_val[di][dj](var);
+        };
+
+        void eval(const VarContainer &var)
+        {
+            _val(var);
+        };
+
+        void eval_grad(const VarContainer &var)
+        {
+            for( int i=0; i<_grad_val.size(); i++)
+                _grad_val[i](var);
+        };
+
+        void eval_hess(const VarContainer &var)
+        {
+            for( int i=0; i<_hess_val.size(); i++)
+                for( int j=0; j<_hess_val[i].size(); j++)
+                    _hess_val[i][j](var);
+        };
+
+        OutType operator()() const
+        {
+            return _val();
+        };
+
+        OutType grad(int di) const
+        {
+            return _grad_val[di]();
+        };
+
+        OutType hess(int di, int dj) const
+        {
+            return _hess_val[di][dj]();
+        };
+
+        
+
+    };
+    
+    
+    /// A class that contains a ptr to a PFuncBase object
+    ///   - like a smart ptr class
+    ///   - same interface as PFuncBase
+    ///   - allows for using PFuncBase objects polymorphically 
     ///     without dereferencing and without worrying about new/delete
     ///    
     ///   example: MyFuncA, MyFuncB, MyFuncC, etc. are defined:
-    ///     template< class VarContainer, class IndexContainer>
-    ///     MyFuncX : public PBaseFunction<double, double, VarContainer, IndexContainer>
+    ///     template< class VarContainer>
+    ///     MyFuncX : public PFuncBase<VarContainer, double>
     ///
     ///   // Then you can do things like this:
     ///   
-    ///   MyFuncA<std::vector<double>, std::vector<int> > my_func_a;
-    ///   MyFuncB<std::vector<double>, std::vector<int> > my_func_b;
+    ///   MyFuncA<std::vector<double> > my_func_a;
+    ///   MyFuncB<std::vector<double> > my_func_b;
     ///
-    ///   PBaseFunction<double, double, std::vector<double>, std::vector<int> >* my_func_c_ptr;
-    ///   my_func_c_ptr = new MyFuncC<std::vector<double>, std::vector<int> >();
+    ///   PFuncBase<std::vector<double>, double>* my_func_c_ptr;
+    ///   my_func_c_ptr = new MyFuncC<std::vector<double>, double >();
     ///
-    ///   PFunction<double, double, std::vector<double>, std::vector<int> > f, g, h;
+    ///   PFunction<std::vector<double>, double > f, g, h;
     ///
     ///   f = my_func_a;
     ///   f = my_func_b;
@@ -233,7 +403,7 @@ namespace PRISMS
     ///   - No deletions are used in this example.  
     ///     PFunction::set makes PFunction the 'owner' of the MyFuncC object and it will delete it.
     ///
-    template< class InType, class OutType, class VarContainer, class IndexContainer>
+    template< class VarContainer, class OutType>
     class PFunction 
     {
     public:
@@ -242,6 +412,10 @@ namespace PRISMS
         {
             return (*ptr).name();
         };
+        int size() const
+        {
+            return (*ptr).size();
+        };
         std::string var_name(int i)
         {
             return (*ptr).var_name(i);
@@ -249,6 +423,21 @@ namespace PRISMS
         std::string var_description(int i)
         {
             return (*ptr).var_description(i);
+        };
+        
+        PSimpleFunction<VarContainer, OutType> simplefunction() const
+        {
+            return (*ptr).simplefunction();
+        };
+        
+        PSimpleFunction<VarContainer, OutType> grad_simplefunction(int di) const
+        {
+            return (*ptr).grad_simplefunction(di);
+        };
+        
+        PSimpleFunction<VarContainer, OutType> hess_simplefunction(int di, int dj) const
+        {
+            return (*ptr).hess_simplefunction(di, dj);
         };
 
         // ----------------------------------------------------------
@@ -295,114 +484,29 @@ namespace PRISMS
         };
 
 
-
-        // Functions for evaluating basis functions & their derivatives:
-
-        // ----------------------------------------------------------
-        // Use these functions if you want to evaluate a single value
-
-        //   use unrolled index
-        virtual OutType basis(int bindex, int term, const VarContainer &var)
-        {
-            return (*ptr).basis(bindex, term, var);
-        };
-        virtual OutType basis_grad(int bindex, int term, const VarContainer &var, int di)
-        {
-            return (*ptr).basis_grad(bindex, term, var, di);
-        };
-        virtual OutType basis_hess(int bindex, int term, const VarContainer &var, int di, int dj)
-        {
-            return (*ptr).basis_hess(bindex, term, var, di, dj);
-        };
-
-        //   or use tensor indices
-        virtual OutType basis(const IndexContainer &term, const VarContainer &var)
-        {
-            return (*ptr).basis(term, var);
-        };
-        virtual OutType basis_grad(const IndexContainer &term, const VarContainer &var, int di)
-        {
-            return (*ptr).basis_grad(term, var, di);
-        };
-        virtual OutType basis_hess(const IndexContainer &term, const VarContainer &var, int di, int dj)
-        {
-            return (*ptr).basis_hess(term, var, di, dj);
-        };
-
-        // ----------------------------------------------------------
-        // Use these functions to evaluate all basis functions,
-        //   then use 'get' methods to access results.
-
-        virtual void eval_basis(const VarContainer &var)
-        {
-            (*ptr).eval_basis(var);
-        };
-        virtual void eval_basis_grad(const VarContainer &var)
-        {
-            (*ptr).eval_basis_grad(var);
-        };
-        virtual void eval_basis_hess(const VarContainer &var)
-        {
-            (*ptr).eval_basis_hess(var);
-        };
-
-        //   use unrolled index
-        virtual OutType basis(int bindex, int term) const
-        {
-            return (*ptr).basis(bindex, term);
-        };
-        virtual OutType basis_grad(int bindex, int term, int di) const
-        {
-            return (*ptr).basis_grad(bindex, term, di);
-        };
-        virtual OutType basis_hess(int bindex, int term, int di, int dj) const
-        {
-            return (*ptr).basis_hess(bindex, term, di, dj);
-        };
-
-        //   or use tensor indices
-        virtual OutType basis(const IndexContainer &term) const
-        {
-            return (*ptr).basis(term);
-        };
-        virtual OutType basis_grad(const IndexContainer &term, int di) const
-        {
-            return (*ptr).basis_grad(term, di);
-        };
-        virtual OutType basis_hess(const IndexContainer &term, int di, int dj) const
-        {
-            return (*ptr).basis_hess(term, di, dj);
-        };
-
-
         // PFunction unique members ------------------------------------------
-
-        PBaseFunction<InType, OutType, VarContainer, IndexContainer> *clone() const
-        {
-            return new PBaseFunction<InType, OutType, VarContainer, IndexContainer>(*ptr);
-        };
 
         PFunction &operator=(const PFunction &RHS)
         {
             if(ptr != NULL)
                 delete ptr;
-            ptr = RHS.clone();
+            ptr = RHS.ptr->clone();
             return *this;
-        }
+        };
 
         template<class T> PFunction &operator=(const T &RHS)
         {
-            RHS.is_derived_from_PBaseFunction();
+            RHS.is_derived_from_PFuncBase();
 
             if(ptr != NULL)
                 delete ptr;
             ptr = RHS.clone();
             return *this;
-        }
+        };
 
         // If you use this, PFunction becomes the 'owner' of the function RHS points to
         //    and it will delete it
-        PFunction &set( PBaseFunction<InType, OutType, VarContainer, IndexContainer> *RHS)
+        PFunction &set( PFuncBase<VarContainer,OutType> *RHS)
         {
             if(RHS == NULL)
             {
@@ -413,19 +517,28 @@ namespace PRISMS
                 delete ptr;
             ptr = RHS;
             return *this;
-        }
+        };
 
         PFunction()
         {
             ptr = NULL;
-        }
+        };
 
         PFunction(const PFunction &RHS)
         {
-            if(ptr != NULL)
-                delete ptr;
+            if( RHS.ptr != NULL)
+                ptr = RHS.ptr->clone();
+            else 
+                ptr = NULL;
+        };
+        
+        template<class T> PFunction(const T &RHS)
+        {
+            RHS.is_derived_from_PFuncBase();
+
             ptr = RHS.clone();
-        }
+            
+        };
 
         ~PFunction()
         {
@@ -434,7 +547,7 @@ namespace PRISMS
         };
 
     private:
-        PBaseFunction<InType, OutType, VarContainer, IndexContainer> *ptr;
+        PFuncBase<VarContainer,OutType> *ptr;
 
     };
 

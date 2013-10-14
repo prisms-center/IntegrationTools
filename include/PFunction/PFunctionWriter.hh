@@ -9,6 +9,12 @@
 namespace PRISMS
 {
 
+    // convert int to string
+    std::string itos( int i);
+    
+    // return current date and time as: YEAR-MM-DD HH:MM:SS
+    std::string now();
+
     /// Class used to write PFunction classes
 
     class PFunctionWriter
@@ -21,6 +27,7 @@ namespace PRISMS
         
         std::string _basic_indent;
         
+        bool _template_intype;
         std::string _intype;
         std::string _outtype;
         
@@ -45,6 +52,8 @@ namespace PRISMS
         void set_intype(std::string intype);
         void set_outtype(std::string outtype);
         void set_types(std::string intype, std::string outtype);
+        void template_intype_on();
+        void template_intype_off();
         void f_on();
         void f_off();
         void grad_on();
@@ -69,7 +78,10 @@ namespace PRISMS
         //void code(  const std::string &json_str, std::ostream &sout);
         //void autodiff_writer( std::ostream &sout);
         //void series_writer( std::ostream &sout);
-
+        void head( std::ostream &sout) const;
+        
+        void foot( std::ostream &sout) const;
+        
     private:
         
         std::string indent(int step) const;
@@ -77,10 +89,11 @@ namespace PRISMS
         void write_basis_function(int I, const std::string &name, const std::string &f, std::ostream &sout) const;
         
         // use polymorphic basis functions
-        void code_poly( std::ostream &sout);
+        void code_poly( std::ostream &sout) const;
         
         // use if/else statements
-        void code_ifelse( std::ostream &sout);
+        void code_ifelse( std::ostream &sout) const;
+        
         
     };
 
