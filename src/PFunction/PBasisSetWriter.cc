@@ -7,6 +7,7 @@
 #include<sstream>
 #include<vector>
 #include<time.h>
+#include<cstdlib>
 #include <ginac/ginac.h>    // compile with: -lcln -lginac
 
 #include "PRealSymFunction.hh"
@@ -723,6 +724,7 @@ namespace PRISMS
         sout << indent(I) << "#ifndef " + _name + "_HH\n"; 
         sout << indent(I) << "#define " + _name + "_HH\n\n"; 
         sout << indent(I) << "#include <cmath>\n";
+        sout << indent(I) << "#include <cstdlib>\n";
         sout << indent(I) << "#include \"PSeriesFunction.hh\"\n\n";
         sout << indent(I) << "namespace PRISMS\n"; 
         sout << indent(I) << "{\n";
