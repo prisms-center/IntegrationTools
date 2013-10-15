@@ -14,7 +14,7 @@
 //#include<iostream>
 #include<fstream>
 //#include<istream>
-//#include<cstdlib>
+#include<cstdlib>
 #include<cstring>
 #include<vector>
 //#include<getopt.h>
