@@ -582,16 +582,22 @@ sout <<
 \n\
 #include<cstring>\n\
 #include<vector>\n\
+#include \"PFunction.hh\"\n\
+#include \"PSeriesFunction.hh\"\n\
 \n\
 namespace PRISMS\n\
 {\n\
 \n\
     /// Library where you can find functions and basis sets\n\
     ///\n\
-    class PLibrary\n\
-    {\n\
-        public:\n";
+    namespace PLibrary\n\
+    {\n";
 
+sout <<
+"        // Use these functions to checkout objects which manage their own memory\n";
+
+    sout << "\n";
+    
     // write PSimpleFunction checkouts
     //void checkout( std::string name, PSimpleFunction<VarContainer, OutType> &simplefunc);
     //void checkout( std::string name, PFunction<VarContainer, OutType> &func);
@@ -623,12 +629,12 @@ namespace PRISMS\n\
             {
                 for( int k=0; k<var.size(); k++)
                 {
-                    sout << "        void checkout( std::string name, PFunction< " + var[k] + ", " + c.function_outtype[j] + " > &simplefunc);\n";
+                    sout << "        void checkout( std::string name, PFunction< " + var[k] + ", " + c.function_outtype[j] + " > &func);\n";
                 }
             }
             else
             {
-                sout << "        void checkout( std::string name, PFunction< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > &simplefunc);\n";
+                sout << "        void checkout( std::string name, PFunction< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > &func);\n";
             }
         }
     sout << "\n";
@@ -640,8 +646,63 @@ namespace PRISMS\n\
             sout << "        void checkout( std::string name, PBasisSet< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > &basis_set, int N);\n";
         }
     
+    sout << "\n\n\n";
+
 sout <<
-"    };\n\
+"        // Use these functions to checkout new 'Base' objects which the user must delete\n";
+
+    sout << "\n";
+    
+    // write PBase checkouts  ( create a 'new' object which the user must delete)
+    //void checkout( std::string name, PSimpleBase<VarContainer, OutType> *simplefunc);
+    //void checkout( std::string name, PFuncBase<VarContainer, OutType> *func);
+    //void checkout( std::string name, PBasisBase<InType, OutType> *basis_set);
+    
+    for(int i=0; i<c.function_intype.size(); i++)
+    for(int j=0; j<c.function_outtype.size(); j++)
+        if( c.simplefunction[i][j].size() > 0)
+        {
+            if( c.function_intype[i] == "VarContainer")
+            {
+                for( int k=0; k<var.size(); k++)
+                {
+                    sout << "        void checkout( std::string name, PSimpleBase< " + var[k] + ", " + c.function_outtype[j] + " > *&simplefunc);\n";
+                }
+            }
+            else
+            {
+                sout << "        void checkout( std::string name, PSimpleBase< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > *&simplefunc);\n";
+            }
+        }
+    sout << "\n";
+    
+    for(int i=0; i<c.function_intype.size(); i++)
+    for(int j=0; j<c.function_outtype.size(); j++)
+        if( c.function[i][j].size() > 0)
+        {
+            if( c.function_intype[i] == "VarContainer")
+            {
+                for( int k=0; k<var.size(); k++)
+                {
+                    sout << "        void checkout( std::string name, PFuncBase< " + var[k] + ", " + c.function_outtype[j] + " > *&func);\n";
+                }
+            }
+            else
+            {
+                sout << "        void checkout( std::string name, PFuncBase< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > *&func);\n";
+            }
+        }
+    sout << "\n";
+    
+    for(int i=0; i<c.function_intype.size(); i++)
+    for(int j=0; j<c.function_outtype.size(); j++)
+        if( c.basis_set[i][j].size() > 0)
+        {
+            sout << "        void checkout( std::string name, PBasisSetBase< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > *&basis_set, int N);\n";
+        }
+    
+sout <<
+"    }\n\
 \n\
 }\n\
 \n\
@@ -676,10 +737,10 @@ namespace PRISMS\n\
 {\n\
 \n";
 
-    // write PSimpleFunction checkouts
+    // write PSimpleFunction, PFunction, PBasisSet checkouts
     //void checkout( std::string name, PSimpleFunction<VarContainer, OutType> &simplefunc);
     //void checkout( std::string name, PFunction<VarContainer, OutType> &func);
-    //void checkout( std::string name, PBasisSet<InType, OutType> &basis_set);
+    //void checkout( std::string name, PBasisSet<InType, OutType> &basis_set, int N);
     
     for(int i=0; i<c.function_intype.size(); i++)
     for(int j=0; j<c.function_outtype.size(); j++)
@@ -742,6 +803,76 @@ namespace PRISMS\n\
             sout << "        {\n";
             for( int k=0; k<c.basis_set[i][j].size(); k++)
             sout << "            if( name == \"" + c.basis_set[i][j][k] + "\") basis_set = PBasisSet< " + c.function_intype[i] + ", " + c.function_outtype[j] + " >( " + c.basis_set[i][j][k] + "(N) );\n";
+            sout << "        }\n";
+        }
+    
+    
+    // write 'Base' checkouts
+    //void checkout( std::string name, PSimpleBase<VarContainer, OutType> *simplefunc);
+    //void checkout( std::string name, PFuncBase<VarContainer, OutType> *func);
+    //void checkout( std::string name, PBasisSetBase<InType, OutType> *basis_set, int N);
+    
+    for(int i=0; i<c.function_intype.size(); i++)
+    for(int j=0; j<c.function_outtype.size(); j++)
+        if( c.simplefunction[i][j].size() > 0)
+        {
+            if( c.function_intype[i] == "VarContainer")
+            {
+                for( int k=0; k<var.size(); k++)
+                {
+                    sout << "        void PLibrary::checkout( std::string name, PSimpleBase< " + var[k] + ", " + c.function_outtype[j] + " > *&simplefunc)\n";
+                    sout << "        {\n";
+                    for( int ii=0; ii<c.simplefunction[i][j].size(); ii++)
+                    sout << "            if( name == \"" + c.simplefunction[i][j][ii] + "\") simplefunc = new " + c.simplefunction[i][j][ii] + "< " + var[k] + " >();\n";
+                    sout << "        }\n";
+                }
+            }
+            else
+            {
+                sout << "        void PLibrary::checkout( std::string name, PSimpleBase< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > *&simplefunc)\n";
+                sout << "        {\n";
+                for( int ii=0; ii<c.simplefunction[i][j].size(); ii++)
+                sout << "            if( name == \"" + c.simplefunction[i][j][ii] + "\") simplefunc = new " + c.simplefunction[i][j][ii] + "();\n";
+                sout << "        }\n";
+            }
+        }
+    sout << "\n";
+    
+    for(int i=0; i<c.function_intype.size(); i++)
+    for(int j=0; j<c.function_outtype.size(); j++)
+        if( c.function[i][j].size() > 0)
+        {
+            if( c.function_intype[i] == "VarContainer")
+            {
+                for( int k=0; k<var.size(); k++)
+                {
+                    sout << "        void PLibrary::checkout( std::string name, PFuncBase< " + var[k] + ", " + c.function_outtype[j] + " > *&func)\n";
+                    sout << "        {\n";
+                    for( int ii=0; ii<c.function[i][j].size(); ii++)
+                    sout << "            if( name == \"" + c.function[i][j][ii] + "\") func = new " + c.function[i][j][ii] + "< " + var[k] + " >();\n";
+                    sout << "        }\n";
+                }
+            }
+            else
+            {
+                sout << "        void PLibrary::checkout( std::string name, PFuncBase< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > *&func)\n";
+                sout << "        {\n";
+                for( int ii=0; ii<c.function[i][j].size(); ii++)
+                sout << "            if( name == \"" + c.function[i][j][ii] + "\") func = new " + c.function[i][j][ii] + "();\n";
+                sout << "        }\n";
+            }
+        }
+    sout << "\n";
+    
+    
+    for(int i=0; i<c.function_intype.size(); i++)
+    for(int j=0; j<c.function_outtype.size(); j++)
+        if( c.basis_set[i][j].size() > 0)
+        {
+            sout << "        void PLibrary::checkout( std::string name, PBasisSetBase< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > *&basis_set, int N)\n";
+            sout << "        {\n";
+            for( int k=0; k<c.basis_set[i][j].size(); k++)
+            sout << "            if( name == \"" + c.basis_set[i][j][k] + "\") basis_set = new " + c.basis_set[i][j][k] + "(N);\n";
             sout << "        }\n";
         }
 
