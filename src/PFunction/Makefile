@@ -2,7 +2,7 @@
 
 HOME = ../..
 H = $(HOME)/include/PFunction
-INCLUDE = $(H) 
+INCLUDE = $(H) .
 
 CXX      = g++
 CPPFLAGS += $(foreach i,$(INCLUDE),-I$(i))
@@ -45,5 +45,12 @@ bsw.o : bsw.cpp $(OBJECTS)
 lw: lw.cpp
 	$(CXX) -o lw lw.cpp $(CPPFLAGS) -lboost_filesystem -lboost_system -lboost_program_options -lboost_regex
 
+extern: PExtern_Example.hh PExtern_Example.cc lw PLibrary.o
+	$(CXX) -o libpextern.dylib PExtern_Example.cc PLibrary.o -dynamiclib $(CPPFLAGS)
+
+PLibrary.o: lw
+	./lw -h -d "." -v "std::vector<double>" "double*";./lw -c -d "." -v "std::vector<double>" "double*"
+	g++ -c PLibrary.cc $(CPPFLAGS)
+
 clean: 
-	rm *.o bsw fw Chebyshev.hh MyFunc.hh PLibrary.hh PLibrary.cc
+	rm *.o bsw fw lw Chebyshev.hh MyFunc.hh PLibrary.hh PLibrary.cc PLibrary.o

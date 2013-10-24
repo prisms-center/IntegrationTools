@@ -3,7 +3,7 @@ HOME = ../..
 H = $(HOME)/include/PFunction
 SRC = $(HOME)/src/PFunction
 PLIB = $(HOME)/lib/PFunction
-INCLUDE = $(H) $(PLIB)
+INCLUDE = $(H) $(PLIB) $(SRC)
 
 CXX      = g++
 CPPFLAGS += $(foreach i,$(INCLUDE),-I$(i))
@@ -48,6 +48,16 @@ test_MyFunc: test_MyFunc.cpp MyFunc.hh $(H)/* test_writer
 test_MyBasisSet: test_MyBasisSet.cpp MyBasisSet.hh $(H)/* test_basissetwriter
 	$(CXX) -o test_MyBasisSet test_MyBasisSet.cpp $(CPPFLAGS)
 	./test_MyBasisSet
+
+test_PExtern: test_PExtern.o EXT
+	$(CXX) -o test_PExtern test_PExtern.o $(SRC)/PLibrary.o $(CPPFLAGS) -lpextern -L$(SRC)
+	export DYLD_LIBRARY_PATH=/usr/local/lib:/Users/bpuchala/Work/codes/IntegrationTools/src/PFunction; ./test_PExtern
+
+test_PExtern.o: test_PExtern.cpp
+	$(CXX) -c test_PExtern.cpp $(CPPFLAGS)
+
+EXT: FORCE
+	cd $(SRC); make extern
 
 
 S: FORCE

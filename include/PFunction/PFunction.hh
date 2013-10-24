@@ -22,6 +22,7 @@ namespace PRISMS
         std::string _name;
         OutType _val;
         
+        std::string name() const { return _name;};
         OutType operator()( const VarContainer &var){ return _val = eval(var);};
         OutType operator()() const { return _val;};
         
