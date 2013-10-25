@@ -5,12 +5,14 @@ from pylab import *
 import PFunction
 import ctypes
 
+max = 1000000
+
 # test PSimple_dd
 print "test PSimple_dd"
 f = PFunction.PSimple_dd("Chebyshev_2")
 print "  created"
-print "  evaluate 1000000 times"
-for i in range(0,1000000):
+print "  evaluate", max, "times"
+for i in range(0,max):
     f.calc(0.2)
 print "  result:", f.get()
 f.delete()
@@ -25,8 +27,8 @@ b = PFunction.c_dbl_array(a)
 print "test Python code"
 v = 0
 print "  var:", a
-print "  evaluate 1000000 times"
-for i in range(0,1000000):
+print "  evaluate", max, "times"
+for i in range(0,max):
     v = b[0]*(b[1]*b[1])+(b[0]*b[0]*b[0])+(b[1]*b[1]*b[1])+(b[0]*b[0])*b[1]
 print "  result:", v
 print "  done\n"
@@ -37,8 +39,8 @@ print "test PSimple_dsd"
 f = PFunction.PSimple_dsd("MyFunc_f")
 print "  created"
 print "  var:", a
-print "  evaluate 1000000 times"
-for i in range(0,1000000):
+print "  evaluate", max, "times"
+for i in range(0,max):
     v = f.calc(b)
 print "  result:", f.get()
 f.delete()
@@ -49,8 +51,8 @@ print "test PFunc_dsd"
 f = PFunction.PFunc_dsd("MyFunc")
 print "  created"
 print "  var:", a
-print "  evaluate 1000000 times"
-for i in range(0,1000000):
+print "  evaluate", max, "times"
+for i in range(0,max):
     v = f.calc(b)
 print "  result:", f.get()
 f.delete()
@@ -61,8 +63,8 @@ print "test PBasisSet_dd"
 f = PFunction.PBasisSet_dd("Chebyshev", 30)
 print "  created"
 print "  var:", 0.2
-print "  evaluate 1000000 times"
-for i in range(0,1000000):
+print "  evaluate", max, "times"
+for i in range(0,max):
     f.eval(0.2)
 print "  result:"
 for i in range(0,30):
