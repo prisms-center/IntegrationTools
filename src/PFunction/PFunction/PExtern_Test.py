@@ -2,7 +2,9 @@ import ctypes
 lib = ctypes.cdll.LoadLibrary("libpextern.dylib")
 
 # use this data structure for passing double* input variables
-def c_dbl_array( var):
+# - input a list or numpy.array, and it will return a c_dbl_array
+# - can not be resized
+def c_dbl_array(var):
     return (ctypes.c_double * len(var))(*var)
 
 # expects a number for input (var), returns a number for output

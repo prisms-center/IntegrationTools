@@ -193,16 +193,15 @@ public:
             
         if( boost::regex_search(line, match, e) )
         {
-            std::cout << "begin scanline_for_PSimpleBase()" << std::endl;
+            //std::cout << "begin scanline_for_PSimpleBase()" << std::endl;
             //std::cout << line << std::endl;
             //std::cout << "### FOUND PSimpleBase ###: ";
-            std::cout << "'" << match[2] << "' '" << match[4] << "' '" << match[6] << "'\n";
+            //std::cout << "'" << match[2] << "' '" << match[4] << "' '" << match[6] << "'\n";
             
             name = std::string(match[2]);
             intype = std::string(match[4]);
             outtype = std::string(match[6]);
             
-            std::cout << "A" << std::endl;
             // store the intype (add it to function_intype, but only if not already there)
             intype_iter = std::find(function_intype.begin(), function_intype.end(), intype);
             in_index = intype_iter - function_intype.begin();
@@ -223,7 +222,6 @@ public:
                 }
             }
             
-            std::cout << "B" << std::endl;
             // store the outtype (add it to function_outtype, but only if not already there)
             outtype_iter = std::find(function_outtype.begin(), function_outtype.end(), outtype);
             out_index = outtype_iter - function_outtype.begin();
@@ -240,17 +238,8 @@ public:
                 }
             }
             
-            std::cout << "C: " << in_index << " " << out_index << std::endl;
-            std::cout << "bs: " << simplefunction.size() << std::endl;
-            std::cout << " bs: " << simplefunction[in_index].size() << std::endl;
-            std::cout << "bs: " << function.size() << std::endl;
-            std::cout << " bs: " << function[in_index].size() << std::endl;
-            std::cout << "bs: " << basis_set.size() << std::endl;
-            std::cout << " bs: " << basis_set[in_index].size() << std::endl;
             namevec = &simplefunction[ in_index][ out_index];
             
-            std::cout << "D" << std::endl;
-            std::cout << "s: " << (*namevec).size() << std::endl;
             // error if name already exists
             if( std::find( (*namevec).begin(), (*namevec).end(), name) != (*namevec).end())
             {
@@ -263,11 +252,8 @@ public:
             else
             {
                 // store the name
-                std::cout << "E" << std::endl;
                 (*namevec).push_back(name);
             }
-            
-            std::cout << "F" << std::endl;
             
             return true;
         }
@@ -296,10 +282,10 @@ public:
         
         if( boost::regex_search(line, match, e) )
         {
-            std::cout << "begin scanline_for_PFuncBase()" << std::endl;
+            //std::cout << "begin scanline_for_PFuncBase()" << std::endl;
             //std::cout << line << std::endl;
             //std::cout << "$$$ FOUND PFuncBase $$$: ";
-            std::cout << "'" << match[2] << "' '" << match[4] << "' '" << match[6] << "'\n";
+            //std::cout << "'" << match[2] << "' '" << match[4] << "' '" << match[6] << "'\n";
             
             name = std::string(match[2]);
             intype = std::string(match[4]);
@@ -384,16 +370,15 @@ public:
             
         if( boost::regex_search(line, match, e) )
         {
-            std::cout << "begin scanline_for_PBasisSetBase()" << std::endl;
+            //std::cout << "begin scanline_for_PBasisSetBase()" << std::endl;
             //std::cout << line << std::endl;
             //std::cout << "@@@ FOUND PSimpleBase @@@: ";
-            std::cout << "'" << match[2] << "' '" << match[4] << "' '" << match[6] << "'\n";
+            //std::cout << "'" << match[2] << "' '" << match[4] << "' '" << match[6] << "'\n";
             
             name = std::string(match[2]);
             intype = std::string(match[4]);
             outtype = std::string(match[6]);
             
-            std::cout << "A" << std::endl;
             // store the intype (add it to function_intype, but only if not already there)
             intype_iter = std::find(function_intype.begin(), function_intype.end(), intype);
             in_index = intype_iter - function_intype.begin();
@@ -414,7 +399,6 @@ public:
                 }
             }
             
-            std::cout << "B" << std::endl;
             // store the outtype (add it to function_outtype, but only if not already there)
             outtype_iter = std::find(function_outtype.begin(), function_outtype.end(), outtype);
             out_index = outtype_iter - function_outtype.begin();
@@ -431,13 +415,8 @@ public:
                 }
             }
             
-            std::cout << "C: " << in_index << " " << out_index << std::endl;
-            std::cout << "bs: " << basis_set.size() << std::endl;
-            std::cout << " bs: " << basis_set[in_index].size() << std::endl;
             namevec = &basis_set[ in_index][ out_index];
             
-            std::cout << "D" << std::endl;
-            std::cout << "s: " << (*namevec).size() << std::endl;
             // error if name already exists
             if( std::find( (*namevec).begin(), (*namevec).end(), name) != (*namevec).end())
             {
