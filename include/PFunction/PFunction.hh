@@ -37,7 +37,7 @@ namespace PRISMS
         }
         
         private:
-        virtual OutType eval( const VarContainer &var) const { undefined("OutType eval( const VarContainer &var)");};
+        virtual OutType eval( const VarContainer &var) const { undefined("OutType eval( const VarContainer &var)"); return OutType();};
         
         void undefined(std::string fname) const
         {
@@ -192,16 +192,19 @@ namespace PRISMS
         virtual PSimpleFunction<VarContainer, OutType> simplefunction() const
         {
             undefined("PSimpleFunction<VarContainer, OutType> simplefunction() const");
+            return PSimpleFunction<VarContainer, OutType>();
         };
         
         virtual PSimpleFunction<VarContainer, OutType> grad_simplefunction(int di) const
         {
             undefined("PSimpleFunction<VarContainer, OutType> grad_simplefunction() const");
+            return PSimpleFunction<VarContainer, OutType>();
         };
         
         virtual PSimpleFunction<VarContainer, OutType> hess_simplefunction(int di, int dj) const
         {
             undefined("PSimpleFunction<VarContainer, OutType> hess_simplefunction(int di, int dj) const");
+            return PSimpleFunction<VarContainer, OutType>();
         };
 
         // ----------------------------------------------------------
@@ -209,14 +212,17 @@ namespace PRISMS
         virtual OutType operator()(const VarContainer &var)
         {
             undefined("OutType operator()(const VarContainer &var)");
+            return OutType();
         };
         virtual OutType grad(const VarContainer &var, int di)
         {
             undefined("OutType grad(const VarContainer &var, int di)");
+            return OutType();
         };
         virtual OutType hess(const VarContainer &var, int di, int dj)
         {
             undefined("OutType hess(const VarContainer &var, int di, int dj)");
+            return OutType();
         };
 
         // ----------------------------------------------------------
@@ -237,14 +243,17 @@ namespace PRISMS
         virtual OutType operator()() const
         {
             undefined("OutType operator()");
+            return OutType();
         };
         virtual OutType grad(int di) const
         {
             undefined("OutType grad(int di)");
+            return OutType();
         };
         virtual OutType hess(int di, int dj) const
         {
             undefined("OutType hess(int di, int dj)");
+            return OutType();
         };
 
     private:

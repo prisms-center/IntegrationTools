@@ -5,7 +5,7 @@ from pylab import *
 import PFunction
 import ctypes
 
-max = 1000000
+max = 1
 
 # test PSimple_dd
 print "test PSimple_dd"
@@ -69,10 +69,21 @@ for i in range(0,max):
 print "  result:"
 for i in range(0,30):
     print "  i:", i, "  val:", f.get(i)
+
+# test plotting basis functions
+rc('font',**{'family':'serif','sans-serif':['Times']})
+fig = plt.figure(1, figsize=(8,7))
+a = np.arange(-1,1, 0.001)
+for i in range(0,10):
+    bf = np.zeros( (a.size))
+    for j in range(0,a.size):
+        bf[j] = f.calc(i,a[j])
+    p = plot( a, bf)
+
 f.delete()
 print "  deleted\n"
 
-
+show()	
 
 
 

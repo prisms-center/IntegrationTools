@@ -74,6 +74,7 @@ namespace PRISMS
         virtual PFunction<InType, OutType> basis_function(int term) const
         {
             undefined("const PFunction<InType, OutType>& basis_function(int term) const");
+            return PFunction<InType, OutType>();
         };
         
         // ----------------------------------------------------------
@@ -153,14 +154,17 @@ namespace PRISMS
         virtual OutType eval(int term, const InType &var)
         {
             undefined("OutType PBasisSetBase::eval(int term, const InType &var)");
+            return OutType();
         };
         virtual OutType eval_grad(int term, const InType &var)
         {
             undefined("OutType PBasisSetBase::eval_grad(int term, const InType &var)");
+            return OutType();
         };
         virtual OutType eval_hess(int term, const InType &var)
         {
             undefined("OutType PBasisSetBase::eval_hess(int term, const InType &var)");
+            return OutType();
         };
     
         void undefined(std::string fname) const
