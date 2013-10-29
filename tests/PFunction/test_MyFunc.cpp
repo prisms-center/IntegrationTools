@@ -51,6 +51,7 @@ double nonvirtual(const T &var, int di)
         return 4.0*var[0]+8.0*(var[0]*var[0]*var[0]);
     else if( di == 1)
         return 2.0;
+    return 0.0;
 }
 
 template<class T>
@@ -70,6 +71,7 @@ double nonvirtual(const T &var, int di, int dj)
         else if( dj == 1)
             return 0.0;
     }
+    return 0.0;
 }
 
 int main(int argc, char *argv[])
