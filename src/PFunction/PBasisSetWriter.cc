@@ -139,10 +139,18 @@ namespace PRISMS
         GiNaC::symtab table;
         table[ var] = symvar;
         table[ index] = symindex;
-        GiNaC::parser reader(table);
+        GiNaC::parser reader(table,true);
         
         // create generating GiNaC expression
-        GiNaC::ex e_gen = reader(f);
+        GiNaC::ex e_gen;
+        try
+        {
+            e_gen = reader(f);
+        }
+        catch (std::invalid_argument& err)
+        {
+            throw err;
+        }
         
         // create recursive symbolic basis set
         PRISMS::PRealSymBasisSet bset( N, symindex, symvar, e_gen);
@@ -227,7 +235,7 @@ namespace PRISMS
         }
         symvec[ phi_sym.size()] = GiNaC::symbol("var");
         table[ var] = symvec[ phi_sym.size()];
-        GiNaC::parser reader(table);
+        GiNaC::parser reader(table, true);
         
         // create list of phi_sym GiNaC symbols
         std::vector<GiNaC::symbol> tphi_sym( phi_sym.size());
@@ -240,7 +248,15 @@ namespace PRISMS
             phi_ex_init[i] = reader(phi_init[i]);
         
         // create generating GiNaC expression
-        GiNaC::ex e_gen = reader(f);
+        GiNaC::ex e_gen;
+        try
+        {
+            e_gen = reader(f);
+        }
+        catch (std::invalid_argument& err)
+        {
+            throw err;
+        }
         
         // create recursive symbolic basis set
         PRISMS::PRealSymRecursBasisSet bset( N, symvec[ phi_sym.size()], tphi_sym, phi_ex_init, e_gen);

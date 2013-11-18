@@ -66,8 +66,6 @@ int main(int argc, char *argv[])
           ("name,n", po::value<std::string>(&name)->required(), "Basis set name") 
           ("description,d", po::value<std::string>(&description)->required(), "Basis set description") 
           ("location,l", po::value<std::string>(&location)->default_value("."), "Location to write basis set") 
-          ("intype,i", po::value<std::string>(&intype), "Basis set input type") 
-          ("outtype,o", po::value<std::string>(&outtype), "Basis set output type")
           ("var,v", po::value<std::string>(&var)->required(), "Variable symbol")
           ("index", po::value<std::string>(&index), "Index symbol")
           ("expression,e", po::value<std::string>(&e_gen)->required(), "Generating expression")
@@ -77,7 +75,9 @@ int main(int argc, char *argv[])
           ("grad", "Include gradient calculation")
           ("hess", "Include Hessian calculation");
         
-        
+        //("intype,i", po::value<std::string>(&intype), "Basis set input type") 
+        //("outtype,o", po::value<std::string>(&outtype), "Basis set output type")
+          
         
         try 
         { 
@@ -137,10 +137,6 @@ int main(int argc, char *argv[])
     } 
     
     
-    
-    
-    // How can I check for UK variables or constants?
-    
     PRISMS::PBasisSetWriter writer(name, description);
     std::ofstream outfile;
     
@@ -152,13 +148,27 @@ int main(int argc, char *argv[])
     outfile.open( fileloc.c_str() );
     
     
-    if( vm.count("intype") ) writer.set_intype( intype );
-    if( vm.count("outtype") )writer.set_outtype( outtype );
+    //if( vm.count("intype") ) writer.set_intype( intype );
+    //if( vm.count("outtype") )writer.set_outtype( outtype );
     vm.count("grad") ? writer.grad_on() : writer.grad_off();
     vm.count("hess") ? writer.hess_on() : writer.hess_off();
     
     if( vm.count("index"))
-        writer.sym2code(e_gen, var, index, max, outfile);
+    {
+        try
+        {
+            writer.sym2code(e_gen, var, index, max, outfile);
+        }
+        catch(std::invalid_argument& err)
+        {
+            std::cout << "Error parsing generating expression." << std::endl;
+            std::cout << "  Unknown symbolic variable(s) in input expression." << std::endl;
+            std::cout << "  " << err.what() << std::endl;
+            outfile.close();
+            fs::remove(fileloc);
+            return 1;
+        }
+    }
     else
     {
         std::cout << "e_gen: " << e_gen << std::endl;
@@ -167,7 +177,20 @@ int main(int argc, char *argv[])
         std::cout << "sym: " << sym << std::endl;
         std::cout << "max: " << max << std::endl;
         
-        writer.sym2code(e_gen, var, init, sym, max, outfile);
+        
+        try
+        {
+            writer.sym2code(e_gen, var, init, sym, max, outfile);
+        }
+        catch(std::invalid_argument& err)
+        {
+            std::cout << "Error parsing generating expression." << std::endl;
+            std::cout << "  Unknown symbolic variable(s) in input expression." << std::endl;
+            std::cout << "  " << err.what() << std::endl;
+            outfile.close();
+            fs::remove(fileloc);
+            return 1;
+        }
     }
     
     return 0;

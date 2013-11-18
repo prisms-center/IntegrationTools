@@ -1,5 +1,6 @@
 *.o
 *.dylib
+version.cc
 PLibrary.hh
 PLibrary.cc
 fw
@@ -8,3 +9,4 @@ lw
 Chebyshev.hh
 Monomial.hh
 MyFunc.hh
+

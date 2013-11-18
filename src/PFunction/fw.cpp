@@ -115,8 +115,6 @@ int main(int argc, char *argv[])
     } 
     
     
-    // How can I check for UK variables or constants?
-    
     PRISMS::PFunctionWriter writer(name);
     std::ofstream outfile;
     
