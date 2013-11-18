@@ -29,7 +29,7 @@
 #include<sstream>
 
 #include "PFunctionWriter.hh"
-
+#include "version.hh"
 
 
 template<typename T>
@@ -472,6 +472,8 @@ int main(int argc, char *argv[])
         /// Set command line options using boost program_options
         po::options_description desc("Options"); 
         desc.add_options() 
+          ("help", "Write help documentation")
+          ("version", "Write version info")
           ("hh,h", "Write header file (.hh)") 
           ("cc,c", "Write source file (.cc)") 
           ("dir,d", po::value<std::vector<std::string> >(&dir)->multitoken(), "Directories to check for PSimpleFunctions, PFunctions and PBasisSets") 
@@ -491,6 +493,17 @@ int main(int argc, char *argv[])
             std::cout << "lw: Library Writer Usage" << std::endl 
                       << desc << std::endl; 
             return SUCCESS; 
+            }
+            
+            /** --version option 
+            */ 
+            if ( vm.count("version")  ) 
+            { 
+                std::cout << "lw: Library Writer" << std::endl; 
+                std::cout << "  version: " << PRISMS::IntegrationTools_version_id() << std::endl; 
+                std::cout << "  url: " << PRISMS::IntegrationTools_repo_url() << std::endl; 
+                std::cout << "  commit: " << PRISMS::IntegrationTools_commit_id() << std::endl; 
+                return SUCCESS; 
             } 
             
             if( !(vm.count("hh") != vm.count("cc")) )

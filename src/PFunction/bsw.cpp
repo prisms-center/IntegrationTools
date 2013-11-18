@@ -28,6 +28,7 @@
 //#include<sstream>
 
 #include "PBasisSetWriter.hh"
+#include "version.hh"
 
 
 
@@ -60,6 +61,8 @@ int main(int argc, char *argv[])
         /// Set command line options using boost program_options
         po::options_description desc("Options"); 
         desc.add_options() 
+          ("help", "Write help documentation")
+          ("version", "Write version info")
           ("name,n", po::value<std::string>(&name)->required(), "Basis set name") 
           ("description,d", po::value<std::string>(&description)->required(), "Basis set description") 
           ("location,l", po::value<std::string>(&location)->default_value("."), "Location to write basis set") 
@@ -84,9 +87,19 @@ int main(int argc, char *argv[])
             */ 
             if ( vm.count("help")  ) 
             { 
-            std::cout << "fw: Function Writer Usage" << std::endl 
-                      << desc << std::endl; 
-            return SUCCESS; 
+                std::cout << "bsw: Basis Set Writer Usage" << std::endl << desc << std::endl; 
+                return SUCCESS; 
+            }
+            
+            /** --version option 
+            */ 
+            if ( vm.count("version")  ) 
+            { 
+                std::cout << "bsw: Basis Set Writer" << std::endl; 
+                std::cout << "  version: " << PRISMS::IntegrationTools_version_id() << std::endl; 
+                std::cout << "  url: " << PRISMS::IntegrationTools_repo_url() << std::endl; 
+                std::cout << "  commit: " << PRISMS::IntegrationTools_commit_id() << std::endl; 
+                return SUCCESS; 
             }
             
             if( vm.count("index") )

@@ -24,16 +24,24 @@ PFunctionWriter.o : PFunctionWriter.cc $(H)/*
 PBasisSetWriter.o : PBasisSetWriter.cc $(H)/*
 	$(CXX) -c PBasisSetWriter.cc $(CPPFLAGS)
 
-fw: fw.cpp $(H)/* PFunctionWriter.o
-	$(CXX) -c fw.cpp $(CPPFLAGS)
-	$(CXX) fw.o PFunctionWriter.o -o fw $(CPPFLAGS) $(LDFLAGS)
+version.cc: FORCE 
+	VERS="0.1.0"; sed "s/VERSION_ID/$$VERS/" version.template.cc > version.tmp.0
+	ID=$$(git rev-parse HEAD); sed "s/COMMIT_ID/$$ID/" version.tmp.0 > version.tmp.1; rm version.tmp.0
+	URL=$$(git config --get remote.origin.url); sed "s|REPO_URL|$$URL|" version.tmp.1 > version.cc; rm version.tmp.1
 
-bsw: bsw.cpp $(H)/* PBasisSetWriter.o PFunctionWriter.o
+version.o: version.cc $(H)/version.hh
+	$(CXX) -c version.cc $(CPPFLAGS)
+
+fw: fw.cpp $(H)/* PFunctionWriter.o version.o
+	$(CXX) -c fw.cpp $(CPPFLAGS)
+	$(CXX) fw.o PFunctionWriter.o version.o -o fw $(CPPFLAGS) $(LDFLAGS)
+
+bsw: bsw.cpp $(H)/* PBasisSetWriter.o PFunctionWriter.o version.o
 	$(CXX) -c bsw.cpp $(CPPFLAGS)
-	$(CXX) bsw.o PBasisSetWriter.o PFunctionWriter.o -o bsw $(CPPFLAGS) $(LDFLAGS)
+	$(CXX) bsw.o PBasisSetWriter.o PFunctionWriter.o version.o -o bsw $(CPPFLAGS) $(LDFLAGS)
 
 lw: lw.cpp
-	$(CXX) -o lw lw.cpp $(CPPFLAGS) -lboost_filesystem -lboost_system -lboost_program_options -lboost_regex
+	$(CXX) version.o -o lw lw.cpp $(CPPFLAGS) -lboost_filesystem -lboost_system -lboost_program_options -lboost_regex
 
 extern: PExtern_Example.hh PExtern_Example.cc PLibrary.o
 	$(CXX) -o libpextern.dylib PExtern_Example.cc PLibrary.o -dynamiclib $(CPPFLAGS)
@@ -42,5 +50,8 @@ PLibrary.o: lw test
 	./lw -h -d "." -v "std::vector<double>" "double*";./lw -c -d "." -v "std::vector<double>" "double*"
 	g++ -c PLibrary.cc $(CPPFLAGS)
 
+FORCE:
+	
+
 clean: 
-	rm -f *.o bsw fw lw Chebyshev.hh MyFunc.hh PLibrary.hh PLibrary.cc *.dylib
+	rm -f *.o bsw fw lw Chebyshev.hh MyFunc.hh PLibrary.hh PLibrary.cc *.dylib version.cc

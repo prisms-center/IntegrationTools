@@ -13,6 +13,7 @@
 #include "PRealSymFunction.hh"
 #include "PBasisSetWriter.hh"
 #include "PFunctionWriter.hh"
+#include "version.hh"
 
 namespace PRISMS
 {
@@ -718,7 +719,10 @@ namespace PRISMS
         
         // write date this was written
         
-        sout << indent(I) << "// created: " << now() << "\n\n";
+        sout << indent(I) << "// created: " << now() << "\n";
+        sout << indent(I) << "// version: " << IntegrationTools_version_id() << "\n";
+        sout << indent(I) << "// url: " << IntegrationTools_repo_url() << "\n";
+        sout << indent(I) << "// commit: " << IntegrationTools_commit_id() << "\n\n";
         
         // write include guards & namespace
         sout << indent(I) << "#ifndef " + _name + "_HH\n"; 

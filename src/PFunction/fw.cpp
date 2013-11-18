@@ -27,7 +27,7 @@
 //#include<sstream>
 
 #include "PFunctionWriter.hh"
-
+#include "version.hh"
 
 
 template<typename T>
@@ -58,16 +58,19 @@ int main(int argc, char *argv[])
         /// Set command line options using boost program_options
         po::options_description desc("Options"); 
         desc.add_options() 
+          ("help", "Write help documentation")
+          ("version", "Write version info")
           ("name,n", po::value<std::string>(&name)->required(), "Function name") 
           ("location,l", po::value<std::string>(&location)->default_value("."), "Location to write function") 
-          ("intype,i", po::value<std::string>(&intype), "Function input type") 
-          ("outtype,o", po::value<std::string>(&outtype), "Function output type") 
           ("sym", po::value<std::string>(&sym)->required()  , "Symbolic expression") 
           ("var,v", po::value<std::vector<std::string> >(&var_name)->multitoken()->required(), "Variable names")
           ("description,d", po::value<std::vector<std::string> >(&var_desc)->multitoken()->required(), "Variable descriptions")
           ("grad", "Include gradient calculation")
           ("hess", "Include Hessian calculation");
         
+        //("intype,i", po::value<std::string>(&intype), "Function input type") 
+        //("outtype,o", po::value<std::string>(&outtype), "Function output type") 
+          
         
         
         try 
@@ -78,9 +81,19 @@ int main(int argc, char *argv[])
             */ 
             if ( vm.count("help")  ) 
             { 
-            std::cout << "fw: Function Writer Usage" << std::endl 
-                      << desc << std::endl; 
-            return SUCCESS; 
+                std::cout << "fw: Function Writer Usage" << std::endl << desc << std::endl; 
+                return SUCCESS; 
+            } 
+            
+            /** --version option 
+            */ 
+            if ( vm.count("version")  ) 
+            { 
+                std::cout << "fw: Function Writer" << std::endl; 
+                std::cout << "  version: " << PRISMS::IntegrationTools_version_id() << std::endl; 
+                std::cout << "  url: " << PRISMS::IntegrationTools_repo_url() << std::endl; 
+                std::cout << "  commit: " << PRISMS::IntegrationTools_commit_id() << std::endl; 
+                return SUCCESS; 
             } 
 
             po::notify(vm); // throws on error, so do after help in case 
@@ -116,15 +129,27 @@ int main(int argc, char *argv[])
     
     writer.set_var( var_name, var_desc);
     
-    if( vm.count("intype") ) writer.set_intype( intype );
-    if( vm.count("outtype") )writer.set_outtype( outtype );
+    //if( vm.count("intype") ) writer.set_intype( intype );
+    //if( vm.count("outtype") )writer.set_outtype( outtype );
     vm.count("grad") ? writer.grad_on() : writer.grad_off();
     vm.count("hess") ? writer.hess_on() : writer.hess_off();
     
     if( vm.count("sym") )
     {
         writer.head(outfile);
-        writer.sym2code( sym , outfile);
+        try
+        {
+            writer.sym2code( sym , outfile);
+        }
+        catch(std::invalid_argument& err)
+        {
+            std::cout << "Error parsing symbolic expression." << std::endl;
+            std::cout << "  Unknown symbolic variable(s) in input expression." << std::endl;
+            std::cout << "  " << err.what() << std::endl;
+            outfile.close();
+            fs::remove(fileloc);
+            return 1;
+        }
         writer.foot(outfile);
     }
     

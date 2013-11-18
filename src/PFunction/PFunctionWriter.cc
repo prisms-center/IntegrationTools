@@ -11,6 +11,7 @@
 #include <ginac/ginac.h>    // compile with: -lcln -lginac
 
 #include "PFunctionWriter.hh"
+#include "version.hh"
 
 namespace PRISMS
 {
@@ -156,6 +157,7 @@ namespace PRISMS
         // read 'f' into a GiNaC expression 'symf', 
         //    using the variables names already given
         GiNaC::symtab table;
+        GiNaC::symtab all_symbol_table;
         std::vector<GiNaC::symbol> symvar(_var_name.size());
         
         std::cout << "\nvar:" << std::endl;
@@ -167,8 +169,17 @@ namespace PRISMS
             table[_var_name[i]] = symvar[i];
         }
         
-        GiNaC::parser reader(table);
-        GiNaC::ex symf = reader(f);
+        GiNaC::parser reader(table, true);
+        GiNaC::ex symf;
+        
+        try
+        {
+            symf = reader(f);
+        }
+        catch (std::invalid_argument& err)
+        {
+            throw err;
+        }
         
         
         // use 'symf' to generate c code strings for f, grad_f, hess_f
@@ -915,7 +926,10 @@ namespace PRISMS
         
         // write date this was written
         
-        sout << indent(I) << "// created: " << now() << "\n\n";
+        sout << indent(I) << "// created: " << now() << "\n";
+        sout << indent(I) << "// version: " << IntegrationTools_version_id() << "\n";
+        sout << indent(I) << "// url: " << IntegrationTools_repo_url() << "\n";
+        sout << indent(I) << "// commit: " << IntegrationTools_commit_id() << "\n\n";
         
         // write include guards & namespace
         sout << indent(I) << "#ifndef " + _name + "_HH\n"; 
