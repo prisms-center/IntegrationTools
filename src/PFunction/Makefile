@@ -24,7 +24,7 @@ PFunctionWriter.o : PFunctionWriter.cc $(H)/*
 PBasisSetWriter.o : PBasisSetWriter.cc $(H)/*
 	$(CXX) -c PBasisSetWriter.cc $(CPPFLAGS)
 
-version.cc: FORCE 
+version.cc: #FORCE
 	VERS="0.1.0"; sed "s/VERSION_ID/$$VERS/" version.template.cc > version.tmp.0
 	ID=$$(git rev-parse HEAD); sed "s/COMMIT_ID/$$ID/" version.tmp.0 > version.tmp.1; rm version.tmp.0
 	URL=$$(git config --get remote.origin.url); sed "s|REPO_URL|$$URL|" version.tmp.1 > version.cc; rm version.tmp.1
@@ -43,8 +43,8 @@ bsw: bsw.cpp $(H)/* PBasisSetWriter.o PFunctionWriter.o version.o
 lw: lw.cpp
 	$(CXX) version.o -o lw lw.cpp $(CPPFLAGS) -lboost_filesystem -lboost_system -lboost_program_options -lboost_regex
 
-extern: PExtern_Example.hh PExtern_Example.cc PLibrary.o
-	$(CXX) -o libpextern.dylib PExtern_Example.cc PLibrary.o -dynamiclib $(CPPFLAGS)
+extern: $(H)/PExtern.hh PExtern.cc PLibrary.o
+	$(CXX) -o libpextern.dylib PExtern.cc PLibrary.o -dynamiclib $(CPPFLAGS)
 
 PLibrary.o: lw test
 	./lw -h -d "." -v "std::vector<double>" "double*";./lw -c -d "." -v "std::vector<double>" "double*"

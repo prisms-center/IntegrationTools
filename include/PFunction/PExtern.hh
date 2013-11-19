@@ -142,7 +142,7 @@ extern "C"
     
     void PSeriesFunction_dsis_new(PRISMS::PSeriesFunction<double,double,double*,int*>* &f);
     
-    void PSeriesFunction_dsis_new(PRISMS::PSeriesFunction<double,double,double*,int*>* &f, PRISMS::PBasisSetBase<double,double>** basis_set, int order);
+    void PSeriesFunction_dsis_setnew(PRISMS::PSeriesFunction<double,double,double*,int*>* &f, PRISMS::PBasisSetBase<double,double>** basis_set, int order);
         
     void PSeriesFunction_dsis_delete(PRISMS::PSeriesFunction<double,double,double*,int*>* &f);
     
@@ -156,9 +156,9 @@ extern "C"
     
     void PSeriesFunction_dsis_dim(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int i, int &dim);
     
-    void PSeriesFunction_dsis_coeff(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int i, double &coeff);
+    void PSeriesFunction_dsis_linear_coeff(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int i, double &coeff);
     
-    void PSeriesFunction_dsis_coeff(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double &coeff);
+    void PSeriesFunction_dsis_tensor_coeff(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double &coeff);
     
     void PSeriesFunction_dsis_linear_index(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, int &linear_index);
     
@@ -178,9 +178,9 @@ extern "C"
     
     void PSeriesFunction_dsis_eval(PRISMS::PSeriesFunction<double,double,double*,int*>* f, double* var);
     
-    void PSeriesFunction_dsis_eval_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, double* var, int di);
+    void PSeriesFunction_dsis_eval_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, double* var);
     
-    void PSeriesFunction_dsis_eval_hess(PRISMS::PSeriesFunction<double,double,double*,int*>* f, double* var, int di, int dj);
+    void PSeriesFunction_dsis_eval_hess(PRISMS::PSeriesFunction<double,double,double*,int*>* f, double* var);
     
     void PSeriesFunction_dsis_get(PRISMS::PSeriesFunction<double,double,double*,int*>* f, double &val);
     
@@ -203,25 +203,25 @@ extern "C"
     void PSeriesFunction_dsis_calc_basis_hess(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int bindex, int term, double* var, double &val);
     
     //   or use tensor indices to evaluate basis function product
-    void PSeriesFunction_dsis_calc_basis(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double* var, double &val);
+    void PSeriesFunction_dsis_calc_tensor_basis(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double* var, double &val);
     
-    void PSeriesFunction_dsis_calc_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double* var, int di, double &val);
+    void PSeriesFunction_dsis_calc_tensor_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double* var, int di, double &val);
     
-    void PSeriesFunction_dsis_calc_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double* var, int di, int dj, double &val);
+    void PSeriesFunction_dsis_calc_tensor_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double* var, int di, int dj, double &val);
     
     // ----------------------------------------------------------
     // Use these functions to evaluate all basis functions,
     //   then use following methods to access results.
     
-    void PSeriesFunction_dsis_eval_basis(PRISMS::PSeriesFunction<double,double,double*,int*>* f, double* var);
+    void PSeriesFunction_dsis_eval_basis_all(PRISMS::PSeriesFunction<double,double,double*,int*>* f, double* var);
     
     void PSeriesFunction_dsis_eval_basis(PRISMS::PSeriesFunction<double,double,double*,int*>* f, double* var, int i);
     
-    void PSeriesFunction_dsis_eval_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, double* var);
+    void PSeriesFunction_dsis_eval_basis_grad_all(PRISMS::PSeriesFunction<double,double,double*,int*>* f, double* var);
     
     void PSeriesFunction_dsis_eval_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, double* var, int i);
     
-    void PSeriesFunction_dsis_eval_basis_hess(PRISMS::PSeriesFunction<double,double,double*,int*>* f, double* var);
+    void PSeriesFunction_dsis_eval_basis_hess_all(PRISMS::PSeriesFunction<double,double,double*,int*>* f, double* var);
     
     void PSeriesFunction_dsis_eval_basis_hess(PRISMS::PSeriesFunction<double,double,double*,int*>* f, double* var, int i);
     
@@ -229,16 +229,16 @@ extern "C"
     //   use basis index and term index for individual basis function
     void PSeriesFunction_dsis_get_basis(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int bindex, int term, double &val);
     
-    void PSeriesFunction_dsis_get_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int bindex, int term, int di, double &val);
+    void PSeriesFunction_dsis_get_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int bindex, int term, double &val);
     
-    void PSeriesFunction_dsis_get_basis_hess(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int bindex, int term, int di, int dj, double &val);
+    void PSeriesFunction_dsis_get_basis_hess(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int bindex, int term, double &val);
     
     //   or use tensor indices to evaluate basis function product
-    void PSeriesFunction_dsis_get_basis(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double &val);
+    void PSeriesFunction_dsis_get_tensor_basis(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double &val);
     
-    void PSeriesFunction_dsis_get_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, int di, double &val);
+    void PSeriesFunction_dsis_get_tensor_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, int di, double &val);
     
-    void PSeriesFunction_dsis_get_basis_hess(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, int di, int dj, double &val);
+    void PSeriesFunction_dsis_get_tensor_basis_hess(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, int di, int dj, double &val);
 }
 
 

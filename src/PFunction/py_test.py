@@ -5,6 +5,8 @@ from pylab import *
 import PFunction
 import ctypes
 
+PFunction.set_lib("libpextern.dylib")
+
 max = 1
 
 # test PSimple_dd
@@ -71,20 +73,28 @@ for i in range(0,30):
     print "  i:", i, "  val:", f.get(i)
 
 # test plotting basis functions
-rc('font',**{'family':'serif','sans-serif':['Times']})
-fig = plt.figure(1, figsize=(8,7))
-a = np.arange(-1,1, 0.001)
-for i in range(0,10):
-    bf = np.zeros( (a.size))
-    for j in range(0,a.size):
-        bf[j] = f.calc(i,a[j])
-    p = plot( a, bf)
+if False:
+    rc('font',**{'family':'serif','sans-serif':['Times']})
+    fig = plt.figure(1, figsize=(8,7))
+    a = np.arange(-1,1, 0.001)
+    for i in range(0,10):
+        bf = np.zeros( (a.size))
+        for j in range(0,a.size):
+            bf[j] = f.calc(i,a[j])
+        p = plot( a, bf)
 
+    show()
 f.delete()
 print "  deleted\n"
 
-show()	
 
+# test PSeries_dsis
+print "test PSeries_dsis"
+cheby = PFunction.PBasisSet_dd("Chebyshev", 30)
+f = PFunction.PSeries_dsis([cheby,cheby])
+print "  created"
+f.delete()
+print "  deleted\n"
 
 
 

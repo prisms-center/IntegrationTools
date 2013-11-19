@@ -1,5 +1,11 @@
 import ctypes
-lib = ctypes.cdll.LoadLibrary("libpextern.dylib")
+
+lib = None
+
+# set lib, such as PFunction.set_lib("libpextern.dylib")
+def set_lib(name):
+    global lib
+    lib = ctypes.cdll.LoadLibrary(name)
 
 # use this data structure for passing double* input variables
 # - input a list or numpy.array, and it will return a c_dbl_array

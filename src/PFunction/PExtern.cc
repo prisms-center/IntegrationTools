@@ -474,14 +474,14 @@ extern "C"
         (*f).basis(bindex,term);
     };
     
-    void PSeriesFunction_dsis_get_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int bindex, int term, int di, double &val)
+    void PSeriesFunction_dsis_get_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int bindex, int term, double &val)
     {
-        (*f).basis_grad(bindex,term,di);
+        (*f).basis_grad(bindex,term);
     };
     
-    void PSeriesFunction_dsis_get_basis_hess(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int bindex, int term, int di, int dj, double &val)
+    void PSeriesFunction_dsis_get_basis_hess(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int bindex, int term, double &val)
     {
-        (*f).basis_hess(bindex,term,di,dj);
+        (*f).basis_hess(bindex,term);
     };
     
     //   or use tensor indices to evaluate basis function product

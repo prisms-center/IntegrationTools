@@ -321,13 +321,11 @@ namespace PRISMS
 
         PBasisSet()
         {
-            std::cout << "begin PBasisSet()" << std::endl;
             ptr = NULL;
         }
 
         PBasisSet(const PBasisSet &RHS)
         {
-            std::cout << "begin PBasisSet(const PBasisSet &RHS)" << std::endl;
             if( RHS.ptr != NULL)
                 ptr = RHS.ptr->clone();
             else 
@@ -336,7 +334,6 @@ namespace PRISMS
         
         template<class T> PBasisSet(const T &RHS)
         {
-            std::cout << "begin PBasisSet(const T &RHS)" << std::endl;
             RHS.is_derived_from_PBasisSetBase();
 
             ptr = RHS.clone();
@@ -436,15 +433,15 @@ namespace PRISMS
         ///
         void set( const std::vector<PBasisSet<InType,OutType> > &basis_set)
         {
-            std::cout << "begin PSeriesFunction::set()" << std::endl;
+            //std::cout << "begin PSeriesFunction::set()" << std::endl;
             clear();
             
-            std::cout << "  basis_set.size(): " << basis_set.size() << std::endl;
+            //std::cout << "  basis_set.size(): " << basis_set.size() << std::endl;
             _order = basis_set.size();
-            std::cout << "  resize: " << basis_set.size() << std::endl;
+            //std::cout << "  resize: " << basis_set.size() << std::endl;
             _basis_set.resize(basis_set.size());
             
-            std::cout << "  _order: " << _order << std::endl;
+            //std::cout << "  _order: " << _order << std::endl;
             _dim.resize( _order );
             
             _grad_val.resize( _order );
@@ -452,20 +449,20 @@ namespace PRISMS
             
             for( int i=0; i<_order; i++)
             {
-                std::cout << "  i: " << i << std::endl;
+                //std::cout << "  i: " << i << std::endl;
                 _dim[i] = basis_set[i].size();
                 _hess_val[i].resize( _order );
-                std::cout << "  copy basis set" << std::endl;
+                //std::cout << "  copy basis set" << std::endl;
                 _basis_set[i] = basis_set[i];
             }
             
-            std::cout << "  generate_unroll" << std::endl;
+            //std::cout << "  generate_unroll" << std::endl;
                 
             generate_unroll();
             
             _volume = _dim[0]*_unroll[0];
             _coeff_tensor.resize(_volume);
-            std::cout << "finish PSeriesFunction::set()" << std::endl;
+            //std::cout << "finish PSeriesFunction::set()" << std::endl;
             
         };
         
@@ -573,7 +570,7 @@ namespace PRISMS
             // evaluate basis function products, multiply by _coeff_tensor & sum
             return calc_hess_val(di,dj);
         };
-
+        
         // ----------------------------------------------------------
         // Use these functions to evaluate several values, then use 'get' methods to access results
         virtual void eval(const VarContainer &var)
@@ -735,11 +732,11 @@ namespace PRISMS
         {
             return _basis_set[bindex](term);
         };
-        virtual OutType basis_grad(int bindex, int term, int di) const
+        virtual OutType basis_grad(int bindex, int term) const
         {
             return _basis_set[bindex].grad(term);
         };
-        virtual OutType basis_hess(int bindex, int term, int di, int dj) const
+        virtual OutType basis_hess(int bindex, int term) const
         {
             return _basis_set[bindex].hess(term);
         };
