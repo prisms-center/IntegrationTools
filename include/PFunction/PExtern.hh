@@ -156,9 +156,13 @@ extern "C"
     
     void PSeriesFunction_dsis_dim(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int i, int &dim);
     
-    void PSeriesFunction_dsis_linear_coeff(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int i, double &coeff);
+    void PSeriesFunction_dsis_get_linear_coeff(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int i, double &coeff);
     
-    void PSeriesFunction_dsis_tensor_coeff(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double &coeff);
+    void PSeriesFunction_dsis_get_tensor_coeff(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double &coeff);
+    
+    void PSeriesFunction_dsis_set_linear_coeff(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int i, double coeff);
+    
+    void PSeriesFunction_dsis_set_tensor_coeff(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double coeff);
     
     void PSeriesFunction_dsis_linear_index(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, int &linear_index);
     

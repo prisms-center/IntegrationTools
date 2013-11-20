@@ -54,14 +54,21 @@ class PSeries_dsis(object):
         config.lib.PSeriesFunction_dsis_dim(self.ptr, ctypes.c_int(i), ctypes.byref(self.tint))
         return self.tint.value
     
-    def linear_coeff(self, linear_index):
-        config.lib.PSeriesFunction_dsis_linear_coeff(self.ptr, ctypes.c_int(linear_index), ctypes.byref(self.tval))
+    def get_linear_coeff(self, linear_index):
+        config.lib.PSeriesFunction_dsis_get_linear_coeff(self.ptr, ctypes.c_int(linear_index), ctypes.byref(self.tval))
         return self.tval.value
     
     #tensor_indices is a c_int_array
-    def tensor_coeff(self, tensor_indices):
-        config.lib.PSeriesFunction_dsis_linear_coeff(self.ptr, tensor_indices, ctypes.byref(self.tval))
+    def get_tensor_coeff(self, tensor_indices):
+        config.lib.PSeriesFunction_dsis_get_tensor_coeff(self.ptr, tensor_indices, ctypes.byref(self.tval))
         return self.tval.value
+    
+    def set_linear_coeff(self, linear_index, val):
+        config.lib.PSeriesFunction_dsis_set_linear_coeff(self.ptr, ctypes.c_int(linear_index), ctypes.c_double(val))
+    
+    #tensor_indices is a c_int_array
+    def set_tensor_coeff(self, tensor_indices, val):
+        config.lib.PSeriesFunction_dsis_set_tensor_coeff(self.ptr, tensor_indices, ctypes.c_double(val))
     
     #tensor_indices is a c_int_array
     def linear_index(self, tensor_indices):
@@ -102,16 +109,16 @@ class PSeries_dsis(object):
     def eval_hess(self, var):
         config.lib.PSeriesFunction_dsis_eval_hess(self.ptr, var)
     
-    def get(self, var):
-        config.lib.PSeriesFunction_dsis_eval(self.ptr, ctypes.byref(self.tval))
+    def get(self):
+        config.lib.PSeriesFunction_dsis_get(self.ptr, ctypes.byref(self.tval))
         return self.tval.value
     
-    def get_grad(self, var, di):
-        config.lib.PSeriesFunction_dsis_eval_grad(self.ptr, ctypes.c_int(di), ctypes.byref(self.tval))
+    def get_grad(self, di):
+        config.lib.PSeriesFunction_dsis_get_grad(self.ptr, ctypes.c_int(di), ctypes.byref(self.tval))
         return self.tval.value
         
-    def get_hess(self, var, di, dj):
-        config.lib.PSeriesFunction_dsis_eval_hess(self.ptr, ctypes.c_int(di), ctypes.c_int(dj), ctypes.byref(self.tval))
+    def get_hess(self, di, dj):
+        config.lib.PSeriesFunction_dsis_get_hess(self.ptr, ctypes.c_int(di), ctypes.c_int(dj), ctypes.byref(self.tval))
         return self.tval.value
     
     # ----------------------------------------------------------

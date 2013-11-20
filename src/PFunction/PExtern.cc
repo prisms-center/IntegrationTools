@@ -321,14 +321,24 @@ extern "C"
         dim = (*f).dim(i);
     };
     
-    void PSeriesFunction_dsis_linear_coeff(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int i, double &coeff)
+    void PSeriesFunction_dsis_get_linear_coeff(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int i, double &coeff)
     {
         coeff = (*f).coeff(i);
     };
     
-    void PSeriesFunction_dsis_tensor_coeff(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double &coeff)
+    void PSeriesFunction_dsis_get_tensor_coeff(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double &coeff)
     {
         coeff = (*f).coeff(term);
+    };
+    
+    void PSeriesFunction_dsis_set_linear_coeff(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int i, double coeff)
+    {
+        (*f).coeff(i) = coeff;
+    };
+    
+    void PSeriesFunction_dsis_set_tensor_coeff(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double coeff)
+    {
+        (*f).coeff(term) = coeff;
     };
     
     void PSeriesFunction_dsis_linear_index(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, int &linear_index)

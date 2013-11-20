@@ -1,10 +1,12 @@
 #!/usr/bin/env python
-
+from mpl_toolkits.mplot3d import Axes3D
 from pylab import *
 
 import PFunction
 import ctypes
+import random
 
+rc('font',**{'family':'serif','sans-serif':['Times']})
 PFunction.set_lib("libpextern.dylib")
 
 max = 1
@@ -73,42 +75,90 @@ for i in range(0,30):
     print "  i:", i, "  val:", f.get(i)
 
 # test plotting basis functions
-if False:
-    rc('font',**{'family':'serif','sans-serif':['Times']})
-    fig = plt.figure(1, figsize=(8,7))
-    a = np.arange(-1,1, 0.001)
-    for i in range(0,10):
-        bf = np.zeros( (a.size))
-        for j in range(0,a.size):
-            bf[j] = f.calc(i,a[j])
-        p = plot( a, bf)
-
-    show()
+fig = plt.figure(1, figsize=(8,7))
+a = np.arange(-1,1, 0.001)
+for i in range(0,10):
+    bf = np.zeros( (a.size))
+    for j in range(0,a.size):
+        bf[j] = f.calc(i,a[j])
+    p = plot( a, bf)
+#show()
 f.delete()
 print "  deleted\n"
 
 
 a = np.array([0.2, 0.3]);
 b = PFunction.c_dbl_array(a)
+Nf = 4
 
 # test PSeries_dsis
 print "test PSeries_dsis"
-cheby = PFunction.PBasisSet_dd("Chebyshev", 30)
+cheby = PFunction.PBasisSet_dd("Chebyshev", Nf)
 f = PFunction.PSeries_dsis([cheby,cheby])
 print "  created"
 print "  var:", a
 print "  evaluate", max, "times"
 for i in range(0,max):
     f.eval(b)
-print "  result:"
+print "  result:", f.get()
 #for i in range(0,15):
 #    print "  i:", i, "  val0:", f.calc_basis(0, i, b), "  val1:", f.calc_basis(1,i,b)
-for i in range(0,30):
-    print "  i:", i, "  val0:", f.get_basis(0, i), "  val1:", f.get_basis(1,i)
+#for i in range(0,30):
+#    print "  i:", i, "  val0:", f.get_basis(0, i), "  val1:", f.get_basis(1,i)
+
+X = np.arange(-1, 1.0001, 0.1)
+Y = np.arange(-1, 1.0001, 0.1)
+X, Y = np.meshgrid(X, Y)
+Z = 0.0*X
+s = X.shape
+
+fig = plt.figure(2, figsize=(8,8))
+index=1
+for t in range(0,Nf):
+    for u in range(0,Nf):
+        for i in range(0,s[0]):
+            for j in range(0,s[1]):
+                Z[i,j] = f.calc_tensor_basis(PFunction.c_int_array([t,u]),PFunction.c_dbl_array([X[i,j],Y[i,j]]))
+        ax = fig.add_subplot(Nf,Nf,index, projection='3d')
+        ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
+        ax.set_zticklabels([])
+        index = index+1
+#show()
+f.delete()
+
+Nf = 8
+X = np.arange(-1, 1.0001, 0.05)
+Y = np.arange(-1, 1.0001, 0.05)
+X, Y = np.meshgrid(X, Y)
+Z = 0.0*X
+s = X.shape
+
+# test PSeries_dsis
+cheby = PFunction.PBasisSet_dd("Chebyshev", Nf)
+f = PFunction.PSeries_dsis([cheby,cheby])
+
+coeff = [1,0.4,0.1,0.05]
+tindex = [[0,1],[1,1],[0,3],[6,3]]
+for i in range(len(coeff)):
+    f.set_tensor_coeff(PFunction.c_int_array(tindex[i]),coeff[i])
+f.set_tensor_coeff(PFunction.c_int_array([0,0]),-1.0*sum(coeff))
+
+fig = plt.figure(3, figsize=(8,8))
+ax = fig.gca(projection='3d')
+for i in range(0,s[0]):
+    for j in range(0,s[1]):
+        Z[i,j] = f.calc(PFunction.c_dbl_array([X[i,j],Y[i,j]]))
+ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+#ax.set_xticklabels([])
+#ax.set_yticklabels([])
+#ax.set_zticklabels([])
 
 f.delete()
 print "  deleted\n"
 
+show()
 
 
 
