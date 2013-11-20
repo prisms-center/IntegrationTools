@@ -88,11 +88,24 @@ f.delete()
 print "  deleted\n"
 
 
+a = np.array([0.2, 0.3]);
+b = PFunction.c_dbl_array(a)
+
 # test PSeries_dsis
 print "test PSeries_dsis"
 cheby = PFunction.PBasisSet_dd("Chebyshev", 30)
 f = PFunction.PSeries_dsis([cheby,cheby])
 print "  created"
+print "  var:", a
+print "  evaluate", max, "times"
+for i in range(0,max):
+    f.eval(b)
+print "  result:"
+#for i in range(0,15):
+#    print "  i:", i, "  val0:", f.calc_basis(0, i, b), "  val1:", f.calc_basis(1,i,b)
+for i in range(0,30):
+    print "  i:", i, "  val0:", f.get_basis(0, i), "  val1:", f.get_basis(1,i)
+
 f.delete()
 print "  deleted\n"
 

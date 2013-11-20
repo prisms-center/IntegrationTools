@@ -122,15 +122,15 @@ class PSeries_dsis(object):
     #   use basis index and term index for individual basis function
     
     def calc_basis(self, bindex, term, var):
-        config.lib.PSeriesFunction_dsis_calc_basis(self.ptr, ctypes.c_int(bindex), cytpes.c_int(term), var, ctypes.byref(self.tval))
+        config.lib.PSeriesFunction_dsis_calc_basis(self.ptr, ctypes.c_int(bindex), ctypes.c_int(term), var, ctypes.byref(self.tval))
         return self.tval.value
     
     def calc_basis_grad(self, bindex, term, var):
-        config.lib.PSeriesFunction_dsis_calc_basis_grad(self.ptr, ctypes.c_int(bindex), cytpes.c_int(term), var, ctypes.byref(self.tval))
+        config.lib.PSeriesFunction_dsis_calc_basis_grad(self.ptr, ctypes.c_int(bindex), ctypes.c_int(term), var, ctypes.byref(self.tval))
         return self.tval.value
     
     def calc_basis_hess(self, bindex, term, var):
-        config.lib.PSeriesFunction_dsis_calc_basis_hess(self.ptr, ctypes.c_int(bindex), cytpes.c_int(term), var, ctypes.byref(self.tval))
+        config.lib.PSeriesFunction_dsis_calc_basis_hess(self.ptr, ctypes.c_int(bindex), ctypes.c_int(term), var, ctypes.byref(self.tval))
         return self.tval.value
     
     #   or use tensor indices to evaluate basis function product
@@ -171,15 +171,15 @@ class PSeries_dsis(object):
 
     #   use basis index and term index for individual basis function
     def get_basis(self, bindex, term):
-        config.lib.PSeriesFunction_dsis_get_basis(self.ptr, ctypes.c_int(bindex), cytpes.c_int(term), ctypes.byref(self.tval))
+        config.lib.PSeriesFunction_dsis_get_basis(self.ptr, ctypes.c_int(bindex), ctypes.c_int(term), ctypes.byref(self.tval))
         return self.tval.value
     
     def get_basis_grad(self, bindex, term):
-        config.lib.PSeriesFunction_dsis_get_basis_grad(self.ptr, ctypes.c_int(bindex), cytpes.c_int(term), ctypes.byref(self.tval))
+        config.lib.PSeriesFunction_dsis_get_basis_grad(self.ptr, ctypes.c_int(bindex), ctypes.c_int(term), ctypes.byref(self.tval))
         return self.tval.value
     
     def get_basis_hess(self, bindex, term):
-        config.lib.PSeriesFunction_dsis_get_basis_hess(self.ptr, ctypes.c_int(bindex), cytpes.c_int(term), ctypes.byref(self.tval))
+        config.lib.PSeriesFunction_dsis_get_basis_hess(self.ptr, ctypes.c_int(bindex), ctypes.c_int(term), ctypes.byref(self.tval))
         return self.tval.value
     
     #   or use tensor indices to evaluate basis function product

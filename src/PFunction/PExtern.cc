@@ -471,33 +471,33 @@ extern "C"
     //   use basis index and term index for individual basis function
     void PSeriesFunction_dsis_get_basis(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int bindex, int term, double &val)
     {
-        (*f).basis(bindex,term);
+        val = (*f).basis(bindex,term);
     };
     
     void PSeriesFunction_dsis_get_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int bindex, int term, double &val)
     {
-        (*f).basis_grad(bindex,term);
+        val = (*f).basis_grad(bindex,term);
     };
     
     void PSeriesFunction_dsis_get_basis_hess(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int bindex, int term, double &val)
     {
-        (*f).basis_hess(bindex,term);
+        val = (*f).basis_hess(bindex,term);
     };
     
     //   or use tensor indices to evaluate basis function product
     void PSeriesFunction_dsis_get_tensor_basis(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double &val)
     {
-        (*f).basis(term);
+        val = (*f).basis(term);
     };
     
     void PSeriesFunction_dsis_get_tensor_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, int di, double &val)
     {
-        (*f).basis_grad(term,di);
+        val = (*f).basis_grad(term,di);
     };
     
     void PSeriesFunction_dsis_get_tensor_basis_hess(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, int di, int dj, double &val)
     {
-        (*f).basis_hess(term,di,dj);
+        val = (*f).basis_hess(term,di,dj);
     };
     
 }

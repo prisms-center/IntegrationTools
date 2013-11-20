@@ -695,36 +695,36 @@ namespace PRISMS
         {
             // evaluate basis functions
             for( int i=0; i<_order; i++)
-                _basis_set[i](var[i]);
+                _basis_set[i].eval(var[i]);
             
         };
         virtual void eval_basis(const VarContainer &var, int i)
         {
             // evaluate basis functions
-            _basis_set[i](var[i]);
+            _basis_set[i].eval(var[i]);
             
         };
         virtual void eval_basis_grad(const VarContainer &var)
         {
             // evaluate basis grad functions
             for( int i=0; i<_order; i++)
-                _basis_set[i].grad(var[i]);
+                _basis_set[i].eval_grad(var[i]);
         };
         virtual void eval_basis_grad(const VarContainer &var, int di)
         {
             // evaluate basis grad functions
-            _basis_set[di].grad(var[di]);
+            _basis_set[di].eval_grad(var[di]);
         };
         virtual void eval_basis_hess(const VarContainer &var)
         {
             // evaluate basis hess functions
             for( int i=0; i<_order; i++)
-                _basis_set[i].hess(var[i]);
+                _basis_set[i].eval_hess(var[i]);
         };
         virtual void eval_basis_hess(const VarContainer &var, int di)
         {
             // evaluate basis hess functions
-            _basis_set[di].hess(var[di]);
+            _basis_set[di].eval_hess(var[di]);
         };
 
         //   use basis index and term index for individual basis function
