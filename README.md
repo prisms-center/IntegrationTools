@@ -9,6 +9,12 @@ Boost is used for program_options, filesystem, and regex: http://www.boost.org/
 
 The python example script py_test.py uses matplotlib: http://matplotlib.org/
 
+'make install' will make and install:
+- 'fw': The Function Writer (/usr/local/bin)
+- 'bsw': The Basis Set Writer (/usr/local/bin)
+- 'lw': The Library Writer (/usr/local/bin)
+- 'PFunction': Python package (default distutils install location)
+
 Release 0.1.0 will include:
 - PSimpleFunction, PFunction, and PBasisSet
 - PSeriesFunction
