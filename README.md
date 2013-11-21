@@ -16,5 +16,5 @@ Release 0.1.0 will include:
 - code writers: fw, bsw, lw
     - with input and output as 'double' only
 - PExtern for calls from C, Fortran, etc.
-- PFunction wrapper for Python and Excel
+- PFunction wrapper for Python
 
