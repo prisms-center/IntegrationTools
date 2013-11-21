@@ -9,4 +9,5 @@ lw
 Chebyshev.hh
 Monomial.hh
 MyFunc.hh
-
+setup.py
+build
