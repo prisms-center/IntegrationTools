@@ -346,7 +346,7 @@ extern "C"
         linear_index = (*f).linear_index(term);
     };
     
-    void PSeriesFunction_dsis_tensor_indices(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int linear_index, int* &term)
+    void PSeriesFunction_dsis_tensor_indices(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int linear_index, int* term)
     {
         // assumes term.size() == order()  (the tensor dimensions)
         //   not sure if this is how we want to do it, but it avoids assuming push_back()

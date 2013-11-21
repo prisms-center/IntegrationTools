@@ -11,7 +11,7 @@
 
 
 //#include<iostream>
-//#include<fstream>
+#include<fstream>
 //#include<istream>
 //#include<cstdlib>
 #include<cstring>
@@ -193,9 +193,9 @@ int main(int argc, char *argv[])
         //fxy.coeff(term) = 30.0;
         
         std::vector<double> var;
-        var.push_back(0.0);
-        var.push_back(0.0);
-        var.push_back(0.0);
+        var.push_back(0.1);
+        var.push_back(0.2);
+        var.push_back(0.3);
         
         
         std::cout << "\n Evaluate basis functions at x == " << var[0] << ", y == " << var[1] << ", z == " << var[2] << ": \n";
@@ -282,23 +282,50 @@ int main(int argc, char *argv[])
             
         }
         
-        std::cout << "\n Tensor coefficients: \n";
-        for( int i=0; i<fxy.dim(0); i++)
-        {
-            std::cout << "-" << i << "-" << std::endl;
-            for( int j=0; j<fxy.dim(1); j++)
-            {
-                for( int k=0; k<fxy.dim(2); k++)
-                {
-                    term[0] = i;
-                    term[1] = j;
-                    term[2] = k;
-                    std::cout << fxy.coeff(term) << " ";
-                }
-                std::cout << std::endl;
-            }
-            
-        }
+        std::cout << "\n Print tensor basis: \n";
+        fxy.eval(var);
+        fxy.print_basis(std::cout);
+        std::cout << "\n";
+        
+        std::cout << "\n Print tensor basis grad 0: \n";
+        fxy.eval_grad(var);
+        fxy.print_basis_grad(std::cout,0);
+        std::cout << "\n";
+        
+        std::cout << "\n Print tensor basis hess 0 1: \n";
+        fxy.eval_hess(var);
+        fxy.print_basis_hess(std::cout,0,1);
+        std::cout << "\n";
+        
+        std::cout << "\n Print tensor coefficients: \n";
+        fxy.print_coeff(std::cout);
+        std::cout << "\n";
+        
+        std::cout << "\n Write tensor coefficients to file: \n";
+        std::ofstream outfile;
+        outfile.open("coeff.txt"); 
+        fxy.print_coeff(outfile);
+        outfile.close();
+        std::cout << "   done \n";
+        
+        std::cout << "\n Zero tensor coefficients: \n";
+        for( int i=0; i<fxy.volume(); i++)
+            fxy.coeff(i) = 0.0;
+        std::cout << "\n Print tensor coefficients: \n";
+        fxy.print_coeff(std::cout);
+        std::cout << "\n";
+        
+        std::cout << "\n Read tensor coefficients: \n";
+        std::ifstream infile;
+        infile.open("coeff.txt");
+        fxy.read_coeff(infile);
+        infile.close();
+        std::cout << "\n";
+        std::cout << "\n Print tensor coefficients: \n";
+        fxy.print_coeff(std::cout);
+        std::cout << "\n";
+        
+        
         
         double delta = 0.01;
         

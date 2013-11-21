@@ -77,8 +77,8 @@ class PSeries_dsis(object):
     
     #returns a c_int_array
     def tensor_indices(self, linear_index):
-        term = c_int_array( [0]*self.order())
-        config.lib.PSeriesFunction_dsis_tensor_indices(self.ptr, config.c_int(linear_index), ctypes.byref(term))
+        term = config.c_int_array( [0]*self.order())
+        config.lib.PSeriesFunction_dsis_tensor_indices(self.ptr, ctypes.c_int(linear_index), ctypes.byref(term))
         return term
     
     # ----------------------------------------------------------
@@ -202,4 +202,19 @@ class PSeries_dsis(object):
     def get_tensor_basis_hess(self, bindex, tensor_indices):
         config.lib.PSeriesFunction_dsis_get_tensor_basis_hess(self.ptr, tensor_indices, ctypes.byref(self.tval))
         return self.tval.value
+    
+    def print_coeff(self, sout):
+        for i in range(0, self.volume()):
+            term = self.tensor_indices(i)
+            for t in term:
+                sout.write( str(t) + " ")
+            sout.write( str(self.get_linear_coeff(i)) + "\n")
+    
+    def read_coeff(self, sin):
+        # assumes file is correct size and in the print_coeff order
+        #   just reads the coeff
+        for i in range(0, self.volume()):
+            val = float( sin.readline().split()[-1])
+            self.set_linear_coeff(i, val)
+                
 

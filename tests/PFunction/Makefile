@@ -29,12 +29,12 @@ test_funcderiv: test_funcderiv.cpp $(H)/*
 
 test_writer: test_writer.cpp $(H)/* S
 	$(CXX) -c test_writer.cpp $(CPPFLAGS)
-	$(CXX) test_writer.o $(SRC)/PFunctionWriter.o -o test_writer $(CPPFLAGS) $(LDFLAGS)
+	$(CXX) test_writer.o $(SRC)/PFunctionWriter.o $(SRC)/version.o -o test_writer $(CPPFLAGS) $(LDFLAGS)
 	./test_writer	
 
 test_basissetwriter: test_basissetwriter.cpp $(H)/* S
 	$(CXX) -c test_basissetwriter.cpp $(CPPFLAGS)
-	$(CXX) test_basissetwriter.o $(SRC)/PBasisSetWriter.o $(SRC)/PFunctionWriter.o -o test_basissetwriter $(CPPFLAGS) $(LDFLAGS)
+	$(CXX) test_basissetwriter.o $(SRC)/PBasisSetWriter.o $(SRC)/PFunctionWriter.o $(SRC)/version.o -o test_basissetwriter $(CPPFLAGS) $(LDFLAGS)
 	./test_basissetwriter
 
 test_MyFunc: test_MyFunc.cpp $(H)/* test_writer
@@ -55,10 +55,10 @@ EXT: FORCE
 
 
 S: FORCE
-	cd $(SRC); make PFunctionWriter.o; make PBasisSetWriter.o
+	cd $(SRC); make PFunctionWriter.o; make PBasisSetWriter.o; make version.o
 
 FORCE:
 	
 	
 clean: 
-	rm -f test test_sym test_writer test_MyFunc test_funcderiv test_basissetwriter test_MyBasisSet test_PExtern MyFunc.hh MyBasisSet.hh *.o
+	rm -f test test_sym test_writer test_MyFunc test_funcderiv test_basissetwriter test_MyBasisSet test_PExtern MyFunc.hh MyBasisSet.hh *.o coeff.txt

@@ -166,7 +166,7 @@ extern "C"
     
     void PSeriesFunction_dsis_linear_index(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, int &linear_index);
     
-    void PSeriesFunction_dsis_tensor_indices(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int linear_index, int* &term);
+    void PSeriesFunction_dsis_tensor_indices(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int linear_index, int* term);
     
     // ----------------------------------------------------------
     // Use these functions if you want to evaluate a single value
@@ -211,7 +211,7 @@ extern "C"
     
     void PSeriesFunction_dsis_calc_tensor_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double* var, int di, double &val);
     
-    void PSeriesFunction_dsis_calc_tensor_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double* var, int di, int dj, double &val);
+    void PSeriesFunction_dsis_calc_tensor_basis_hess(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, double* var, int di, int dj, double &val);
     
     // ----------------------------------------------------------
     // Use these functions to evaluate all basis functions,
@@ -243,6 +243,7 @@ extern "C"
     void PSeriesFunction_dsis_get_tensor_basis_grad(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, int di, double &val);
     
     void PSeriesFunction_dsis_get_tensor_basis_hess(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, int di, int dj, double &val);
+    
 }
 
 

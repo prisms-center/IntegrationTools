@@ -5,6 +5,7 @@ from pylab import *
 import PFunction
 import ctypes
 import random
+import os, sys
 
 rc('font',**{'family':'serif','sans-serif':['Times']})
 PFunction.set_lib("libpextern.dylib")
@@ -154,6 +155,26 @@ ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, an
 #ax.set_xticklabels([])
 #ax.set_yticklabels([])
 #ax.set_zticklabels([])
+
+print "write 'coeff.txt'\n"
+coeff_file = open('coeff.txt','w')
+f.print_coeff(coeff_file)
+coeff_file.close()
+
+print "clear coeffs:"
+for i in range(0,f.volume()):
+    f.set_linear_coeff(i,0.0)
+f.print_coeff(sys.stdout)
+print ""
+
+print "read 'coeff.txt'"
+coeff_file = open('coeff.txt','r')
+f.read_coeff(coeff_file)
+coeff_file.close()
+f.print_coeff(sys.stdout)
+
+os.remove('coeff.txt')
+
 
 f.delete()
 print "  deleted\n"

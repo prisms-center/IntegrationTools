@@ -25,7 +25,7 @@
 //#include<sstream>
 //#include "../../external/MersenneTwister/MersenneTwister.h"
 
-#include "PExtern_Example.hh"
+#include "PExtern.hh"
 
 
 template<typename T>

@@ -710,10 +710,10 @@ namespace PRISMS
             for( int i=0; i<_order; i++)
                 _basis_set[i].eval_grad(var[i]);
         };
-        virtual void eval_basis_grad(const VarContainer &var, int di)
+        virtual void eval_basis_grad(const VarContainer &var, int i)
         {
             // evaluate basis grad functions
-            _basis_set[di].eval_grad(var[di]);
+            _basis_set[i].eval_grad(var[i]);
         };
         virtual void eval_basis_hess(const VarContainer &var)
         {
@@ -721,10 +721,10 @@ namespace PRISMS
             for( int i=0; i<_order; i++)
                 _basis_set[i].eval_hess(var[i]);
         };
-        virtual void eval_basis_hess(const VarContainer &var, int di)
+        virtual void eval_basis_hess(const VarContainer &var, int i)
         {
             // evaluate basis hess functions
-            _basis_set[di].eval_hess(var[di]);
+            _basis_set[i].eval_hess(var[i]);
         };
 
         //   use basis index and term index for individual basis function
@@ -793,6 +793,76 @@ namespace PRISMS
             }
             
             return tmp;
+        };
+        
+        // ----------------------------------------------------------
+        // Read and write routines: 
+        //   Write routines only uses 'getters', they assume you have 
+        //   already evaluated the necessary basis functions
+        //
+        // These are not included in PExtern
+        
+        void print_basis(std::ostream &sout)
+        {
+            std::vector<int> term = std::vector<int>(_order,0);
+            for( int i=0; i<_volume; i++)
+            {
+                tensor_indices(i,term);
+                for( int j=0; j<term.size(); j++)
+                    sout << term[j] << " ";
+                sout << basis(term) << "\n";
+            }
+                
+        };
+        void print_basis_grad(std::ostream &sout, int di)
+        {
+            std::vector<int> term = std::vector<int>(_order,0);
+            for( int i=0; i<_volume; i++)
+            {
+                tensor_indices(i,term);
+                for( int j=0; j<term.size(); j++)
+                    sout << term[j] << " ";
+                sout << basis_grad(term,di) << "\n";
+            }
+                
+        };
+        void print_basis_hess(std::ostream &sout, int di, int dj)
+        {
+            std::vector<int> term = std::vector<int>(_order,0);
+            for( int i=0; i<_volume; i++)
+            {
+                tensor_indices(i,term);
+                for( int j=0; j<term.size(); j++)
+                    sout << term[j] << " ";
+                sout << basis_hess(term,di,dj) << "\n";
+            }
+                
+        };
+        void print_coeff(std::ostream &sout)
+        {
+            std::vector<int> term = std::vector<int>(_order,0);
+            for( int i=0; i<_volume; i++)
+            {
+                tensor_indices(i,term);
+                for( int j=0; j<term.size(); j++)
+                    sout << term[j] << " ";
+                sout << coeff(i) << "\n";
+            }
+        };
+        void read_coeff(std::istream &sin)
+        {
+            // no error checking, 
+            //   assumes format identical to print_coeff output
+            std::vector<int> term = std::vector<int>(_order,0);
+            for( int i=0; i<_volume; i++)
+            {
+                // ignores tensor indices
+                for( int j=0; j<term.size(); j++)
+                {    
+                    sin >> term[j];
+                }
+                sin >> coeff(i);
+            }
         };
         
         
