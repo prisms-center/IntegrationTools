@@ -7,6 +7,8 @@ The function and basis set writers require GiNaC: http://www.ginac.de/
 
 Boost is used for program_options, filesystem, and regex: http://www.boost.org/
 
+The python example script py_test.py uses matplotlib: http://matplotlib.org/
+
 Release 0.1.0 will include:
 - PSimpleFunction, PFunction, and PBasisSet
 - PSeriesFunction
