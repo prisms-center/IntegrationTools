@@ -31,10 +31,23 @@ uninstall:
 	@echo "python module PFunction must be uninstalled manually, trying running 'python setup.py install' to see where it is located."
 	
 
-test : fw bsw lw FORCE
+test : test_fw test_bsw test_lw test_py FORCE
+
+test_fw : fw FORCE
 	./fw -n "MyFunc" -v "x" "y" -d "x variable" "y variable"  --sym "x^3 + x^2*y + x*y^2 + y^3" --grad --hess
+
+test_bsw : test_bsw_mono test_bsw_cheb FORCE
+
+test_bsw_mono : bsw FORCE
 	./bsw -n "Monomial" -d "Monomials up to 30" -v "x" --index "i" -e "x^i" -m 30 --grad --hess
+
+test_bsw_cheb : bsw FORCE
 	./bsw -n "Chebyshev" -d "Chebyshev Polynomials up to term 30"  -v "x" -e "2*x*phi1 - phi0" --init "1.0" "x" --sym "phi0" "phi1" -m 30 --grad --hess
+
+test_lw : lw FORCE
+	./lw -h -d "." -v "std::vector<double>" "double*";./lw -c -d "." -v "std::vector<double>" "double*"
+	
+test_py : test_lw extern FORCE
 	python py_test.py
 	
 PFunctionWriter.o : PFunctionWriter.cc $(H)/*
@@ -64,15 +77,19 @@ fw: fw.cpp $(H)/* PFunctionWriter.o version.o
 bsw: bsw.cpp $(H)/* PBasisSetWriter.o PFunctionWriter.o version.o
 	$(CXX) PBasisSetWriter.o PFunctionWriter.o version.o -o bsw bsw.cpp $(CPPFLAGS) $(LDFLAGS)
 
-lw: lw.cpp
+lw: lw.cpp version.o
 	$(CXX) version.o -o lw lw.cpp $(CPPFLAGS) -lboost_filesystem -lboost_system -lboost_program_options -lboost_regex
 
 extern: $(H)/PExtern.hh PExtern.cc PLibrary.o
 	$(CXX) -o libpextern.dylib PExtern.cc PLibrary.o -dynamiclib $(CPPFLAGS)
 
-PLibrary.o: lw test
-	./lw -h -d "." -v "std::vector<double>" "double*";./lw -c -d "." -v "std::vector<double>" "double*"
+PLibrary.o: PLibrary.cc FORCE
 	g++ -c PLibrary.cc $(CPPFLAGS)
+
+PLibrary.cc: Chebyshev.hh test_lw
+
+Chebyshev.hh: test_bsw_cheb
+	
 
 FORCE:
 	
