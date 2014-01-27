@@ -266,7 +266,9 @@ namespace PRISMS
 
     };
     
-    
+    /// A class to create functions consisting of PSimpleFunctions
+    ///  Used to create basis_functions from PSimpleFunctions for f, grad_f, and hess_f
+    ///
     template<class VarContainer, class OutType>
     class PFlexFunction : public PFuncBase< VarContainer, OutType>
     {
