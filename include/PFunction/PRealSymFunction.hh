@@ -31,32 +31,28 @@ namespace PRISMS
             _sym.clear();
             _sym.resize(_sym.size());
 
-            _var_name.clear();
-            _var_name.resize(_sym.size());
+            this->_var_name.clear();
+            this->_var_name.resize(_sym.size());
 
             for(int i = 0; i < sym.size(); i++)
             {
                 _sym.push_back(sym[i]);
                 _sym[i] = sym[i];
-                _var_name.push_back(_sym[i].get_name());
+                this->_var_name.push_back(_sym[i].get_name());
             }
 
-            _name = name;
+            this->_name = name;
 
             _e = e;
         }
 
-
         // ----------------------------------------------------------
         //   Inherited:
-
-        using PFuncBase<VarContainer, double>::_name;
-        using PFuncBase<VarContainer, double>::_var_name;
 
         virtual PRealSymFunction<VarContainer> *clone() const
         {
             return new PRealSymFunction<VarContainer>(*this);
-        };
+        }
 
         // ----------------------------------------------------------
         // Use these functions if you want to evaluate a single value
@@ -89,7 +85,7 @@ namespace PRISMS
             m[_sym[i]] = var[i];
         
         return GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.subs(m))).to_double();
-    };
+    }
 
     template<class VarContainer>
     double PRealSymFunction<VarContainer>::hess(const VarContainer &var, int di, int dj)
@@ -101,7 +97,7 @@ namespace PRISMS
             m[_sym[i]] = var[i];
         
         return GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.subs(m))).to_double();
-    };
+    }
 
     // ----------------------------------------------------------
     
@@ -112,23 +108,18 @@ namespace PRISMS
         public:
         GiNaC::ex _e;
         GiNaC::symbol _var;
-        using PSimpleBase<double, double>::_val;
-        
-        // Reminder, inherited from PSymBasisFunction<double, double>:
-        //double operator()( const double &var){ _val = eval(var); return _val;};
-        //double operator()(){ return _val;};
         
         PRealSymBasisFunction( GiNaC::symbol var, GiNaC::ex e)
         {
             _var = var;
             _e = e;
-        };
+        }
         
         private:
         virtual double eval( const double &var) const
         { 
             return GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(_e.subs(_var == var))).to_double();
-        };
+        }
         
         
     };
@@ -152,27 +143,27 @@ namespace PRISMS
             _e = e;
             _var = var;
             _i = index;
-        };
+        }
         
         virtual PRealSymBasisSet* clone() const
         {
             return new PRealSymBasisSet(*this);
-        };
+        }
         
         virtual PRealSymBasisFunction* clone_basis_function( int term) const
         {
             return new PRealSymBasisFunction( _var, _e.subs(_i == term));
-        };
+        }
         
         virtual PRealSymBasisFunction* clone_grad_basis_function( int term)const
         {
             return new PRealSymBasisFunction( _var, _e.subs(_i == term).diff(_var) );
-        };
+        }
         
         virtual PRealSymBasisFunction* clone_hess_basis_function( int term)const
         {
             return new PRealSymBasisFunction( _var, _e.subs(_i == term).diff(_var, 2));
-        };
+        }
         
         private:
         
@@ -184,21 +175,21 @@ namespace PRISMS
             double result = (*bf)(var);
             delete bf;
             return result;
-        };
+        }
         virtual double eval_grad(int term, const double &var)
         {
             PRealSymBasisFunction* bf = clone_grad_basis_function(term);
             double result = (*bf)(var);
             delete bf;
             return result;
-        };
+        }
         virtual double hess(int term, const double &var)
         {
             PRealSymBasisFunction* bf = clone_hess_basis_function(term);
             double result = (*bf)(var);
             delete bf;
             return result;
-        };
+        }
         
         
     };
@@ -260,35 +251,30 @@ namespace PRISMS
                 _phi_sym[i] = phi_sym[i];
                 _phi[i] = phi_init[i];
             }
-        };
-        
-        //PRealSymBasisSet( const PRealSymBasisSet &RHS)
-        //{
-        //    something
-        //};
+        }
 
         virtual PRealSymRecursBasisSet* clone() const
         {
             return new PRealSymRecursBasisSet(*this);
-        };
+        }
         
         virtual PRealSymBasisFunction* clone_basis_function( int term)
         {
             generate_up_to(term);
             return new PRealSymBasisFunction( _var, _phi[term]);
-        };
+        }
         
         virtual PRealSymBasisFunction* clone_grad_basis_function( int term)
         {
             generate_up_to(term);
             return new PRealSymBasisFunction( _var, _phi[term].diff(_var) );
-        };
+        }
         
         virtual PRealSymBasisFunction* clone_hess_basis_function( int term)
         {
             generate_up_to(term);
             return new PRealSymBasisFunction( _var, _phi[term].diff(_var, 2));
-        };
+        }
         
         
         private:
@@ -301,21 +287,21 @@ namespace PRISMS
             double result = (*bf)(var);
             delete bf;
             return result;
-        };
+        }
         virtual double eval_grad(int term, const double &var)
         {
             PRealSymBasisFunction* bf = clone_grad_basis_function(term);
             double result = (*bf)(var);
             delete bf;
             return result;
-        };
+        }
         virtual double eval_hess(int term, const double &var)
         {
             PRealSymBasisFunction* bf = clone_hess_basis_function(term);
             double result = (*bf)(var);
             delete bf;
             return result;
-        };
+        }
         
 
         
@@ -330,7 +316,7 @@ namespace PRISMS
                 }
                 _phi.push_back(_e_gen.subs(m, GiNaC::subs_options::algebraic).expand());
             }
-        };
+        }
         
     };
     

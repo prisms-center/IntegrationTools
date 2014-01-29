@@ -25,7 +25,7 @@ namespace PRISMS
         std::stringstream ss;
         ss << i;
         return ss.str();
-    };
+    }
     
     // return current date and time as: YEAR-MM-DD HH:MM:SS
     std::string now()
@@ -55,7 +55,7 @@ namespace PRISMS
              << " " << _now->tm_hour << ":" << smin << ":" << ssec;
         return ss.str();
         
-    };
+    }
     */
 
     PBasisSetWriter::PBasisSetWriter(const std::string &name, const std::string &description)
@@ -69,58 +69,58 @@ namespace PRISMS
         hess_on();
         set_basic_indent("    ");
         set_types("double", "double");
-    };
+    }
     
     void PBasisSetWriter::set_basic_indent( std::string basic_indent)
     {
         _basic_indent = basic_indent;
-    };
+    }
     
     void PBasisSetWriter::set_intype(std::string intype)
     {
         _intype = intype;
-    };
+    }
     
     void PBasisSetWriter::set_outtype(std::string outtype)
     {
         _outtype = outtype;
-    };
+    }
     
     void PBasisSetWriter::set_types( std::string intype, std::string outtype)
     {
         _intype = intype;
         _outtype = outtype;
-    };
+    }
     
     void PBasisSetWriter::phi_on()
     {
         _write_phi = true;
-    };
+    }
     
     void PBasisSetWriter::phi_off()
     {
         _write_phi = false;
-    };
+    }
     
     void PBasisSetWriter::grad_on()
     {
         _write_grad = true;
-    };
+    }
     
     void PBasisSetWriter::grad_off()
     {
         _write_grad = false;
-    };
+    }
     
     void PBasisSetWriter::hess_on()
     {
         _write_hess = true;
-    };
+    }
     
     void PBasisSetWriter::hess_off()
     {
         _write_hess = false;
-    };
+    }
     
     void PBasisSetWriter::sym2code(     std::string f, 
                               std::string var, 
@@ -210,7 +210,7 @@ namespace PRISMS
         code(sout);
         foot(sout);
         
-    };
+    }
     
     void PBasisSetWriter::sym2code( std::string f, 
                               std::string var, 
@@ -315,13 +315,13 @@ namespace PRISMS
         head(sout);
         code(sout);
         foot(sout);
-    };
+    }
     
     /*
     void PBasisSetWriter::code( const std::string &json_str,  std::ostream &sout)
     {
     
-    };
+    }
     */
     
     void PBasisSetWriter::code( 
@@ -336,7 +336,7 @@ namespace PRISMS
         head(sout);
         code(sout);
         foot(sout);
-    };
+    }
     
     
     //private:
@@ -355,7 +355,7 @@ namespace PRISMS
         I++;
         sout << indent(I) << "return " + f + ";\n";
         I--;
-        sout << indent(I) << "};\n\n";
+        sout << indent(I) << "}\n\n";
         I--;
         sout << indent(I) << "public:\n";
         I++;
@@ -364,10 +364,10 @@ namespace PRISMS
         I++;
         sout << indent(I) << "return new " + name + "(*this);\n";
         I--;
-        sout << indent(I) << "};\n";
+        sout << indent(I) << "}\n";
         I--;
         sout << indent(I) << "};\n\n";
-    };
+    }
     
     
     
@@ -376,7 +376,7 @@ namespace PRISMS
     void PBasisSetWriter::code( 
       std::ostream &sout) const
     {
-        int I = 0;
+        int I = 1;
         std::string PBasisSetBaseTemplate = "PBasisSetBase<" + _intype + ", " + _outtype + ">";
         std::string PSimpleBaseTemplate = "PSimpleBase< " + _intype + ", " + _outtype + ">";
         std::string PSimpleFunctionTemplate = "PSimpleFunction< " + _intype + ", " + _outtype + ">";
@@ -438,11 +438,11 @@ namespace PRISMS
         // write members
         sout << indent(I) << "public:\n";
         I++;
-        sout << indent(I) << "using " + PBasisSetBaseTemplate + "::_name;\n";
-        sout << indent(I) << "using " + PBasisSetBaseTemplate + "::_description;\n";
-        sout << indent(I) << "using " + PBasisSetBaseTemplate + "::_val;\n";
-        sout << indent(I) << "using " + PBasisSetBaseTemplate + "::_grad_val;\n";
-        sout << indent(I) << "using " + PBasisSetBaseTemplate + "::_hess_val;\n";
+        //sout << indent(I) << "using " + PBasisSetBaseTemplate + "::_name;\n";
+        //sout << indent(I) << "using " + PBasisSetBaseTemplate + "::_description;\n";
+        //sout << indent(I) << "using " + PBasisSetBaseTemplate + "::_val;\n";
+        //sout << indent(I) << "using " + PBasisSetBaseTemplate + "::_grad_val;\n";
+        //sout << indent(I) << "using " + PBasisSetBaseTemplate + "::_hess_val;\n";
         sout << indent(I) << "\n";
         sout << indent(I) << "std::vector< " + PFunctionTemplate + " > _basis_function;\n";
         //sout << indent(I) << PSimpleBaseTemplate + "** _phi;\n";
@@ -489,7 +489,7 @@ namespace PRISMS
         I++;
         //sout << indent(I) << "destruct();\n";
         I--;
-        sout << indent(I) << "};\n\n";
+        sout << indent(I) << "}\n\n";
         
         
         // write clone
@@ -498,20 +498,27 @@ namespace PRISMS
         I++;
         sout << indent(I) << "return new " + _name + "(*this);\n";
         I--;
-        sout << indent(I) << "};\n\n";
+        sout << indent(I) << "}\n\n";
         
         
         // write     PFunction<InType, OutType> basis_function(term) const
         sout << indent(I) << PFunctionTemplate + " basis_function( int term) const\n";
         sout << indent(I) << "{\n";
         I++;
-        sout << indent(I) << "if(term >= max_size()){ std::cout << \"Error in " + _name + "::basis_function( int term). term >= max_size().\" << std::endl; exit(1);}\n";
+        sout << indent(I) << "if(term >= max_size()){ std::cout << \"Error in " + _name + "::basis_function( int term). term >= max_size().\" << std::endl; exit(1);}\n\n";
         
-        sout << indent(I) << "PFlexFunction< " + _intype + ", " + _outtype + " > tmp;\n"; 
-        sout << indent(I) << "tmp._var_name.push_back(\"x\");\n";
-        sout << indent(I) << "tmp._var_description.push_back(\"x\");\n";
-        sout << indent(I) << "tmp._hess_val.resize(1);\n";
+        sout << indent(I) << "std::string name;\n";
+        sout << indent(I) << "std::vector< std::string> var_name(1, \"x\");\n";
+        sout << indent(I) << "std::vector< std::string> var_description(1, \"x\");\n\n";
         
+        std::string psf = "psf";
+        sout << indent(I) << "typedef " + PSimpleFunctionTemplate + " " + psf + ";\n\n";
+        
+        sout << indent(I) << psf + " simplef;\n";
+        sout << indent(I) << "std::vector< " + psf + " > grad_simplef;\n";
+        sout << indent(I) << "std::vector< std::vector< " + psf + " > > hess_simplef;\n";
+        sout << indent(I) << "hess_simplef.resize(1);\n";
+            
         sout << indent(I) << "switch( term )\n";
         sout << indent(I) << "{\n";
         I++;
@@ -523,18 +530,19 @@ namespace PRISMS
         {
             sout << indent(I) << "case " + itos(i) + ":\n";
             I++;
-            sout << indent(I) << "tmp._name = \"" + _name + "_" + itos(i) + "\";\n";
-            sout << indent(I) << "tmp._val = " + PSimpleFunctionTemplate + "( " + _name + "_" + itos(i) + "() );\n";
-            sout << indent(I) << "tmp._grad_val.push_back( " + PSimpleFunctionTemplate + "( " + _name + "_" + itos(i) + "_grad() ) );\n";
-            sout << indent(I) << "tmp._hess_val[0].push_back( " + PSimpleFunctionTemplate + "( " + _name + "_" + itos(i) + "_hess() ) );\n";
+            sout << indent(I) << "name = \"" + _name + "_" + itos(i) + "\";\n";
+            sout << indent(I) << "simplef = " + _name + "_" + itos(i) + "();\n";
+            sout << indent(I) << "grad_simplef.push_back( " + psf + "( " + _name + "_" + itos(i) + "_grad() ) );\n";
+            sout << indent(I) << "hess_simplef[0].push_back( " + psf + "( " + _name + "_" + itos(i) + "_hess() ) );\n";
             sout << indent(I) << "break;\n";
             I--;
         }
         I--;
         sout << indent(I) << "}\n";
+        sout << indent(I) << "PFlexFunction< " + _intype + ", " + _outtype + " > tmp( name, var_name, var_description, simplef, grad_simplef, hess_simplef);\n"; 
         sout << indent(I) << "return " + PFunctionTemplate + "( tmp );\n";
         I--;
-        sout << indent(I) << "};\n\n";
+        sout << indent(I) << "}\n\n";
         
         /*
         // write     PSimpleFunction<InType, OutType>* clone_basis_function( int term)
@@ -552,7 +560,7 @@ namespace PRISMS
         I--;
         sout << indent(I) << "}\n";
         I--;
-        sout << indent(I) << "};\n\n";
+        sout << indent(I) << "}\n\n";
         
         
         // write     PSimpleFunction<InType, OutType>* clone_basis_grad_function( int term)
@@ -570,7 +578,7 @@ namespace PRISMS
         I--;
         sout << indent(I) << "}\n";
         I--;
-        sout << indent(I) << "};\n\n";
+        sout << indent(I) << "}\n\n";
         
         
         // write      PSimpleFunction<InType, OutType>* clone_basis_hess_function( int term)
@@ -588,7 +596,7 @@ namespace PRISMS
         I--;
         sout << indent(I) << "}\n";
         I--;
-        sout << indent(I) << "};\n\n";
+        sout << indent(I) << "}\n\n";
         */
         
         // write max_size
@@ -597,7 +605,7 @@ namespace PRISMS
         I++;
         sout << indent(I) << "return " << _phi.size() << ";\n";
         I--;
-        sout << indent(I) << "};\n\n";
+        sout << indent(I) << "}\n\n";
         
         
         // write resize
@@ -609,7 +617,7 @@ namespace PRISMS
         sout << indent(I) << "construct(N);\n";
         sout << indent(I) << "copy(tmp);\n";
         I--;
-        sout << indent(I) << "};\n\n";
+        sout << indent(I) << "}\n\n";
         
         
         
@@ -626,7 +634,7 @@ namespace PRISMS
         I++;
         sout << indent(I) << "return _basis_function[term](var);\n";
         I--;
-        sout << indent(I) << "};\n\n";
+        sout << indent(I) << "}\n\n";
         
         // write eval_grad
         sout << indent(I) << _outtype + " eval_grad(int term, const " + _intype + " &var)\n";
@@ -634,7 +642,7 @@ namespace PRISMS
         I++;
         sout << indent(I) << "return _basis_function[term].grad(var, 0);\n";
         I--;
-        sout << indent(I) << "};\n\n";
+        sout << indent(I) << "}\n\n";
         
         // write eval_hess
         sout << indent(I) << _outtype + " eval_hess(int term, const " + _intype + " &var)\n";
@@ -642,7 +650,7 @@ namespace PRISMS
         I++;
         sout << indent(I) << "return _basis_function[term].hess(var, 0, 0);\n";
         I--;
-        sout << indent(I) << "};\n\n";
+        sout << indent(I) << "}\n\n";
         
         
         // write construct
@@ -650,11 +658,11 @@ namespace PRISMS
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "if( N > max_size() ){ std::cout << \"Error in " << _name << ". Requested size \" << N << \". Max size is\" << max_size() << \".\"; exit(1);}\n";
-        sout << indent(I) << "_name = \"" + _name + "\";\n";
-        sout << indent(I) << "_description = \"" + _description + "\";\n";
-        sout << indent(I) << "_val.resize(N);\n";
-        sout << indent(I) << "_grad_val.resize(N);\n";
-        sout << indent(I) << "_hess_val.resize(N);\n";
+        sout << indent(I) << "this->_name = \"" + _name + "\";\n";
+        sout << indent(I) << "this->_description = \"" + _description + "\";\n";
+        sout << indent(I) << "this->_val.resize(N);\n";
+        sout << indent(I) << "this->_grad_val.resize(N);\n";
+        sout << indent(I) << "this->_hess_val.resize(N);\n";
         sout << indent(I) << "_basis_function.resize(N);\n";
         sout << indent(I) << "for( int i=0; i<size(); i++)\n";
         sout << indent(I) << "{\n";
@@ -663,7 +671,7 @@ namespace PRISMS
         I--;
         sout << indent(I) << "}\n";
         I--;
-        sout << indent(I) << "};\n\n";
+        sout << indent(I) << "}\n\n";
         
         
         /*
@@ -683,22 +691,22 @@ namespace PRISMS
         sout << indent(I) << "delete [] _grad_phi;\n";
         sout << indent(I) << "delete [] _hess_phi;\n";
         I--;
-        sout << indent(I) << "};\n\n";
+        sout << indent(I) << "}\n\n";
         */
         
         // write copy 
         sout << indent(I) << "void copy(const " + _name + " &RHS )\n";
         sout << indent(I) << "{\n";
         I++;
-        sout << indent(I) << "_name = RHS._name;\n";
-        sout << indent(I) << "_description = RHS._description;\n";
+        sout << indent(I) << "this->_name = RHS._name;\n";
+        sout << indent(I) << "this->_description = RHS._description;\n";
         sout << indent(I) << "int lim = RHS.size() < this->size() ? RHS.size() : this->size();\n";
         sout << indent(I) << "for( int i=0; i<lim; i++)\n";
         sout << indent(I) << "{\n";
         I++;
-        sout << indent(I) << "_val[i] = RHS._val[i];\n";
-        sout << indent(I) << "_grad_val[i] = RHS._grad_val[i];\n";
-        sout << indent(I) << "_hess_val[i] = RHS._hess_val[i];\n";
+        sout << indent(I) << "this->_val[i] = RHS._val[i];\n";
+        sout << indent(I) << "this->_grad_val[i] = RHS._grad_val[i];\n";
+        sout << indent(I) << "this->_hess_val[i] = RHS._hess_val[i];\n";
         sout << indent(I) << "_basis_function[i] = RHS._basis_function[i];\n";
         /*
         sout << indent(I) << "(*_phi[i])._val = (*RHS._phi[i])._val;\n";
@@ -708,7 +716,7 @@ namespace PRISMS
         I--;
         sout << indent(I) << "}\n";
         I--;
-        sout << indent(I) << "};\n\n";
+        sout << indent(I) << "}\n\n";
         
         
         
@@ -717,7 +725,7 @@ namespace PRISMS
         sout << indent(I) << "};\n";
         
         
-    };
+    }
     
 
     
@@ -727,7 +735,7 @@ namespace PRISMS
         for( int i=0; i<step; i++)
             tmp += _basic_indent;
         return tmp;
-    };
+    }
     
     void PBasisSetWriter::head( std::ostream &sout) const
     {
@@ -750,7 +758,7 @@ namespace PRISMS
         sout << indent(I) << "{\n";
         I++;
         
-    };
+    }
     
     void PBasisSetWriter::foot( std::ostream &sout) const
     {
@@ -760,7 +768,7 @@ namespace PRISMS
         // finish
         sout << indent(0) << "#endif\n";
         
-    };
+    }
 
 }
 

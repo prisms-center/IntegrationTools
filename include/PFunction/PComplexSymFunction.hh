@@ -31,17 +31,17 @@ namespace PRISMS
             _sym.clear();
             _sym.resize(_sym.size());
 
-            _var_name.clear();
-            _var_name.resize(_sym.size());
+            this->_var_name.clear();
+            this->_var_name.resize(_sym.size());
 
             for(int i = 0; i < sym.size(); i++)
             {
                 _sym.push_back(sym[i]);
                 _sym[i] = sym[i];
-                _var_name.push_back(_sym[i].get_name());
+                this->_var_name.push_back(_sym[i].get_name());
             }
 
-            _name = name;
+            this->_name = name;
 
             _e = e;
         }
@@ -49,14 +49,11 @@ namespace PRISMS
 
         // ----------------------------------------------------------
         //   Inherited:
-
-        using PFuncBase< VarContainer, std::complex<double> >::_name;
-        using PFuncBase< VarContainer, std::complex<double> >::_var_name;
-
+        
         virtual PComplexSymFunction<VarContainer> *clone() const
         {
             return new PComplexSymFunction<VarContainer>(*this);
-        };
+        }
 
         // ----------------------------------------------------------
         // Use these functions if you want to evaluate a single value
@@ -89,7 +86,7 @@ namespace PRISMS
         
         return std::complex<double>(GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.real_part().subs(m))).to_double(),
                                GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.imag_part().subs(m))).to_double());
-    };
+    }
 
     template< class VarContainer>
     std::complex<double> PComplexSymFunction<VarContainer>::hess(const VarContainer &var, int di, int dj)
@@ -102,7 +99,7 @@ namespace PRISMS
         
         return std::complex<double>(GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.real_part().subs(m))).to_double(),
                                GiNaC::ex_to<GiNaC::numeric>(GiNaC::evalf(de.imag_part().subs(m))).to_double());
-    };
+    }
 
 }
 

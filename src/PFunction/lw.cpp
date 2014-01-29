@@ -70,12 +70,12 @@ bool is_header( fs::path p)
         return false;
     }
     
-};
+}
 
 bool not_header( fs::path p)
 {
     return !is_header(p);
-};
+}
 
 bool is_generated_header( fs::path p)
 {
@@ -701,7 +701,7 @@ sout <<
 \n\
 #endif\n";
 
-};
+}
 
 void write_source( std::vector<std::string> dir, std::vector<std::string> var, std::ofstream &sout)
 {
@@ -744,8 +744,9 @@ namespace PRISMS\n\
                 {
                     sout << "        void PLibrary::checkout( std::string name, PSimpleFunction< " + var[k] + ", " + c.function_outtype[j] + " > &simplefunc)\n";
                     sout << "        {\n";
+                    sout << "            typedef PSimpleFunction< " + var[k] + ", " + c.function_outtype[j] + " > psf;\n";
                     for( int ii=0; ii<c.simplefunction[i][j].size(); ii++)
-                    sout << "            if( name == \"" + c.simplefunction[i][j][ii] + "\") simplefunc = PSimpleFunction< " + var[k] + ", " + c.function_outtype[j] + " >( " + c.simplefunction[i][j][ii] + "< " + var[k] + " >() );\n";
+                    sout << "            if( name == \"" + c.simplefunction[i][j][ii] + "\") simplefunc = psf( " + c.simplefunction[i][j][ii] + "< " + var[k] + " >() );\n";
                     sout << "        }\n";
                 }
             }
@@ -753,8 +754,9 @@ namespace PRISMS\n\
             {
                 sout << "        void PLibrary::checkout( std::string name, PSimpleFunction< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > &simplefunc)\n";
                 sout << "        {\n";
+                sout << "            typedef PSimpleFunction< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > psf;\n";
                 for( int ii=0; ii<c.simplefunction[i][j].size(); ii++)
-                sout << "            if( name == \"" + c.simplefunction[i][j][ii] + "\") simplefunc = PSimpleFunction< " + c.function_intype[i] + ", " + c.function_outtype[j] + " >( " + c.simplefunction[i][j][ii] + "() );\n";
+                sout << "            if( name == \"" + c.simplefunction[i][j][ii] + "\") simplefunc = psf( " + c.simplefunction[i][j][ii] + "() );\n";
                 sout << "        }\n";
             }
         }
@@ -770,8 +772,9 @@ namespace PRISMS\n\
                 {
                     sout << "        void PLibrary::checkout( std::string name, PFunction< " + var[k] + ", " + c.function_outtype[j] + " > &func)\n";
                     sout << "        {\n";
+                    sout << "            typedef PFunction< " + var[k] + ", " + c.function_outtype[j] + " > pf;\n";
                     for( int ii=0; ii<c.function[i][j].size(); ii++)
-                    sout << "            if( name == \"" + c.function[i][j][ii] + "\") func = PFunction< " + var[k] + ", " + c.function_outtype[j] + " >( " + c.function[i][j][ii] + "< " + var[k] + " >() );\n";
+                    sout << "            if( name == \"" + c.function[i][j][ii] + "\") func = pf( " + c.function[i][j][ii] + "< " + var[k] + " >() );\n";
                     sout << "        }\n";
                 }
             }
@@ -779,8 +782,9 @@ namespace PRISMS\n\
             {
                 sout << "        void PLibrary::checkout( std::string name, PFunction< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > &func)\n";
                 sout << "        {\n";
+                sout << "            typedef PFunction< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > pf;\n";
                 for( int ii=0; ii<c.function[i][j].size(); ii++)
-                sout << "            if( name == \"" + c.function[i][j][ii] + "\") func = PFunction< " + c.function_intype[i] + ", " + c.function_outtype[j] + " >( " + c.function[i][j][ii] + "() );\n";
+                sout << "            if( name == \"" + c.function[i][j][ii] + "\") func = pf( " + c.function[i][j][ii] + "() );\n";
                 sout << "        }\n";
             }
         }
@@ -793,8 +797,9 @@ namespace PRISMS\n\
         {
             sout << "        void PLibrary::checkout( std::string name, PBasisSet< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > &basis_set, int N)\n";
             sout << "        {\n";
+            sout << "            typedef PBasisSet< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > pbs;\n";
             for( int k=0; k<c.basis_set[i][j].size(); k++)
-            sout << "            if( name == \"" + c.basis_set[i][j][k] + "\") basis_set = PBasisSet< " + c.function_intype[i] + ", " + c.function_outtype[j] + " >( " + c.basis_set[i][j][k] + "(N) );\n";
+            sout << "            if( name == \"" + c.basis_set[i][j][k] + "\") basis_set = pbs( " + c.basis_set[i][j][k] + "(N) );\n";
             sout << "        }\n";
         }
     
@@ -875,6 +880,6 @@ sout <<
 \n\
 #endif\n";
 
-};
+}
 
 
