@@ -1,11 +1,11 @@
 # make PFunction src
 
-HOME = ../..
+HOME = ..
 H = $(HOME)/include/PFunction
 INCLUDE = $(H) .
 
 INSTALL = /usr/local/bin
-VERS = "0.1.0"
+VERS = "develop"
 ID=$$(git rev-parse HEAD)
 URL=$$(git config --get remote.origin.url)
 
