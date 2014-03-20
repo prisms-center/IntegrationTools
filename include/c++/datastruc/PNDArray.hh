@@ -1,8 +1,8 @@
 
-#ifndef PNDARRAY_HH
-#define PNDARRAY_HH
+#ifndef PNDArray_HH
+#define PNDArray_HH
 
-#include "PFunction.hh"
+#include "PSimpleBase.hh"
 
 namespace PRISMS
 {
@@ -11,7 +11,7 @@ namespace PRISMS
     ///    takes int valued IndexContainer and returns OutType value
     ///
     template< class OutType>
-    class PNDArray : public PSimpleBase< std::vector<int>, OutType>
+    class PNDArray
     {
         std::vector< int > _dim;                        // dimension along each compenent
         std::vector< int > _unroll;                     // used to translate from tensor indices to linear index
@@ -113,7 +113,8 @@ namespace PRISMS
             return lindex;
         }
         
-        template <class Container> void tensor_indices( int lindex, Container &term) const
+        template <class IndexContainer> 
+        void tensor_indices( int lindex, IndexContainer &term) const
         {   // assumes term.size() == order()  (the tensor order)
             //   not sure if this is how we want to do it, but it avoids assuming push_back() or resize()
             

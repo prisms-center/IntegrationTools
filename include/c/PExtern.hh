@@ -1,14 +1,16 @@
 
-#ifndef PEXTERN_HH
-#define PEXTERN_HH
+#ifndef PExtern_HH
+#define PExtern_HH
 
 #include<cstring>
 #include<iostream>
 #include<vector>
 #include<cstdlib>
 
-#include "PFunction.hh"
-#include "PLibrary.hh"
+#include "PSimpleBase.hh"
+#include "PFuncBase.hh"
+#include "PBasisSetBase.hh"
+#include "PSeriesFunction.hh"
 
 // In future, might have more complicated OutType, 
 //   so make all have 'void' return and pass everything by reference

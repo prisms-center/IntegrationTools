@@ -1,5 +1,5 @@
-#ifndef VERSION_HH
-#define VERSION_HH
+#ifndef Version_HH
+#define Version_HH
 
 #include<string>
 

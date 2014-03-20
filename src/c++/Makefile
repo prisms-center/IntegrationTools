@@ -1,8 +1,10 @@
-# make PFunction src
+# make command line interface programs: fs, bsw, lw
 
 HOME = ../..
-H = $(HOME)/include/PFunction
-INCLUDE = $(H) .
+H = $(HOME)/include/c++
+PFUNC = $(H)/pfunction
+WRITER = $(H)/writer
+INCLUDE = . $(H) $(PFUNC) $(WRITER)
 
 INSTALL = /usr/local/bin
 VERS = "develop"
@@ -28,10 +30,10 @@ uninstall:
 	rm $(INSTALL)/bsw
 	rm $(INSTALL)/lw
 
-PFunctionWriter.o : PFunctionWriter.cc $(H)/*
+PFunctionWriter.o: PFunctionWriter.cc $(H)/version.hh $(WRITER)/PFunctionWriter.hh 
 	$(CXX) -c PFunctionWriter.cc $(CPPFLAGS)
 
-PBasisSetWriter.o : PBasisSetWriter.cc $(H)/*
+PBasisSetWriter.o: PBasisSetWriter.cc $(PFUNC)/PRealSymBasisFunction.hh $(PFUNC)/PRealSymBasisSet.hh $(PFUNC)/PRealSymRecursBasisSet.hh $(H)/version.hh $(WRITER)/*
 	$(CXX) -c PBasisSetWriter.cc $(CPPFLAGS)
 
 version.cc: #FORCE
@@ -42,10 +44,10 @@ version.cc: #FORCE
 version.o: version.cc $(H)/version.hh
 	$(CXX) -c version.cc $(CPPFLAGS)
 
-fw: fw.cpp $(H)/* PFunctionWriter.o version.o
+fw: fw.cpp PFunctionWriter.o version.o
 	$(CXX) PFunctionWriter.o version.o -o fw fw.cpp $(CPPFLAGS) $(LDFLAGS)
 
-bsw: bsw.cpp $(H)/* PBasisSetWriter.o PFunctionWriter.o version.o
+bsw: bsw.cpp PBasisSetWriter.o PFunctionWriter.o version.o
 	$(CXX) PBasisSetWriter.o PFunctionWriter.o version.o -o bsw bsw.cpp $(CPPFLAGS) $(LDFLAGS)
 
 lw: lw.cpp version.o

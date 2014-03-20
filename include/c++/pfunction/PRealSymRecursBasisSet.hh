@@ -1,6 +1,6 @@
 
-#ifndef PRealSymRecurBasisSet_HH
-#define PRealSymRecurBasisSet_HH
+#ifndef PRealSymRecursBasisSet_HH
+#define PRealSymRecursBasisSet_HH
 
 #include "PBasisSetBase.hh"
 #include "PRealSymBasisFunction.hh"

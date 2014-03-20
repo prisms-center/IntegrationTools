@@ -574,8 +574,12 @@ sout <<
 \n\
 #include<cstring>\n\
 #include<vector>\n\
+#include \"PFuncBase.hh\"\n\
+#include \"PSimpleBase.hh\"\n\
+#include \"PSimpleFunction.hh\"\n\
 #include \"PFunction.hh\"\n\
-#include \"PSeriesFunction.hh\"\n\
+#include \"PBasisSetBase.hh\"\n\
+#include \"PBasisSet.hh\"\n\
 \n\
 namespace PRISMS\n\
 {\n\

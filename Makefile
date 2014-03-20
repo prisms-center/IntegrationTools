@@ -1,19 +1,20 @@
 # make PFunction
 
-SRC = src/PFunction
+SRC = src
+TEST = tests
 
-all : 
-	cd $(SRC); make all
+all: 
+	cd $(SRC) && $(MAKE)
 
 install: 
-	cd $(SRC); make install
+	cd $(SRC) && $(MAKE) install
 
 uninstall:
-	cd $(SRC); make uninstall
-	
+	cd $(SRC) && $(MAKE) uninstall
 
-test : 
-	cd $(SRC); make test
+test: 
+	cd $(TEST) && $(MAKE)
 
 clean: 
-	cd $(SRC); make clean
+	cd $(SRC) && $(MAKE) clean
+	cd $(TEST) && $(MAKE) clean

@@ -1,13 +1,16 @@
 
-#ifndef PEXTERN_HH
-#define PEXTERN_HH
+#ifndef PExtern_CC
+#define PExtern_CC
 
 #include<cstring>
 #include<iostream>
 #include<vector>
 #include<cstdlib>
 
-#include "PFunction.hh"
+#include "PSimpleBase.hh"
+#include "PFuncBase.hh"
+#include "PBasisSetBase.hh"
+#include "PSeriesFunction.hh"
 #include "PLibrary.hh"
 
 // In future, might have more complicated OutType, 

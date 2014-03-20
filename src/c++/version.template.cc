@@ -1,5 +1,5 @@
-#ifndef VERSION_CC
-#define VERSION_CC
+#ifndef Version_CC
+#define Version_CC
 
 #include<string>
 
