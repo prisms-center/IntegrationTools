@@ -18,3 +18,4 @@ test:
 clean: 
 	cd $(SRC) && $(MAKE) clean
 	cd $(TEST) && $(MAKE) clean
+	rm -r .cache .matplotlib

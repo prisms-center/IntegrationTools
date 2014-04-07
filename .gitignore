@@ -3,3 +3,5 @@
 *.o
 *.dylib
 bp_stylize.sh
+.cache
+.matplotlib
