@@ -1,11 +1,9 @@
 # make pextern.dylib
 
 HOME = ../..
-H = $(HOME)/include/c
+EXTERN = $(HOME)/include/IntegrationTools/extern
 SRC = $(HOME)/src/c
-PFUNC = $(HOME)/include/c++/pfunction
-DATASTRUC = $(HOME)/include/c++/datastruc
-INCLUDE = . $(H) $(PFUNC) $(DATASTRUC)
+INCLUDE = . $(HOME)/include
 
 INSTALL = /usr/local/bin
 
@@ -14,8 +12,12 @@ CPPFLAGS += $(foreach i,$(INCLUDE),-I$(i))
 CPPFLAGS += -O3 
 
 
-extern: $(H)/PExtern.hh $(SRC)/PExtern.cc PLibrary.o
+extern: $(EXTERN)/PExtern.hh $(SRC)/PExtern.cc PLibrary.o
 	$(CXX) -o libpextern.dylib $(SRC)/PExtern.cc PLibrary.o -dynamiclib $(CPPFLAGS)
+
+PLibrary.cc: CLI
+
+PLibrary.hh: CLI
 
 PLibrary.o: PLibrary.cc PLibrary.hh CLI
 	g++ -c PLibrary.cc $(CPPFLAGS)

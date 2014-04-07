@@ -1,7 +1,8 @@
 # make PFunction tests
 
 test:
-	cd python; make
+	cd python && $(MAKE)
 
 clean: 
-	cd testlib; make clean
+	cd commandline && $(MAKE) clean
+	cd testlib && $(MAKE) clean

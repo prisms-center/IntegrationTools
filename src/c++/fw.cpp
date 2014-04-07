@@ -26,8 +26,8 @@
 //#include<time.h>
 //#include<sstream>
 
-#include "PFunctionWriter.hh"
-#include "version.hh"
+#include "IntegrationTools/writer/PFunctionWriter.hh"
+#include "IntegrationTools/version.hh"
 
 
 template<typename T>

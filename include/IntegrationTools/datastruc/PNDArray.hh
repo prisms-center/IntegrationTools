@@ -2,7 +2,8 @@
 #ifndef PNDArray_HH
 #define PNDArray_HH
 
-#include "PSimpleBase.hh"
+#include <vector>
+#include <iostream>
 
 namespace PRISMS
 {

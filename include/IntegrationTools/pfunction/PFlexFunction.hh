@@ -7,8 +7,8 @@
 #include<vector>
 #include<cstdlib>
 
-#include "PFuncBase.hh"
-#include "PSimpleFunction.hh"
+#include "./PFuncBase.hh"
+#include "./PSimpleFunction.hh"
 
 namespace PRISMS
 {

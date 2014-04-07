@@ -2,7 +2,7 @@
 #ifndef PRealSymBasisFunction_HH
 #define PRealSymBasisFunction_HH
 
-#include "PSimpleBase.hh"
+#include "../pfunction/PSimpleBase.hh"
 #include <ginac/ginac.h>    // compile with: -lcln -lginac
 
 namespace PRISMS

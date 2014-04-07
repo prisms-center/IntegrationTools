@@ -27,8 +27,8 @@
 //#include<time.h>
 //#include<sstream>
 
-#include "PBasisSetWriter.hh"
-#include "version.hh"
+#include "IntegrationTools/writer/PBasisSetWriter.hh"
+#include "IntegrationTools/version.hh"
 
 
 

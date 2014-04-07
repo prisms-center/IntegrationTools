@@ -10,8 +10,8 @@
 #include<cstdlib>
 #include <ginac/ginac.h>    // compile with: -lcln -lginac
 
-#include "PFunctionWriter.hh"
-#include "version.hh"
+#include "IntegrationTools/writer/PFunctionWriter.hh"
+#include "IntegrationTools/version.hh"
 
 namespace PRISMS
 {
@@ -936,9 +936,7 @@ namespace PRISMS
         sout << indent(I) << "#define " + _name + "_HH\n\n"; 
         sout << indent(I) << "#include <cmath>\n";
         sout << indent(I) << "#include <cstdlib>\n";
-        sout << indent(I) << "#include \"PSimpleBase.hh\"\n";
-        sout << indent(I) << "#include \"PFuncBase.hh\"\n";
-        sout << indent(I) << "#include \"PSimpleFunction.hh\"\n\n";
+        sout << indent(I) << "#include \"IntegrationTools/PFunction.hh\"\n\n";
         sout << indent(I) << "namespace PRISMS\n"; 
         sout << indent(I) << "{\n";
         I++;

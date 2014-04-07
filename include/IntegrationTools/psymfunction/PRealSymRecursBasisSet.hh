@@ -2,8 +2,8 @@
 #ifndef PRealSymRecursBasisSet_HH
 #define PRealSymRecursBasisSet_HH
 
-#include "PBasisSetBase.hh"
-#include "PRealSymBasisFunction.hh"
+#include "../pfunction/PBasisSetBase.hh"
+#include "./PRealSymBasisFunction.hh"
 #include <ginac/ginac.h>    // compile with: -lcln -lginac
 
 namespace PRISMS

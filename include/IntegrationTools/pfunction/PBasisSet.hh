@@ -7,8 +7,8 @@
 #include<vector>
 #include<limits>
 
-#include "PFunction.hh"
-#include "PBasisSetBase.hh"
+#include "./PFunction.hh"
+#include "./PBasisSetBase.hh"
 
 namespace PRISMS
 {

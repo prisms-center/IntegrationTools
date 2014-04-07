@@ -7,9 +7,9 @@
 #include<vector>
 #include<limits>
 
-#include "PFuncBase.hh"
-#include "PNDArray.hh"
-#include "PBasisSet.hh"
+#include "./PFuncBase.hh"
+#include "./PBasisSet.hh"
+#include "../datastruc/PNDArray.hh"
 
 namespace PRISMS
 {

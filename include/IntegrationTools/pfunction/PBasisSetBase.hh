@@ -7,7 +7,7 @@
 #include<vector>
 #include<limits>
 
-#include "PFunction.hh"
+#include "./PFunction.hh"
 
 namespace PRISMS
 {

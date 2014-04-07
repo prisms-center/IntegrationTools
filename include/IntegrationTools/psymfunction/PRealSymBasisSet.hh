@@ -2,8 +2,8 @@
 #ifndef PRealSymBasisSet_HH
 #define PRealSymBasisSet_HH
 
-#include "PBasisSetBase.hh"
-#include "PRealSymBasisFunction.hh"
+#include "../pfunction/PBasisSetBase.hh"
+#include "./PRealSymBasisFunction.hh"
 #include <ginac/ginac.h>    // compile with: -lcln -lginac
 
 namespace PRISMS

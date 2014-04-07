@@ -10,12 +10,10 @@
 #include<cstdlib>
 #include <ginac/ginac.h>    // compile with: -lcln -lginac
 
-#include "PRealSymBasisFunction.hh"
-#include "PRealSymBasisSet.hh"
-#include "PRealSymRecursBasisSet.hh"
-#include "PBasisSetWriter.hh"
-#include "PFunctionWriter.hh"
-#include "version.hh"
+#include "IntegrationTools/PSymFunction.hh"
+#include "IntegrationTools/writer/PBasisSetWriter.hh"
+#include "IntegrationTools/writer/PFunctionWriter.hh"
+#include "IntegrationTools/version.hh"
 
 namespace PRISMS
 {
@@ -755,11 +753,7 @@ namespace PRISMS
         sout << indent(I) << "#define " + _name + "_HH\n\n"; 
         sout << indent(I) << "#include <cmath>\n";
         sout << indent(I) << "#include <cstdlib>\n";
-        sout << indent(I) << "#include \"PSimpleBase.hh\"\n";
-        sout << indent(I) << "#include \"PBasisSetBase.hh\"\n";
-        sout << indent(I) << "#include \"PSimpleFunction.hh\"\n";
-        sout << indent(I) << "#include \"PFunction.hh\"\n";
-        sout << indent(I) << "#include \"PFlexFunction.hh\"\n\n";
+        sout << indent(I) << "#include \"IntegrationTools/PFunction.hh\"\n\n";
         sout << indent(I) << "namespace PRISMS\n"; 
         sout << indent(I) << "{\n";
         I++;

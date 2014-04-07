@@ -1,10 +1,11 @@
 # make command line interface programs: fs, bsw, lw
 
 HOME = ../..
-H = $(HOME)/include/c++
-PFUNC = $(H)/pfunction
-WRITER = $(H)/writer
-INCLUDE = . $(H) $(PFUNC) $(WRITER)
+TOOLS = $(HOME)/include/IntegrationTools
+PFUNC = $(TOOLS)/pfunction
+PSYM = $(TOOLS)/psymfunction
+WRITER = $(TOOLS)/writer
+INCLUDE = . $(HOME)/include
 
 INSTALL = /usr/local/bin
 VERS = "develop"
@@ -30,10 +31,10 @@ uninstall:
 	rm $(INSTALL)/bsw
 	rm $(INSTALL)/lw
 
-PFunctionWriter.o: PFunctionWriter.cc $(H)/version.hh $(WRITER)/PFunctionWriter.hh 
+PFunctionWriter.o: PFunctionWriter.cc $(TOOLS)/version.hh $(WRITER)/PFunctionWriter.hh 
 	$(CXX) -c PFunctionWriter.cc $(CPPFLAGS)
 
-PBasisSetWriter.o: PBasisSetWriter.cc $(PFUNC)/PRealSymBasisFunction.hh $(PFUNC)/PRealSymBasisSet.hh $(PFUNC)/PRealSymRecursBasisSet.hh $(H)/version.hh $(WRITER)/*
+PBasisSetWriter.o: PBasisSetWriter.cc $(PSYM)/PRealSymBasisFunction.hh $(PSYM)/PRealSymBasisSet.hh $(PSYM)/PRealSymRecursBasisSet.hh $(TOOLS)/version.hh $(WRITER)/*
 	$(CXX) -c PBasisSetWriter.cc $(CPPFLAGS)
 
 version.cc: #FORCE
@@ -41,7 +42,7 @@ version.cc: #FORCE
 	@sed "s/COMMIT_ID/$(ID)/" version.tmp.0 > version.tmp.1; rm version.tmp.0
 	@sed "s|REPO_URL|$(URL)|" version.tmp.1 > version.cc; rm version.tmp.1
 
-version.o: version.cc $(H)/version.hh
+version.o: version.cc $(TOOLS)/version.hh
 	$(CXX) -c version.cc $(CPPFLAGS)
 
 fw: fw.cpp PFunctionWriter.o version.o

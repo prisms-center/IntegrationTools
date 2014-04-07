@@ -2,7 +2,7 @@
 #ifndef PComplexSymFunction_HH
 #define PComplexSymFunction_HH
 
-#include "PFunction.hh"
+#include "../pfunction/PFunction.hh"
 #include <ginac/ginac.h>    // compile with: -lcln -lginac
 #include <complex>
 

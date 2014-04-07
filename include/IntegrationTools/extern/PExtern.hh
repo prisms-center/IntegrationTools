@@ -7,10 +7,7 @@
 #include<vector>
 #include<cstdlib>
 
-#include "PSimpleBase.hh"
-#include "PFuncBase.hh"
-#include "PBasisSetBase.hh"
-#include "PSeriesFunction.hh"
+#include "../PFunction.hh"
 
 // In future, might have more complicated OutType, 
 //   so make all have 'void' return and pass everything by reference

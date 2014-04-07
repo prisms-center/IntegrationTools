@@ -28,8 +28,8 @@
 #include<algorithm>
 #include<sstream>
 
-#include "PFunctionWriter.hh"
-#include "version.hh"
+#include "IntegrationTools/writer/PFunctionWriter.hh"
+#include "IntegrationTools/version.hh"
 
 
 template<typename T>
@@ -574,12 +574,7 @@ sout <<
 \n\
 #include<cstring>\n\
 #include<vector>\n\
-#include \"PFuncBase.hh\"\n\
-#include \"PSimpleBase.hh\"\n\
-#include \"PSimpleFunction.hh\"\n\
-#include \"PFunction.hh\"\n\
-#include \"PBasisSetBase.hh\"\n\
-#include \"PBasisSet.hh\"\n\
+#include \"IntegrationTools/PFunction.hh\"\n\
 \n\
 namespace PRISMS\n\
 {\n\
