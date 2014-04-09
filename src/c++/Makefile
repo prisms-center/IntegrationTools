@@ -15,7 +15,7 @@ URL=$$(git config --get remote.origin.url)
 CXX      = g++
 CPPFLAGS += $(foreach i,$(INCLUDE),-I$(i))
 CPPFLAGS += -O3 
-LDFLAGS  = -lcln -lginac -lboost_program_options -lboost_filesystem -lboost_system
+LDFLAGS  = -lcln -lginac -lboost_program_options -lboost_filesystem -lboost_system -lboost_regex
 
 
 
@@ -52,7 +52,7 @@ bsw: bsw.cpp PBasisSetWriter.o PFunctionWriter.o version.o
 	$(CXX) PBasisSetWriter.o PFunctionWriter.o version.o -o bsw bsw.cpp $(CPPFLAGS) $(LDFLAGS)
 
 lw: lw.cpp version.o
-	$(CXX) version.o -o lw lw.cpp $(CPPFLAGS) -lboost_filesystem -lboost_system -lboost_program_options -lboost_regex
+	$(CXX) version.o -o lw lw.cpp $(CPPFLAGS) $(LDFLAGS)
 
 clean: 
 	rm -f *.o bsw fw lw version.cc

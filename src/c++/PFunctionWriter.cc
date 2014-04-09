@@ -8,6 +8,7 @@
 #include<vector>
 #include<time.h>
 #include<cstdlib>
+#include<stdexcept>
 
 //#include <boost/property_tree/ptree.hpp>
 //#include <boost/property_tree/json_parser.hpp>
@@ -15,6 +16,8 @@
 #include "json_spirit/json_spirit_writer_template.h"
 
 #include <ginac/ginac.h>    // compile with: -lcln -lginac
+
+#include<boost/regex.hpp>
 
 #include "IntegrationTools/writer/PFunctionWriter.hh"
 #include "IntegrationTools/version.hh"
@@ -156,6 +159,40 @@ namespace PRISMS
     }
     */
     
+    std::string PFunctionWriter::sym2string( const std::string &f)
+    {
+        // read 'f' into a GiNaC expression 'symf', 
+        //    using the variables names already given
+        GiNaC::symtab table;
+        GiNaC::symtab all_symbol_table;
+        std::vector<GiNaC::symbol> symvar(_var_name.size());
+        
+        for( int i=0; i<_var_name.size(); i++)
+        {
+            symvar[i] = GiNaC::symbol( "var[" + itos(i) + "]");
+            table[_var_name[i]] = symvar[i];
+        }
+        
+        GiNaC::parser reader(table, true);
+        GiNaC::ex symf;
+        
+        try
+        {
+            symf = reader(f);
+        }
+        catch (std::invalid_argument& err)
+        {
+            throw err;
+        }
+        
+        
+        // use 'symf' to generate c code string for f
+        
+        std::ostringstream ss;
+        ss << GiNaC::csrc_double << symf;    
+        return ss.str();
+    }
+    
     void PFunctionWriter::sym2code( const std::string &f, std::ostream &sout)
     {
         std::cout << "Input f = " << f << std::endl;
@@ -237,19 +274,34 @@ namespace PRISMS
         
     }
     
+    /// Read JSON string, parse into function and condition expressions, write to sout
+    ///
+    ///   Format: list of Piece objects: [{piece1}, {piece2}, ...]
+    ///           Piece object: {"func":"expression", "cond": [cond1, cond2, ...]}
+    ///           Condition array: ["lhs expression", "operation", "rhs expression"]
+    ///           Possible operatoins: 
+    ///              <  : less than
+    ///              <= : less than or equal to
+    ///              >  : greater than
+    ///              >= : greater than or equal to
+    ///              == or = : equal to
+    ///              != or ~= : not equal to
+    ///
+    ///   Format example: 
+    ///   '[ { "func": "0", 
+    ///        "cond": [ ["x<0"] ] }, 
+    ///      { "func": "pow(x,2)", 
+    ///        "cond":["x >= 0", "x<1"] }, 
+    ///      { "func": "2x",  
+    ///        "cond":["x >= 1"] } 
+    ///    ]'
+    ///
+    ///    Translates to:
+    ///      f(x) = 0 if x<0; x^2 if 0<=x<1; and 2x if 1<=x 
+    
     void PFunctionWriter::piecewise2code( const std::string &f, std::ostream &sout)
     {
-        /*namespace pt = boost::property_tree;
-        std::istringstream ss(f);
-        
-        pt::ptree pieces;
-        
-        // read JSON string 'f'
-        pt::read_json(ss, pieces);
-        
-        pt::write_json(std::cout, pieces);
-        */
-        
+        // read JSON
         json_spirit::mValue pieces;
         json_spirit::read_string( f, pieces);
         
@@ -257,33 +309,160 @@ namespace PRISMS
         json_spirit::write_stream( pieces, std::cout);
         std::cout << "\n";
         
-        // write each function piece (region)
+        // remember the piecewise function's name
+        std::string piecewise_funcname = _name;
+        
+        // remember which functions we want
+        bool piecewise_write_f = _write_f;
+        bool piecewise_write_grad = _write_grad;
+        bool piecewise_write_hess = _write_hess;
+        
+        // save a list of the condition operations
+        std::vector< std::vector<std::string> > operation( pieces.get_array().size(), std::vector<std::string>());
+        
+        // save a list of the condition names
+        std::vector< std::vector<std::string> > lhs_cond_name( pieces.get_array().size(), std::vector<std::string>());
+        std::vector< std::vector<std::string> > rhs_cond_name( pieces.get_array().size(), std::vector<std::string>());
+        
+        // save a list of the piece names
+        std::vector< std::string > piece_name;
+        
+        // write each function piece
         for( int i=0; i<pieces.get_array().size(); i++)
         {
+            std::cout << "\n++++++++++++++++++++++++++++" << std::endl;
+            std::cout << "Piece " << i << ": " << std::endl;
+        
+            std::string func, cond_name;
+            
+            // for this piece of the function
+            //   collect the function expression and the conditions array of arrays
+            json_spirit::mObject &piece = pieces.get_array()[i].get_obj();
+            func = piece["func"].get_str();
+            json_spirit::mArray all_cond = piece["cond"].get_array();
+            
+            // write this piece's function
+            //std::cout << "  Function: " << func << std::endl;
+            std::stringstream ss;
+            ss << i;
+            piece_name.push_back( _name + "_piece" + ss.str());
+            _name = piece_name.back();
+            sym2code(func, sout);
             
             
-            json_spirit::mObject &region = pieces.get_array()[i].get_obj();
-            std::string func = region["func"].get_str();
-            json_spirit::mArray all_cond = region["cond"].get_array();
-            //for( int j=0; j<region.size(); j++)
-            //{
-            //    std::cout << "i: " << i << "  j: " << j << "  name: " << region[j].name_ << std::endl;
-            //}
-            std::cout << "i: " << i << "  func: " << func << std::endl;
+            // write this piece's conditions
+            _write_f = true;
+            _write_grad = false;
+            _write_hess = false;
             for( int j=0; j<all_cond.size(); j++)
             {
-                json_spirit::mArray cond = all_cond[j].get_array();
-                std::string lhs = cond[0].get_str();
-                std::string operation = cond[1].get_str();
-                std::string rhs = cond[2].get_str();
-                std::cout << "    j: " << j << "  lhs: " << lhs << "  operation: " << operation << "  rhs: " << rhs << std::endl;
+                std::string cond, lhs, oper, rhs;
+                cond = all_cond[j].get_str();
+                
+                std::cout << "  Condition " << j << ": \'" << cond << "\'" << std::endl;
+                
+                parse_condition( cond, lhs, oper, rhs);
+                
+                std::cout << "     lhs: \'" << lhs << "\'" << std::endl;
+                std::cout << "     oper: \'" << oper << "\'" << std::endl;
+                std::cout << "     rhs: \'" << rhs << "\'" << std::endl;
+                
+                ss.str("");
+                ss << j;
+                cond_name = piece_name.back() + "_cond" + ss.str();
+                lhs_cond_name[i].push_back( cond_name + "_lhs");
+                rhs_cond_name[i].push_back( cond_name + "_lhs");
+                
+                // read the condition expressions and operation,
+                //   and write the condition expressions
+                write_basis_function(1, lhs_cond_name[i].back(), sym2string(lhs), sout); 
+                
+                operation[i].push_back(oper);
+                
+                write_basis_function(1, rhs_cond_name[i].back(), sym2string(rhs), sout);
+                
             }
             std::cout << std::endl;
-            //std::cout << "i: " << i << "  cond: " << region["cond"].get_str() << std::endl;
+            
+            _name = piecewise_funcname;
+            _write_f = piecewise_write_f;
+            _write_grad = piecewise_write_grad;
+            _write_hess = piecewise_write_hess;
+            
         }
         
         
-        // write the total piecewise function
+        std::cout << "Begin writing PPieceWiseFuncBase" << std::endl;
+        
+        
+        // write the PPieceWiseFuncBase piecewise function
+        int I = 1;
+        sout << indent(I) << "template< class VarContainer, class " << _outtype << ">\n";
+        sout << indent(I) << "class " << _name << " : public PPieceWiseFuncBase<class VarContainer, class " << _outtype << ">\n"; 
+        sout << indent(I) << "{\n";
+        sout << indent(I) << "public:\n";
+        I++;
+        
+        // write constructor
+        sout << indent(I) << _name << "()\n";
+        sout << indent(I) << "{\n";
+        I++;
+        
+        sout << indent(I) << "typedef Piece<VarContainer, " << _outtype << "> Reg;\n";
+        sout << indent(I) << "typedef Condition<VarContainer, " << _outtype << "> Cond;\n";
+        sout << indent(I) << "typedef PSimpleFunction<VarContainer, " << _outtype << "> psf;\n";
+        sout << indent(I) << "typedef PFunction<VarContainer, " << _outtype << "> pf;\n\n";
+            
+        sout << indent(I) << "std::vector<Cond> cond;\n\n";
+        
+        // write each piece here
+        for( int i=0; i< piece_name.size(); i++)
+        {
+        std::cout << "i: " << i << std::endl;
+        for( int j=0; j< lhs_cond_name[i].size(); j++)
+        {
+        std::cout << "  j: " << j << std::endl;
+        sout << indent(I) << "cond.push_back( Cond( psf("<< lhs_cond_name[i][j] << "()), \"" << operation[i][j] << "\", psf(" << rhs_cond_name[i][j] << "())));\n";
+        }
+        sout << indent(I) << "_piece.push_back( Reg( pf(" << piece_name[i] << "()), cond) );\n";
+        sout << indent(I) << "cond.clear();\n\n";
+        }
+        I--;
+        sout << indent(I) << "}\n";
+        
+        // close class
+        I--;
+        sout << indent(I) << "};\n\n\n";
+        
+        std::cout << "Finish writing PPieceWiseFuncBase" << std::endl;
+        
+    }
+    
+    void PFunctionWriter::parse_condition( const std::string &cond, std::string &lhs, std::string &oper, std::string &rhs)
+    {
+        std::vector< boost::regex> e;
+        e.push_back( boost::regex("(.*)(<=)(.*)") );
+        e.push_back( boost::regex("(.*)(>=)(.*)") );
+        e.push_back( boost::regex("(.*)(==)(.*)") );
+        e.push_back( boost::regex("(.*)(!=)(.*)") );
+        e.push_back( boost::regex("(.*)(~=)(.*)") );
+        e.push_back( boost::regex("(.*)(<)(.*)") );
+        e.push_back( boost::regex("(.*)(>)(.*)") );
+        e.push_back( boost::regex("(.*)(=)(.*)") );
+        boost::smatch match;
+        
+        for( int i=0; i<e.size(); i++)
+        {
+            if( boost::regex_search(cond, match, e[i]) )
+            {
+                lhs = std::string(match[1]);
+                oper = std::string(match[2]);
+                rhs = std::string(match[3]);
+                return;
+            }
+        }
+        
+        throw std::invalid_argument("Could not parse condition: " + cond);
     }
     
     /*
@@ -484,60 +663,81 @@ namespace PRISMS
         sout << indent(I) << "}\n\n";
         
         // write simplefunction getter
+        if( _write_f)
+        {
         sout << indent(I) << PSimpleFunctionTemplate + " simplefunction() const\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return " + PSimpleFunctionTemplate + "( *_val );\n";
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
+        if( _write_grad)
+        {
         sout << indent(I) << PSimpleFunctionTemplate + " grad_simplefunction(int di) const\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return " + PSimpleFunctionTemplate + "( *_grad_val[di] );\n";
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
+        if( _write_hess)
+        {
         sout << indent(I) << PSimpleFunctionTemplate + " hess_simplefunction(int di, int dj) const\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return " + PSimpleFunctionTemplate + "( *_hess_val[di][dj] );\n";
         I--;
         sout << indent(I) << "}\n\n";
-        
+        }
         
         
         // write operators
+        if( _write_f)
+        {
         sout << indent(I) << _outtype + " operator()(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return (*_val)(var);\n";
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
+        if( _write_grad)
+        {
         sout << indent(I) << _outtype + " grad(const " + instring + " &var, int di)\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return (*_grad_val[di])(var);\n";
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
+        if( _write_hess)
+        {
         sout << indent(I) << _outtype + " hess(const " + instring + " &var, int di, int dj)\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return (*_hess_val[di][dj])(var);\n";
         I--;
         sout << indent(I) << "}\n\n";
-        
+        }
         
         // write evals
+        if( _write_f)
+        {
         sout << indent(I) << "void eval(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "(*_val)(var);\n";
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
+        if( _write_grad)
+        {
         sout << indent(I) << "void eval_grad(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
@@ -545,7 +745,10 @@ namespace PRISMS
             sout << indent(I) << "(*_grad_val[" + itos(i) + "])(var);\n";
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
+        if( _write_hess)
+        {
         sout << indent(I) << "void eval_hess(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
@@ -554,29 +757,38 @@ namespace PRISMS
         sout << indent(I) << "(*_hess_val[" + itos(i) + "][" + itos(j) + "])(var);\n";
         I--;
         sout << indent(I) << "}\n\n";
-        
+        }
         
         // write getters
+        if( _write_f)
+        {
         sout << indent(I) << _outtype + " operator()() const\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return (*_val)();\n";
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
+        if( _write_grad)
+        {
         sout << indent(I) << _outtype + " grad(int di) const\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return (*_grad_val[di])();\n";
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
+        if( _write_hess)
+        {
         sout << indent(I) << _outtype + " hess(int di, int dj) const\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return (*_hess_val[di][dj])();\n";
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
         // write construct
         I--;
@@ -620,7 +832,7 @@ namespace PRISMS
         
         // close class
         I--;
-        sout << indent(I) << "};\n";
+        sout << indent(I) << "};\n\n\n";
         
         
     }
@@ -753,13 +965,18 @@ namespace PRISMS
         
         
         // write simplefunction getter
+        if( _write_f)
+        {
         sout << indent(I) << PSimpleFunctionTemplate + " simplefunction() const\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return " + PSimpleFunctionTemplate + "(" + _name + "_f());\n";
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
+        if( _write_grad)
+        {
         sout << indent(I) << PSimpleFunctionTemplate + " grad_simplefunction(int di) const\n";
         sout << indent(I) << "{\n";
         I++;
@@ -777,7 +994,10 @@ namespace PRISMS
         }
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
+        if( _write_hess)
+        {
         sout << indent(I) << PSimpleFunctionTemplate + " hess_simplefunction(int di, int dj) const\n";
         sout << indent(I) << "{\n";
         I++;
@@ -806,16 +1026,21 @@ namespace PRISMS
         }
         I--;
         sout << indent(I) << "}\n\n";
-        
+        }
         
         // write operators
+        if( _write_f)
+        {
         sout << indent(I) << _outtype + " operator()(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return _val = " + _f + ";\n";
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
+        if( _write_grad)
+        {
         sout << indent(I) << _outtype + " grad(const " + instring + " &var, int di)\n";
         sout << indent(I) << "{\n";
         I++;
@@ -833,7 +1058,10 @@ namespace PRISMS
         }
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
+        if( _write_hess)
+        {
         sout << indent(I) << _outtype + " hess(const " + instring + " &var, int di, int dj)\n";
         sout << indent(I) << "{\n";
         I++;
@@ -862,16 +1090,21 @@ namespace PRISMS
         }
         I--;
         sout << indent(I) << "}\n\n";
-        
+        }
         
         // write evals
+        if( _write_f)
+        {
         sout << indent(I) << "void operator()(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "_val = " + _f + ";\n";
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
+        if( _write_grad)
+        {
         sout << indent(I) << "void grad(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
@@ -879,7 +1112,10 @@ namespace PRISMS
             sout << indent(I) << "_grad_val[" + itos(i) + "] = " + _grad[i] + ";\n";
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
+        if( _write_hess)
+        {
         sout << indent(I) << "void hess(const " + instring + " &var)\n";
         sout << indent(I) << "{\n";
         I++;
@@ -888,29 +1124,38 @@ namespace PRISMS
         sout << indent(I) << "_hess_val[" + itos(i) + "][" + itos(j) + "] = " + _hess[i][j] + ";\n";
         I--;
         sout << indent(I) << "}\n\n";
-        
+        }
         
         // write getters
+        if( _write_f)
+        {
         sout << indent(I) << _outtype + " operator()() const\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return _val;\n";
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
+        if( _write_grad)
+        {
         sout << indent(I) << _outtype + " grad(int di) const\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return _grad_val[di];\n";
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
+        if( _write_hess)
+        {
         sout << indent(I) << _outtype + " hess(int di, int dj) const\n";
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return _hess_val[di][dj];\n";
         I--;
         sout << indent(I) << "}\n\n";
+        }
         
         // write construct
         I--;
@@ -945,7 +1190,7 @@ namespace PRISMS
         
         // close class
         I--;
-        sout << indent(I) << "};\n";
+        sout << indent(I) << "};\n\n\n";
         
     }
     

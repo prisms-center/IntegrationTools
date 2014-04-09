@@ -1,42 +1,40 @@
 
-#ifndef Region_HH
-#define Region_HH
+#ifndef Piece_HH
+#define Piece_HH
 
 #include<iostream>
 #include<vector>
 
 #include "../pfunction/PFunction.hh"
 #include "./Condition.hh"
-#include "./SimpleRegion.hh"
+#include "./SimplePiece.hh"
 
 namespace PRISMS
 {   
     
-    /// Class to contain a Function and the region in which it is valid.
+    /// Class to contain a Function and the piece in which it is valid.
     /// 
-    ///   This can be evaluated in or out of the region in which it is declared valid
+    ///   This can be evaluated in or out of the piece in which it is declared valid
     ///
     template< class VarContainer, class OutType>
-    class Region : public PFuncBase<class VarContainer, class OutType> 
+    class Piece : public PFuncBase<class VarContainer, class OutType> 
     {
         protected:
         
-        OutType _zero;
         PFunction<VarContainer, OutType> _expr;
         std::vector< Condition<VarContainer, OutType> > _condition;
         
         public:
-        Region( const PFunction<VarContainer, OutType> &RHS, const std::vector<Condition<VarContainer, OutType> &condition, const OutType &zero)
+        Piece( const PFunction<VarContainer, OutType> &expr, const std::vector<Condition<VarContainer, OutType> &condition)
         {
-            _expr = RHS;
+            _expr = expr;
             _condition = condition;
-            _zero = zero;
             _name = _expr._name;
             _var_name = _expr._var_name;
             _var_description = _expr._var_description;
         }
         
-        bool in_region( const VarContainer &var) const
+        bool in_piece( const VarContainer &var) const
         {
             for( int i=0; i<_condition.size(); i++)
             {
@@ -46,30 +44,30 @@ namespace PRISMS
             return true;
         }
         
-        virtual Region<VarContainer, OutType> *clone() const
+        virtual Piece<VarContainer, OutType> *clone() const
         {
-            return new Region<VarContainer, OutType>(*this);
+            return new Piece<VarContainer, OutType>(*this);
         }
         
-        virtual SimpleRegion<VarContainer, OutType> simplefunction() const
+        virtual SimplePiece<VarContainer, OutType> simplefunction() const
         {
-            return SimpleRegion<VarContainer, OutType>(_expr.simplefunction, _condition, _zero);
+            return SimplePiece<VarContainer, OutType>(_expr.simplefunction, _condition, _zero);
         }
         
-        virtual SimpleRegion<VarContainer, OutType> grad_simplefunction(int di) const
+        virtual SimplePiece<VarContainer, OutType> grad_simplefunction(int di) const
         {
-            return SimpleRegion<VarContainer, OutType>(_expr.grad_simplefunction(di), _condition, _zero);
+            return SimplePiece<VarContainer, OutType>(_expr.grad_simplefunction(di), _condition, _zero);
         }
         
-        virtual SimpleRegion<VarContainer, OutType> hess_simplefunction(int di, int dj) const
+        virtual SimplePiece<VarContainer, OutType> hess_simplefunction(int di, int dj) const
         {
-            return SimpleRegion<VarContainer, OutType>(_expr.hess_simplefunction(di,dj), _condition, _zero);
+            return SimplePiece<VarContainer, OutType>(_expr.hess_simplefunction(di,dj), _condition, _zero);
         }
 
         // ----------------------------------------------------------
         // Use these functions if you want to evaluate a single value
         
-        /// These will return '_expr' evaluated anywhere. Must check in_region first. We
+        /// These will return '_expr' evaluated anywhere. Must check in_piece first. We
         ///    don't check it here to avoid double checking when evaluating PPieceWiseFuncBase
         ///
         virtual OutType operator()(const VarContainer &var)

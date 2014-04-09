@@ -9,6 +9,9 @@ test : $(PLIB)/MyFunc.hh $(PLIB)/Monomial.hh $(PLIB)/Chebyshev.hh $(PLIB)/PLibra
 $(PLIB)/MyFunc.hh: 
 	fw -n "MyFunc" -v "x" "y" -d "x variable" "y variable"  --sym "x^3 + x^2*y + x*y^2 + y^3" --grad --hess -l $(PLIB)
 
+$(PLIB)/MyPieceWiseFunc.hh: 
+	fw -n "MyPieceWiseFunc" -v "x" "y" -d "x variable" "y variable"  --piecewise '[ { "func": "sqrt(pow(x,2) + pow(y,2))", "cond":[ ["pow(x,2) + pow(y,2)", "lt", "1.0"] ] }, { "func": "pow(x,2)", "cond":[["x", "ge", "0"], ["x", "lt", "1"]] }, { "func": "1",  "cond":[  ["x", "ge", "1"] ]' --grad --hess -l $(PLIB)
+
 $(PLIB)/Monomial.hh:
 	bsw -n "Monomial" -d "Monomials up to 30" -v "x" --index "i" -e "x^i" -m 30 --grad --hess -l $(PLIB)
 

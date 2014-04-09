@@ -7,49 +7,77 @@
 #include<stdexcept>
 
 #include "../pfunction/PFuncBase.hh"
-#include "./SimpleRegion.hh"
+#include "./SimplePiece.hh"
 #include "./PPieceWiseSimpleBase.hh"
-#include "./Region.hh"
+#include "./Piece.hh"
 
 namespace PRISMS
 {   
     
     /// Class to define a PieceWise Function
     /// 
-    ///   Contains a vector of 'Region'. Throws a domain_error if it 
-    ///   is evaluated outside of the valid domain of any region.
+    ///   Contains a vector of 'Piece'. Throws a domain_error if it 
+    ///   is evaluated outside of the valid domain of any piece.
     ///
+    
+    template< class VarContainer, class OutType>
+    class my_piecewise_func : public PPieceWiseFuncBase<class VarContainer, class OutType> 
+    {
+        public:
+        
+        my_piecewise_func()
+        {
+            typedef Piece<VarContainer, double> Reg;
+            typedef Condition<VarContainer, double> Cond;
+            typedef PSimpleFunction<VarContainer, double> psf;
+            typedef PFunction<VarContainer, double> pf;
+            
+            std::vector<Cond> cond;
+            
+            // for each piece:
+            
+            // construct conditions
+            cond.push_back( Cond( psf(my_piecewise_func_piece0_cond0_lhs()), "lt", psf(my_piecewise_func_piece0_cond0_rhs())));
+            cond.push_back( Cond( psf(my_piecewise_func_piece0_cond1_lhs()), "lt", psf(my_piecewise_func_piece0_cond1_rhs())));
+            
+            // add piece
+            _piece.push_back( Reg( pf(my_piecewise_func_piece0()), cond) );
+            cond.clear();
+        }
+        
+    }
+    
     template< class VarContainer, class OutType>
     class PPieceWiseFuncBase : public PFuncBase<class VarContainer, class OutType> 
     {
         public:
         
-        std::vector<Region<VarContainer, OutType> > _region;
+        std::vector<Piece<VarContainer, OutType> > _piece;
         
-        PPieceWiseFuncBase( const std::vector<Region<VarContainer, OutType> > &region)
+        PPieceWiseFuncBase( const std::vector<Piece<VarContainer, OutType> > &piece)
         {
-            _region = region;
+            _piece = piece;
         }
         
-        bool in_region( const VarContainer &var) const
+        bool in_piece( const VarContainer &var) const
         {
-            for( int i=0; i<_region.size(); i++)
+            for( int i=0; i<_piece.size(); i++)
             {
-                if( _region[i].in_region(var) )
+                if( _piece[i].in_piece(var) )
                     return true;
             }
             return false;
         }
         
-        int region(const VarContainer &var)
+        int piece(const VarContainer &var)
         {
-            for( int i=0; i<_region.size(); i++)
+            for( int i=0; i<_piece.size(); i++)
             {
-                if( _region[i].in_region(var))
+                if( _piece[i].in_piece(var))
                     return i;
             }
             
-            throw std::domain_error("PPieceWiseFuncBase: Not in any region");
+            throw std::domain_error("PPieceWiseFuncBase: Not in any piece");
         }
         
         virtual PPieceWiseFuncBase<VarContainer, OutType> *clone() const
@@ -59,38 +87,38 @@ namespace PRISMS
         
         virtual PPieceWiseSimpleBase<VarContainer, OutType> simplefunction() const
         {
-            std::vector<SimpleRegion<VarContainer, OutType> > region;
+            std::vector<SimplePiece<VarContainer, OutType> > piece;
             
-            for( int i=0; i<_region.size(); i++)
+            for( int i=0; i<_piece.size(); i++)
             {
-                region.push_back( _region.simplefunction());
+                piece.push_back( _piece.simplefunction());
             }
             
-            return PPieceWiseSimpleBase<VarContainer, OutType>(region);
+            return PPieceWiseSimpleBase<VarContainer, OutType>(piece);
         }
         
         virtual PPieceWiseSimpleBase<VarContainer, OutType> grad_simplefunction(int di) const
         {
-            std::vector<SimpleRegion<VarContainer, OutType> > region;
+            std::vector<SimplePiece<VarContainer, OutType> > piece;
             
-            for( int i=0; i<_region.size(); i++)
+            for( int i=0; i<_piece.size(); i++)
             {
-                region.push_back( _region.grad_simplefunction(di));
+                piece.push_back( _piece.grad_simplefunction(di));
             }
             
-            return PPieceWiseSimpleBase<VarContainer, OutType>(region);
+            return PPieceWiseSimpleBase<VarContainer, OutType>(piece);
         }
         
         virtual PPieceWiseSimpleBase<VarContainer, OutType> hess_simplefunction(int di, int dj) const
         {
-            std::vector<SimpleRegion<VarContainer, OutType> > region;
+            std::vector<SimplePiece<VarContainer, OutType> > piece;
             
-            for( int i=0; i<_region.size(); i++)
+            for( int i=0; i<_piece.size(); i++)
             {
-                region.push_back( _region.hess_simplefunction(di, dj) );
+                piece.push_back( _piece.hess_simplefunction(di, dj) );
             }
             
-            return PPieceWiseSimpleBase<VarContainer, OutType>(region);
+            return PPieceWiseSimpleBase<VarContainer, OutType>(piece);
         }
 
         // ----------------------------------------------------------
@@ -98,66 +126,66 @@ namespace PRISMS
         
         virtual OutType operator()(const VarContainer &var)
         {
-            for( int i=0; i<_region.size(); i++)
+            for( int i=0; i<_piece.size(); i++)
             {
-                if( _region[i].in_region(var))
+                if( _piece[i].in_piece(var))
                     return _expr(var);
             }
             
-            throw std::domain_error("PPieceWiseFuncBase: Not in any region");
+            throw std::domain_error("PPieceWiseFuncBase: Not in any piece");
         }
         virtual OutType grad(const VarContainer &var, int di)
         {
-            for( int i=0; i<_region.size(); i++)
+            for( int i=0; i<_piece.size(); i++)
             {
-                if( _region[i].in_region(var))
+                if( _piece[i].in_piece(var))
                     return _expr.grad(var, di);
             }
             
-            throw std::domain_error("PPieceWiseFuncBase: Not in any region");
+            throw std::domain_error("PPieceWiseFuncBase: Not in any piece");
         }
         virtual OutType hess(const VarContainer &var, int di, int dj)
         {
-            for( int i=0; i<_region.size(); i++)
+            for( int i=0; i<_piece.size(); i++)
             {
-                if( _region[i].in_region(var))
+                if( _piece[i].in_piece(var))
                     return _expr.hess(var, di, dj);
             }
             
-            throw std::domain_error("PPieceWiseFuncBase: Not in any region");
+            throw std::domain_error("PPieceWiseFuncBase: Not in any piece");
         }
 
         // ----------------------------------------------------------
         // Use these functions to evaluate several values, then use 'get' methods to access results
         virtual void eval(const VarContainer &var)
         {
-            for( int i=0; i<_region.size(); i++)
+            for( int i=0; i<_piece.size(); i++)
             {
-                if( _region[i].in_region(var))
+                if( _piece[i].in_piece(var))
                     return _expr(var);
             }
             
-            throw std::domain_error("PPieceWiseFuncBase: Not in any region");
+            throw std::domain_error("PPieceWiseFuncBase: Not in any piece");
         }
         virtual void eval_grad(const VarContainer &var)
         {
-            for( int i=0; i<_region.size(); i++)
+            for( int i=0; i<_piece.size(); i++)
             {
-                if( _region[i].in_region(var))
+                if( _piece[i].in_piece(var))
                     return _expr.eval_grad(var);
             }
             
-            throw std::domain_error("PPieceWiseFuncBase: Not in any region");
+            throw std::domain_error("PPieceWiseFuncBase: Not in any piece");
         }
         virtual void eval_hess(const VarContainer &var)
         {
-            for( int i=0; i<_region.size(); i++)
+            for( int i=0; i<_piece.size(); i++)
             {
-                if( _region[i].in_region(var))
+                if( _piece[i].in_piece(var))
                     return _expr.eval_hess(var);
             }
             
-            throw std::domain_error("PPieceWiseFuncBase: Not in any region");
+            throw std::domain_error("PPieceWiseFuncBase: Not in any piece");
         }
         
         /// These don't recheck the domain

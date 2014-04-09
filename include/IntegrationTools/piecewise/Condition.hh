@@ -38,27 +38,27 @@ namespace PRISMS
         
         static COMPARISON get_operation( std::string operation)
         {
-            if(operation == "gt" || operation == "GT")
+            if(operation == ">" || operation == "gt" || operation == "GT")
             {
                 return GT;
             }
-            else if(operation == "ge" || operation == "GE")
+            else if(operation == ">=" || operation == "ge" || operation == "GE")
             {
                 return GE;
             }
-            else if(operation == "lt" || operation == "LT")
+            else if(operation == "<" || operation == "lt" || operation == "LT")
             {
                 return LT;
             }
-            else if(operation == "le" || operation == "LE")
+            else if(operation == "<=" || operation == "le" || operation == "LE")
             {
                 return LE;
             }
-            else if(operation == "eq" || operation == "EQ")
+            else if(operation == "=" || operation == "==" || operation == "eq" || operation == "EQ")
             {
                 return EQ;
             }
-            else if(operation == "ne" || operation == "NE")
+            else if(operation == "~=" || operation == "!=" || operation == "ne" || operation == "NE")
             {
                 return NE;
             }

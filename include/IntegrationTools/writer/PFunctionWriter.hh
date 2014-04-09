@@ -88,6 +88,12 @@ namespace PRISMS
         
         std::string indent(int step) const;
         
+        // generate c string for symbolic expression string 'f'
+        std::string sym2string( const std::string &f);
+        
+        // parse a relational expression into a lhs expression, relational operator, and rhs expression
+        void parse_condition( const std::string &cond, std::string &lhs, std::string &oper, std::string &rhs);
+        
         void write_basis_function(int I, const std::string &name, const std::string &f, std::ostream &sout) const;
         
         // use polymorphic basis functions

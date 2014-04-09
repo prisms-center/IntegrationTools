@@ -1,6 +1,6 @@
 
-#ifndef SimpleRegion_HH
-#define SimpleRegion_HH
+#ifndef SimplePiece_HH
+#define SimplePiece_HH
 
 #include<iostream>
 #include<vector>
@@ -10,34 +10,32 @@
 
 namespace PRISMS
 {   
-    /// Class to contain a SimpleFunction and the region in which it is valid.
+    /// Class to contain a SimpleFunction and the piece in which it is valid.
     /// 
-    ///   This can be evaluated in or out of the region in which it is declared valid
+    ///   This can be evaluated in or out of the piece in which it is declared valid
     ///
     template< class VarContainer, class OutType>
-    class SimpleRegion : public PSimpleBase<class VarContainer, class OutType> 
+    class SimplePiece : public PSimpleBase<class VarContainer, class OutType> 
     {
         protected:
         
-        OutType _zero;
         PSimpleFunction<VarContainer, OutType> _expr;
         std::vector< Condition<VarContainer, OutType> > _condition;
         
         public:
         
-        SimpleRegion( const PSimpleFunction<VarContainer, OutType> &RHS, const std::vector<Condition<VarContainer, OutType> &condition, const OutType &zero)
+        SimplePiece( const PSimpleFunction<VarContainer, OutType> &expr, const std::vector<Condition<VarContainer, OutType> &condition)
         {
-            _expr = RHS;
-            _zero = zero;
+            _expr = expr;
             _name = _expr._name;
         }
         
-        virtual SimpleRegion<VarContainer, OutType>* clone() const
+        virtual SimplePiece<VarContainer, OutType>* clone() const
         {
-            return new SimpleRegion<VarContainer, OutType>(*this);
+            return new SimplePiece<VarContainer, OutType>(*this);
         }
         
-        bool in_region( const VarContainer &var) const
+        bool in_piece( const VarContainer &var) const
         {
             for( int i=0; i<_condition.size(); i++)
             {
@@ -49,7 +47,7 @@ namespace PRISMS
         
         private:
         
-        /// This will return '_expr' evaluated anywhere. Must check in_region first. We
+        /// This will return '_expr' evaluated anywhere. Must check in_piece first. We
         ///    don't check it here to avoid double checking when evaluating PPieceWiseSimpleBase
         ///
         virtual OutType eval( const VarContainer &var) 
