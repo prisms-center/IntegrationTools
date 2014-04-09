@@ -408,7 +408,7 @@ namespace PRISMS
         sout << indent(I) << "{\n";
         I++;
         
-        sout << indent(I) << "typedef Piece<VarContainer, " << _outtype << "> Reg;\n";
+        sout << indent(I) << "typedef Piece<VarContainer, " << _outtype << "> Pc;\n";
         sout << indent(I) << "typedef Condition<VarContainer, " << _outtype << "> Cond;\n";
         sout << indent(I) << "typedef PSimpleFunction<VarContainer, " << _outtype << "> psf;\n";
         sout << indent(I) << "typedef PFunction<VarContainer, " << _outtype << "> pf;\n\n";
@@ -424,7 +424,7 @@ namespace PRISMS
         std::cout << "  j: " << j << std::endl;
         sout << indent(I) << "cond.push_back( Cond( psf("<< lhs_cond_name[i][j] << "()), \"" << operation[i][j] << "\", psf(" << rhs_cond_name[i][j] << "())));\n";
         }
-        sout << indent(I) << "_piece.push_back( Reg( pf(" << piece_name[i] << "()), cond) );\n";
+        sout << indent(I) << "_piece.push_back( Pc( pf(" << piece_name[i] << "()), cond) );\n";
         sout << indent(I) << "cond.clear();\n\n";
         }
         I--;

@@ -19,34 +19,6 @@ namespace PRISMS
     ///   Contains a vector of 'Piece'. Throws a domain_error if it 
     ///   is evaluated outside of the valid domain of any piece.
     ///
-    
-    template< class VarContainer, class OutType>
-    class my_piecewise_func : public PPieceWiseFuncBase<class VarContainer, class OutType> 
-    {
-        public:
-        
-        my_piecewise_func()
-        {
-            typedef Piece<VarContainer, double> Reg;
-            typedef Condition<VarContainer, double> Cond;
-            typedef PSimpleFunction<VarContainer, double> psf;
-            typedef PFunction<VarContainer, double> pf;
-            
-            std::vector<Cond> cond;
-            
-            // for each piece:
-            
-            // construct conditions
-            cond.push_back( Cond( psf(my_piecewise_func_piece0_cond0_lhs()), "lt", psf(my_piecewise_func_piece0_cond0_rhs())));
-            cond.push_back( Cond( psf(my_piecewise_func_piece0_cond1_lhs()), "lt", psf(my_piecewise_func_piece0_cond1_rhs())));
-            
-            // add piece
-            _piece.push_back( Reg( pf(my_piecewise_func_piece0()), cond) );
-            cond.clear();
-        }
-        
-    }
-    
     template< class VarContainer, class OutType>
     class PPieceWiseFuncBase : public PFuncBase<class VarContainer, class OutType> 
     {
