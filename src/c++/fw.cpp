@@ -45,7 +45,7 @@ const size_t ERROR_UNHANDLED_EXCEPTION = 2;
 int main(int argc, char *argv[])
 {
     // input variables
-    std::string name, location, intype, outtype, sym;
+    std::string name, location, intype, outtype, sym, piecewise;
     std::vector< std::string> var_name, var_desc;
     
     namespace po = boost::program_options;
@@ -62,7 +62,8 @@ int main(int argc, char *argv[])
           ("version", "Write version info")
           ("name,n", po::value<std::string>(&name)->required(), "Function name") 
           ("location,l", po::value<std::string>(&location)->default_value("."), "Location to write function") 
-          ("sym", po::value<std::string>(&sym)->required()  , "Symbolic expression") 
+          ("sym", po::value<std::string>(&sym)  , "Symbolic expression") 
+          ("piecewise", po::value<std::string>(&piecewise)  , "Expressions defining a piecewise function") 
           ("var,v", po::value<std::vector<std::string> >(&var_name)->multitoken()->required(), "Variable names")
           ("description,d", po::value<std::vector<std::string> >(&var_desc)->multitoken()->required(), "Variable descriptions")
           ("grad", "Include gradient calculation")
@@ -94,6 +95,11 @@ int main(int argc, char *argv[])
                 std::cout << "  url: " << PRISMS::IntegrationTools_repo_url() << std::endl; 
                 std::cout << "  commit: " << PRISMS::IntegrationTools_commit_id() << std::endl; 
                 return SUCCESS; 
+            }
+            
+            if( !(vm.count("sym") != vm.count("piecewise")) )
+            {
+                throw po::error("Error writing function. Either choose (--sym) or (--piecewise).");
             } 
 
             po::notify(vm); // throws on error, so do after help in case 
@@ -149,6 +155,28 @@ int main(int argc, char *argv[])
             return 1;
         }
         writer.foot(outfile);
+    }
+    else if (vm.count("piecewise"))
+    {
+        writer.head(outfile);
+        try
+        {
+            writer.piecewise2code( piecewise, outfile);
+        }
+        catch(std::invalid_argument& err)
+        {
+            std::cout << "Error parsing piecewise function expression." << std::endl;
+            std::cout << "  Unknown symbolic variable(s) in input expression." << std::endl;
+            std::cout << "  " << err.what() << std::endl;
+            outfile.close();
+            fs::remove(fileloc);
+            return 1;
+        }
+        writer.foot(outfile);
+    }
+    else
+    {
+        throw po::error("Error writing function. Either choose (--sym) or (--piecewise).");
     }
     
     return 0;

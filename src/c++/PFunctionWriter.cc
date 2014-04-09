@@ -8,6 +8,12 @@
 #include<vector>
 #include<time.h>
 #include<cstdlib>
+
+//#include <boost/property_tree/ptree.hpp>
+//#include <boost/property_tree/json_parser.hpp>
+#include "json_spirit/json_spirit_reader_template.h"
+#include "json_spirit/json_spirit_writer_template.h"
+
 #include <ginac/ginac.h>    // compile with: -lcln -lginac
 
 #include "IntegrationTools/writer/PFunctionWriter.hh"
@@ -229,6 +235,55 @@ namespace PRISMS
         
         code_poly( sout);
         
+    }
+    
+    void PFunctionWriter::piecewise2code( const std::string &f, std::ostream &sout)
+    {
+        /*namespace pt = boost::property_tree;
+        std::istringstream ss(f);
+        
+        pt::ptree pieces;
+        
+        // read JSON string 'f'
+        pt::read_json(ss, pieces);
+        
+        pt::write_json(std::cout, pieces);
+        */
+        
+        json_spirit::mValue pieces;
+        json_spirit::read_string( f, pieces);
+        
+        std::cout << "\n";
+        json_spirit::write_stream( pieces, std::cout);
+        std::cout << "\n";
+        
+        // write each function piece (region)
+        for( int i=0; i<pieces.get_array().size(); i++)
+        {
+            
+            
+            json_spirit::mObject &region = pieces.get_array()[i].get_obj();
+            std::string func = region["func"].get_str();
+            json_spirit::mArray all_cond = region["cond"].get_array();
+            //for( int j=0; j<region.size(); j++)
+            //{
+            //    std::cout << "i: " << i << "  j: " << j << "  name: " << region[j].name_ << std::endl;
+            //}
+            std::cout << "i: " << i << "  func: " << func << std::endl;
+            for( int j=0; j<all_cond.size(); j++)
+            {
+                json_spirit::mArray cond = all_cond[j].get_array();
+                std::string lhs = cond[0].get_str();
+                std::string operation = cond[1].get_str();
+                std::string rhs = cond[2].get_str();
+                std::cout << "    j: " << j << "  lhs: " << lhs << "  operation: " << operation << "  rhs: " << rhs << std::endl;
+            }
+            std::cout << std::endl;
+            //std::cout << "i: " << i << "  cond: " << region["cond"].get_str() << std::endl;
+        }
+        
+        
+        // write the total piecewise function
     }
     
     /*

@@ -33,7 +33,7 @@ namespace PRISMS
     template< class InType, class OutType, class VarContainer, class IndexContainer>
     class PSeriesFunction : public PFuncBase<VarContainer, OutType>
     {
-    public:
+    protected:
         
         // coefficient tensor
         PNDArray<OutType> _coeff;
@@ -49,7 +49,7 @@ namespace PRISMS
         std::vector<OutType> _grad_val;
         std::vector< std::vector< OutType> > _hess_val;
         
-        
+    public:    
         PSeriesFunction(OutType zero, OutType identity)
         {
             _zero_val = zero;

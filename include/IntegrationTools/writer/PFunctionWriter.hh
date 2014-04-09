@@ -67,6 +67,7 @@ namespace PRISMS
         //   Different styles are be possible:
         
         void sym2code( const std::string &f, std::ostream &sout);
+        void piecewise2code( const std::string &f, std::ostream &sout);
         
         void code( 
           const std::string &f, 
