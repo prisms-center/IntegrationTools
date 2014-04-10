@@ -38,6 +38,13 @@ std::ostream& operator<<(std::ostream &sout, const std::vector<T> &v)
     return sout;
 }
 
+void print_examples( std::ostream &sout)
+{
+    sout << "\n\nExamples: " << std::endl;
+    sout << "fw -n \"MyFunc\" -v \"x\" \"y\" -d \"x variable\" \"y variable\"  --sym \"x^3 + x^2*y + x*y^2 + y^3\" --grad --hess -l \"/path/to/MyLibrary\"\n" << std::endl;
+    sout << "fw -n \"MyPieceWiseFunc\" -v \"x\" \"y\" -d \"x variable\" \"y variable\"  --piecewise \'[ { \"func\": \"pow(x,2) + pow(y,2)\", \"cond\":[\"pow(x,2) + pow(y,2)<0.5*0.5\"] }, { \"func\": \"sqrt(pow(x,2) + pow(y,2)) - 0.25\", \"cond\":[\"pow(x,2) + pow(y,2)>=0.5*0.5\"] } ]\' --grad --hess -l \"/path/to/MyLibrary\"\n" << std::endl;
+}
+
 const size_t ERROR_IN_COMMAND_LINE = 1; 
 const size_t SUCCESS = 0; 
 const size_t ERROR_UNHANDLED_EXCEPTION = 2; 
@@ -58,12 +65,12 @@ int main(int argc, char *argv[])
         /// Set command line options using boost program_options
         po::options_description desc("Options"); 
         desc.add_options() 
-          ("help", "Write help documentation")
+          ("help", "Write help documentation, including examples")
           ("version", "Write version info")
           ("name,n", po::value<std::string>(&name)->required(), "Function name") 
           ("location,l", po::value<std::string>(&location)->default_value("."), "Location to write function") 
           ("sym", po::value<std::string>(&sym)  , "Symbolic expression") 
-          ("piecewise", po::value<std::string>(&piecewise)  , "Expressions defining a piecewise function") 
+          ("piecewise", po::value<std::string>(&piecewise)  , "Expressions defining a piecewise function, listed in JSON") 
           ("var,v", po::value<std::vector<std::string> >(&var_name)->multitoken()->required(), "Variable names")
           ("description,d", po::value<std::vector<std::string> >(&var_desc)->multitoken()->required(), "Variable descriptions")
           ("grad", "Include gradient calculation")
@@ -82,7 +89,8 @@ int main(int argc, char *argv[])
             */ 
             if ( vm.count("help")  ) 
             { 
-                std::cout << "fw: Function Writer Usage" << std::endl << desc << std::endl; 
+                std::cout << "fw: Function Writer Usage" << std::endl << desc << std::endl;
+                print_examples(std::cout);
                 return SUCCESS; 
             } 
             
@@ -109,6 +117,7 @@ int main(int argc, char *argv[])
         { 
           std::cerr << "ERROR: " << e.what() << std::endl << std::endl; 
           std::cerr << desc << std::endl; 
+          //print_examples(std::cerr);
           return ERROR_IN_COMMAND_LINE; 
         }
     }
