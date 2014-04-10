@@ -1,0 +1,11 @@
+*.o
+test
+test_sym
+test_writer
+test_MyFunc
+test_funcderiv
+test_basissetwriter
+test_MyBasisSet
+test_PExtern
+MyFunc.hh
+MyBasisSet.hh
