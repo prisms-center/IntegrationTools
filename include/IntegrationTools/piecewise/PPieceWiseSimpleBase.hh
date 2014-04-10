@@ -17,11 +17,13 @@ namespace PRISMS
     ///   is evaluated outside of the valid domain of any piece.
     ///
     template< class VarContainer, class OutType>
-    class PPieceWiseSimpleBase : public PSimpleBase<class VarContainer, class OutType> 
+    class PPieceWiseSimpleBase : public PSimpleBase<VarContainer, OutType> 
     {
         public:
         
         std::vector<SimplePiece<VarContainer, OutType> > _piece;
+        
+        PPieceWiseSimpleBase() {}
         
         PPieceWiseSimpleBase( const std::vector<SimplePiece<VarContainer, OutType> > &piece)
         {
@@ -60,7 +62,7 @@ namespace PRISMS
             for( int i=0; i<_piece.size(); i++)
             {
                 if( _piece[i].in_piece(var))
-                    return _val = _piece[i](var);
+                    return this->_val = _piece[i](var);
             }
             
             throw std::domain_error("PPieceWiseSimpleBase: Not in any piece");

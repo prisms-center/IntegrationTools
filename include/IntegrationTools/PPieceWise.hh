@@ -1,5 +1,5 @@
 #include "piecewise/Condition.hh"
-#include "piecewise/SimpleRegion.hh"
+#include "piecewise/SimplePiece.hh"
 #include "piecewise/PPieceWiseSimpleBase.hh"
-#include "piecewise/Region.hh"
+#include "piecewise/Piece.hh"
 #include "piecewise/PPieceWiseFuncBase.hh"

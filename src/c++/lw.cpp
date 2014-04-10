@@ -112,9 +112,14 @@ public:
 
     std::vector<std::string> function_intype;
     std::vector<std::string> function_outtype;
-    std::vector<std::vector<std::vector<std::string> > > simplefunction; // [outtype][name0, name1, etc.]
-    std::vector<std::vector<std::vector<std::string> > > function; // [outtype][name0, name1, etc.]
-    std::vector<std::vector<std::vector<std::string> > > basis_set; // [intype][outtype][name0, name1, etc.]
+    
+    typedef std::vector<std::vector<std::vector<std::string> > > tri_vec_string;
+    
+    tri_vec_string simplefunction; // [outtype][name0, name1, etc.]
+    tri_vec_string function; // [outtype][name0, name1, etc.]
+    tri_vec_string pwsimplefunction; // [outtype][name0, name1, etc.]
+    tri_vec_string pwfunction; // [outtype][name0, name1, etc.]
+    tri_vec_string basis_set; // [intype][outtype][name0, name1, etc.]
     
     Collection(std::vector< std::string> dir)
     {
@@ -150,14 +155,35 @@ public:
         std::ifstream infile;
         infile.open(p.c_str());
         std::string line;
+        std::vector<tri_vec_string*> functiontype;
+        
         while(std::getline(infile, line))
         {
-            bool a = scanline_for_PSimpleBase(line);
-            bool b = scanline_for_PFuncBase(line);
-            bool c = scanline_for_PBasisSetBase(line);
+            
+            functiontype.clear();
+            functiontype.push_back( &simplefunction);
+            bool found = scanline_for_class(line, "PSimpleBase", functiontype);
+            
+            functiontype.clear();
+            functiontype.push_back( &function);
+            found = found || scanline_for_class(line, "PFuncBase", functiontype);
+            
+            functiontype.clear();
+            functiontype.push_back( &simplefunction);
+            functiontype.push_back( &pwsimplefunction);
+            found = found || scanline_for_class(line, "PPieceWiseSimpleBase", functiontype);
+            
+            functiontype.clear();
+            functiontype.push_back( &function);
+            functiontype.push_back( &pwfunction);
+            found = found || scanline_for_class(line, "PPieceWiseFuncBase", functiontype);
+            
+            functiontype.clear();
+            functiontype.push_back( &basis_set);
+            found = found || scanline_for_class(line, "PBasisSetBase", functiontype);
             
             // if p contains something, make sure to save p's filename
-            if( a || b || c)
+            if( found )
             {
                 if( std::find( filename.begin(), filename.end(), p.filename().string()) == filename.end() )
                     filename.push_back( p.filename().string());
@@ -167,7 +193,61 @@ public:
     
     }
     
-    bool scanline_for_PSimpleBase(const std::string &line)
+    // store the intype (add it to function_intype, but only if not already there)
+    //   return index into function_intype
+    int add_intype( const std::string &intype)
+    {
+        std::vector<std::string>::iterator intype_iter = std::find(function_intype.begin(), function_intype.end(), intype);
+        int in_index = intype_iter - function_intype.begin();
+        if( intype_iter == function_intype.end())
+        {
+            function_intype.push_back(intype);
+            
+            // resize function here
+            simplefunction.push_back(std::vector<std::vector<std::string> >(0) );
+            function.push_back(std::vector<std::vector<std::string> >(0) );
+            pwsimplefunction.push_back(std::vector<std::vector<std::string> >(0) );
+            pwfunction.push_back(std::vector<std::vector<std::string> >(0) );
+            basis_set.push_back(std::vector<std::vector<std::string> >(0) );
+            
+            for( int i=0; i<function_outtype.size(); i++)
+            {
+                simplefunction.back().push_back(std::vector<std::string>(0) );
+                function.back().push_back(std::vector<std::string>(0) );
+                pwsimplefunction.back().push_back(std::vector<std::string>(0) );
+                pwfunction.back().push_back(std::vector<std::string>(0) );
+                basis_set.back().push_back(std::vector<std::string>(0) );
+            }
+        }
+        
+        return in_index;
+    }
+            
+    // store the outtype (add it to function_outtype, but only if not already there)
+    //   return index into function_outtype
+    int add_outtype( const std::string &outtype)
+    {        
+        std::vector<std::string>::iterator outtype_iter = std::find(function_outtype.begin(), function_outtype.end(), outtype);
+        int out_index = outtype_iter - function_outtype.begin();
+        if( outtype_iter == function_outtype.end())
+        {
+            function_outtype.push_back(outtype);
+            
+            // resize function here
+            for( int i=0; i<simplefunction.size(); i++)
+            {
+                simplefunction[i].push_back( std::vector<std::string>(0) );
+                function[i].push_back( std::vector<std::string>(0) );
+                pwsimplefunction[i].push_back( std::vector<std::string>(0) );
+                pwfunction[i].push_back( std::vector<std::string>(0) );
+                basis_set[i].push_back( std::vector<std::string>(0) );
+            }
+        }
+        
+        return out_index;
+    }
+    
+    bool scanline_for_class(const std::string &line, const std::string &classname, std::vector<tri_vec_string*> &functiontype)
     {
         // want to match:
         //    "class" + (1+ whtspace) 
@@ -184,7 +264,7 @@ public:
         
         // return true if match found
         
-        boost::regex e("(class\\s+)(\\w*)(\\s*:\\s*public\\s+PSimpleBase\\s*<\\s*)(.*)(\\s*,\\s*)(.*)(\\s*>)");
+        boost::regex e("(class\\s+)(\\w*)(\\s*:\\s*public\\s+" + classname + "\\s*<\\s*)(.*)(\\s*,\\s*)(.*)(\\s*>)");
         boost::smatch match;
         std::vector<std::string>::iterator intype_iter, outtype_iter, name_iter;
         std::vector<std::string>* namevec;
@@ -193,243 +273,36 @@ public:
             
         if( boost::regex_search(line, match, e) )
         {
-            //std::cout << "begin scanline_for_PSimpleBase()" << std::endl;
+            //std::cout << "begin scanline_for_class()" << std::endl;
             //std::cout << line << std::endl;
-            //std::cout << "### FOUND PSimpleBase ###: ";
+            //std::cout << "### FOUND " + classname + " ###: ";
             //std::cout << "'" << match[2] << "' '" << match[4] << "' '" << match[6] << "'\n";
             
             name = std::string(match[2]);
             intype = std::string(match[4]);
             outtype = std::string(match[6]);
             
-            // store the intype (add it to function_intype, but only if not already there)
-            intype_iter = std::find(function_intype.begin(), function_intype.end(), intype);
-            in_index = intype_iter - function_intype.begin();
-            if( intype_iter == function_intype.end())
+            in_index = add_intype(intype);
+            out_index = add_outtype(outtype);
+            
+            for( int i=0; i<functiontype.size(); i++)
             {
-                function_intype.push_back(intype);
+                namevec = &((*functiontype[i])[ in_index][ out_index]);
                 
-                // resize function here
-                simplefunction.push_back(std::vector<std::vector<std::string> >(0) );
-                function.push_back(std::vector<std::vector<std::string> >(0) );
-                basis_set.push_back(std::vector<std::vector<std::string> >(0) );
-                
-                for( int i=0; i<function_outtype.size(); i++)
+                // error if name already exists
+                if( std::find( (*namevec).begin(), (*namevec).end(), name) != (*namevec).end())
                 {
-                    simplefunction.back().push_back(std::vector<std::string>(0) );
-                    function.back().push_back(std::vector<std::string>(0) );
-                    basis_set.back().push_back(std::vector<std::string>(0) );
+                    std::cout << "Error. Found the " + classname + " '" << name << "' with OutType='" << outtype << "' twice." << std::endl;
+                    std::cout << "   Names can not be repeated." << std::endl;
+                    std::cout << "   Sorry for the inconvenience, but you must not exclude one of these and retry." << std::endl;
+                    exit(1);
+                     
                 }
-            }
-            
-            // store the outtype (add it to function_outtype, but only if not already there)
-            outtype_iter = std::find(function_outtype.begin(), function_outtype.end(), outtype);
-            out_index = outtype_iter - function_outtype.begin();
-            if( outtype_iter == function_outtype.end())
-            {
-                function_outtype.push_back(outtype);
-                
-                // resize function here
-                for( int i=0; i<simplefunction.size(); i++)
+                else
                 {
-                    simplefunction[i].push_back( std::vector<std::string>(0) );
-                    function[i].push_back( std::vector<std::string>(0) );
-                    basis_set[i].push_back( std::vector<std::string>(0) );
+                    // store the name
+                    (*namevec).push_back(name);
                 }
-            }
-            
-            namevec = &simplefunction[ in_index][ out_index];
-            
-            // error if name already exists
-            if( std::find( (*namevec).begin(), (*namevec).end(), name) != (*namevec).end())
-            {
-                std::cout << "Error. Found the PSimpleFunction '" << name << "' with OutType='" << outtype << "' twice." << std::endl;
-                std::cout << "   Names can not be repeated." << std::endl;
-                std::cout << "   Sorry for the inconvenience, but you must not exclude one of these and retry." << std::endl;
-                exit(1);
-                 
-            }
-            else
-            {
-                // store the name
-                (*namevec).push_back(name);
-            }
-            
-            return true;
-        }
-        
-        return false;
-    }
-    
-    bool scanline_for_PFuncBase(const std::string &line)
-    {
-        // want to match:
-        //    "class" + (1+ whtspace) 
-        //    + classname 
-        //    + (0+ whtspace) + ":" + (0+ whtspace) + "public" + (1+ whtspace) +  "PFuncBase" + (0+ whtspace) + "<" + (0+ whtspace) 
-        //    + VarContainerType 
-        //    + (0+ whtspace) + "," + (0+ whtspace) 
-        //    + OutType 
-        //    + (0+ whtspace) + ">"
-        // and determine classname, OutType
-        
-        boost::regex e("(class\\s+)(\\w*)(\\s*:\\s*public\\s+PFuncBase\\s*<\\s*)(.*)(\\s*,\\s*)(.*)(\\s*>)");
-        boost::smatch match;
-        std::vector<std::string>::iterator intype_iter, outtype_iter, name_iter;
-        std::vector<std::string>* namevec;
-        std::string name, intype, outtype;
-        int in_index, out_index;
-        
-        if( boost::regex_search(line, match, e) )
-        {
-            //std::cout << "begin scanline_for_PFuncBase()" << std::endl;
-            //std::cout << line << std::endl;
-            //std::cout << "$$$ FOUND PFuncBase $$$: ";
-            //std::cout << "'" << match[2] << "' '" << match[4] << "' '" << match[6] << "'\n";
-            
-            name = std::string(match[2]);
-            intype = std::string(match[4]);
-            outtype = std::string(match[6]);
-            
-            // store the intype (add it to function_intype, but only if not already there)
-            intype_iter = std::find(function_intype.begin(), function_intype.end(), intype);
-            in_index = intype_iter - function_intype.begin();
-            if( intype_iter == function_intype.end())
-            {
-                function_intype.push_back(intype);
-                
-                // resize function here
-                simplefunction.push_back(std::vector<std::vector<std::string> >(0) );
-                function.push_back(std::vector<std::vector<std::string> >(0) );
-                basis_set.push_back(std::vector<std::vector<std::string> >(0) );
-                
-                for( int i=0; i<function_outtype.size(); i++)
-                {
-                    simplefunction.back().push_back(std::vector<std::string>(0) );
-                    function.back().push_back(std::vector<std::string>(0) );
-                    basis_set.back().push_back(std::vector<std::string>(0) );
-                }
-            }
-            
-            // store the outtype (add it to function_outtype, but only if not already there)
-            outtype_iter = std::find(function_outtype.begin(), function_outtype.end(), outtype);
-            out_index = outtype_iter - function_outtype.begin();
-            if( outtype_iter == function_outtype.end())
-            {
-                function_outtype.push_back(outtype);
-                
-                // resize function here
-                for( int i=0; i<function.size(); i++)
-                {
-                    simplefunction[i].push_back( std::vector<std::string>(0) );
-                    function[i].push_back( std::vector<std::string>(0) );
-                    basis_set[i].push_back( std::vector<std::string>(0) );
-                }
-            }
-            
-            namevec = &function[ in_index][ out_index];
-            
-            // error if name already exists
-            if( std::find( (*namevec).begin(), (*namevec).end(), name) != (*namevec).end())
-            {
-                std::cout << "Error. Found the PFunction '" << name << "' with OutType='" << outtype << "' twice." << std::endl;
-                std::cout << "   Names can not be repeated." << std::endl;
-                std::cout << "   Sorry for the inconvenience, but you must not exclude one of these and retry." << std::endl;
-                exit(1);
-                 
-            }
-            else
-            {
-                (*namevec).push_back(name);
-            }
-            
-            return true;
-        }
-        
-        return false;
-    }
-    
-    bool scanline_for_PBasisSetBase(const std::string &line)
-    {
-        // want to match:
-        //    "class" + (1+ whtspace) 
-        //    + classname 
-        //    + (0+ whtspace) + ":" + (0+ whtspace) + "public" + (1+ whtspace) +  "PFuncBase" + (0+ whtspace) + "<" + (0+ whtspace) 
-        //    + InType 
-        //    + (0+ whtspace) + "," + (0+ whtspace) 
-        //    + OutType 
-        //    + (0+ whtspace) + ">"
-        // and determine classname, InType, OutType
-        
-        boost::regex e("(class\\s+)(\\w*)(\\s*:\\s*public\\s+PBasisSetBase\\s*<\\s*)(.*)(\\s*,\\s*)(.*)(\\s*>)");
-        boost::smatch match;
-        std::vector<std::string>::iterator intype_iter, outtype_iter, name_iter;
-        std::vector<std::string>* namevec;
-        std::string name, intype, outtype;
-        int in_index, out_index;
-            
-        if( boost::regex_search(line, match, e) )
-        {
-            //std::cout << "begin scanline_for_PBasisSetBase()" << std::endl;
-            //std::cout << line << std::endl;
-            //std::cout << "@@@ FOUND PSimpleBase @@@: ";
-            //std::cout << "'" << match[2] << "' '" << match[4] << "' '" << match[6] << "'\n";
-            
-            name = std::string(match[2]);
-            intype = std::string(match[4]);
-            outtype = std::string(match[6]);
-            
-            // store the intype (add it to function_intype, but only if not already there)
-            intype_iter = std::find(function_intype.begin(), function_intype.end(), intype);
-            in_index = intype_iter - function_intype.begin();
-            if( intype_iter == function_intype.end())
-            {
-                function_intype.push_back(intype);
-                
-                // resize function here
-                simplefunction.push_back(std::vector<std::vector<std::string> >(0) );
-                function.push_back(std::vector<std::vector<std::string> >(0) );
-                basis_set.push_back(std::vector<std::vector<std::string> >(0) );
-                
-                for( int i=0; i<function_outtype.size(); i++)
-                {
-                    simplefunction.back().push_back(std::vector<std::string>(0) );
-                    function.back().push_back(std::vector<std::string>(0) );
-                    basis_set.back().push_back(std::vector<std::string>(0) );
-                }
-            }
-            
-            // store the outtype (add it to function_outtype, but only if not already there)
-            outtype_iter = std::find(function_outtype.begin(), function_outtype.end(), outtype);
-            out_index = outtype_iter - function_outtype.begin();
-            if( outtype_iter == function_outtype.end())
-            {
-                function_outtype.push_back(outtype);
-                
-                // resize function here
-                for( int i=0; i<basis_set.size(); i++)
-                {
-                    simplefunction[i].push_back( std::vector<std::string>(0) );
-                    function[i].push_back( std::vector<std::string>(0) );
-                    basis_set[i].push_back( std::vector<std::string>(0) );
-                }
-            }
-            
-            namevec = &basis_set[ in_index][ out_index];
-            
-            // error if name already exists
-            if( std::find( (*namevec).begin(), (*namevec).end(), name) != (*namevec).end())
-            {
-                std::cout << "Error. Found the PBasisSet '" << name << "' with InType='" << intype << "' and OutType='" << outtype << "' twice." << std::endl;
-                std::cout << "   Names can not be repeated." << std::endl;
-                std::cout << "   Sorry for the inconvenience, but you must not exclude one of these and retry." << std::endl;
-                exit(1);
-                 
-            }
-            else
-            {
-                // store the name
-                (*namevec).push_back(name);
             }
             
             return true;
@@ -440,16 +313,18 @@ public:
     
     void write( std::ostream &sout)
     {
-        std::cout << "Files containing PSimpleFunctions, PFunctions, or PBasisSets: \n";
+        std::cout << "Files containing PSimpleBase, PFuncBase, PPieceWiseSimpleBase, PPieceWiseFuncBase, or PBasisSets: \n";
         std::cout << "  " << filename << "\n\n";
         
-        std::cout << "SimpleFunctions, Functions, & BasisSets: \n";
+        std::cout << "Functions, & BasisSets: \n";
         for( int i=0; i<function_intype.size(); i++)
         for( int j=0; j<function_outtype.size(); j++)
         {
             std::cout << function_intype[i] << ", " << function_outtype[j] << ": \n";
-            std::cout << "  PSimpleFunctions: " << simplefunction[i][j] << "\n\n";
-            std::cout << "  PFunctions: " << function[i][j] << "\n\n";
+            std::cout << "  PSimpleBase: " << simplefunction[i][j] << "\n\n";
+            std::cout << "  PFuncBase: " << function[i][j] << "\n\n";
+            std::cout << "  PPieceWiseSimpleBase: " << pwsimplefunction[i][j] << "\n\n";
+            std::cout << "  PPieceWiseFuncBase: " << pwfunction[i][j] << "\n\n";
             std::cout << "  PBasisSets: " << basis_set[i][j] << "\n\n";
         }
         
@@ -589,7 +464,7 @@ sout <<
 
     sout << "\n";
     
-    // write PSimpleFunction checkouts
+    // write PFunction checkouts
     //void checkout( std::string name, PSimpleFunction<VarContainer, OutType> &simplefunc);
     //void checkout( std::string name, PFunction<VarContainer, OutType> &func);
     //void checkout( std::string name, PBasisSet<InType, OutType> &basis_set);
@@ -647,6 +522,8 @@ sout <<
     // write PBase checkouts  ( create a 'new' object which the user must delete)
     //void checkout( std::string name, PSimpleBase<VarContainer, OutType> *simplefunc);
     //void checkout( std::string name, PFuncBase<VarContainer, OutType> *func);
+    //void checkout( std::string name, PPieceWiseSimpleBase<VarContainer, OutType> *simplefunc);
+    //void checkout( std::string name, PPieceWiseFuncBase<VarContainer, OutType> *func);
     //void checkout( std::string name, PBasisBase<InType, OutType> *basis_set);
     
     for(int i=0; i<c.function_intype.size(); i++)
@@ -681,6 +558,42 @@ sout <<
             else
             {
                 sout << "        void checkout( std::string name, PFuncBase< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > *&func);\n";
+            }
+        }
+    sout << "\n";
+    
+    for(int i=0; i<c.function_intype.size(); i++)
+    for(int j=0; j<c.function_outtype.size(); j++)
+        if( c.pwsimplefunction[i][j].size() > 0)
+        {
+            if( c.function_intype[i] == "VarContainer")
+            {
+                for( int k=0; k<var.size(); k++)
+                {
+                    sout << "        void checkout( std::string name, PPieceWiseSimpleBase< " + var[k] + ", " + c.function_outtype[j] + " > *&simplefunc);\n";
+                }
+            }
+            else
+            {
+                sout << "        void checkout( std::string name, PPieceWiseSimpleBase< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > *&simplefunc);\n";
+            }
+        }
+    sout << "\n";
+    
+    for(int i=0; i<c.function_intype.size(); i++)
+    for(int j=0; j<c.function_outtype.size(); j++)
+        if( c.pwfunction[i][j].size() > 0)
+        {
+            if( c.function_intype[i] == "VarContainer")
+            {
+                for( int k=0; k<var.size(); k++)
+                {
+                    sout << "        void checkout( std::string name, PPieceWiseFuncBase< " + var[k] + ", " + c.function_outtype[j] + " > *&func);\n";
+                }
+            }
+            else
+            {
+                sout << "        void checkout( std::string name, PPieceWiseFuncBase< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > *&func);\n";
             }
         }
     sout << "\n";
@@ -746,6 +659,8 @@ namespace PRISMS\n\
                     sout << "            typedef PSimpleFunction< " + var[k] + ", " + c.function_outtype[j] + " > psf;\n";
                     for( int ii=0; ii<c.simplefunction[i][j].size(); ii++)
                     sout << "            if( name == \"" + c.simplefunction[i][j][ii] + "\") simplefunc = psf( " + c.simplefunction[i][j][ii] + "< " + var[k] + " >() );\n";
+                    for( int ii=0; ii<c.pwsimplefunction[i][j].size(); ii++)
+                    sout << "            if( name == \"" + c.pwsimplefunction[i][j][ii] + "\") simplefunc = psf( " + c.pwsimplefunction[i][j][ii] + "< " + var[k] + " >() );\n";
                     sout << "        }\n";
                 }
             }
@@ -756,6 +671,8 @@ namespace PRISMS\n\
                 sout << "            typedef PSimpleFunction< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > psf;\n";
                 for( int ii=0; ii<c.simplefunction[i][j].size(); ii++)
                 sout << "            if( name == \"" + c.simplefunction[i][j][ii] + "\") simplefunc = psf( " + c.simplefunction[i][j][ii] + "() );\n";
+                for( int ii=0; ii<c.pwsimplefunction[i][j].size(); ii++)
+                sout << "            if( name == \"" + c.pwsimplefunction[i][j][ii] + "\") simplefunc = psf( " + c.pwsimplefunction[i][j][ii] + "() );\n";
                 sout << "        }\n";
             }
         }
@@ -801,16 +718,18 @@ namespace PRISMS\n\
             sout << "            if( name == \"" + c.basis_set[i][j][k] + "\") basis_set = pbs( " + c.basis_set[i][j][k] + "(N) );\n";
             sout << "        }\n";
         }
-    
+    sout << "\n\n\n";
     
     // write 'Base' checkouts
     //void checkout( std::string name, PSimpleBase<VarContainer, OutType> *simplefunc);
     //void checkout( std::string name, PFuncBase<VarContainer, OutType> *func);
+    //void checkout( std::string name, PPieceWiseSimpleBase<VarContainer, OutType> *simplefunc);
+    //void checkout( std::string name, PPieceWiseFuncBase<VarContainer, OutType> *func);
     //void checkout( std::string name, PBasisSetBase<InType, OutType> *basis_set, int N);
     
     for(int i=0; i<c.function_intype.size(); i++)
     for(int j=0; j<c.function_outtype.size(); j++)
-        if( c.simplefunction[i][j].size() > 0)
+        if( c.simplefunction[i][j].size() > 0 || c.pwsimplefunction[i][j].size() > 0)
         {
             if( c.function_intype[i] == "VarContainer")
             {
@@ -836,7 +755,7 @@ namespace PRISMS\n\
     
     for(int i=0; i<c.function_intype.size(); i++)
     for(int j=0; j<c.function_outtype.size(); j++)
-        if( c.function[i][j].size() > 0)
+        if( c.function[i][j].size() > 0 || c.pwfunction[i][j].size() > 0)
         {
             if( c.function_intype[i] == "VarContainer")
             {
@@ -860,6 +779,57 @@ namespace PRISMS\n\
         }
     sout << "\n";
     
+    for(int i=0; i<c.function_intype.size(); i++)
+    for(int j=0; j<c.function_outtype.size(); j++)
+        if( c.pwsimplefunction[i][j].size() > 0)
+        {
+            if( c.function_intype[i] == "VarContainer")
+            {
+                for( int k=0; k<var.size(); k++)
+                {
+                    sout << "        void PLibrary::checkout( std::string name, PPieceWiseSimpleBase< " + var[k] + ", " + c.function_outtype[j] + " > *&simplefunc)\n";
+                    sout << "        {\n";
+                    for( int ii=0; ii<c.pwsimplefunction[i][j].size(); ii++)
+                    sout << "            if( name == \"" + c.pwsimplefunction[i][j][ii] + "\") simplefunc = new " + c.pwsimplefunction[i][j][ii] + "< " + var[k] + " >();\n";
+                    sout << "        }\n";
+                }
+            }
+            else
+            {
+                sout << "        void PLibrary::checkout( std::string name, PPieceWiseSimpleBase< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > *&simplefunc)\n";
+                sout << "        {\n";
+                for( int ii=0; ii<c.pwsimplefunction[i][j].size(); ii++)
+                sout << "            if( name == \"" + c.pwsimplefunction[i][j][ii] + "\") simplefunc = new " + c.pwsimplefunction[i][j][ii] + "();\n";
+                sout << "        }\n";
+            }
+        }
+    sout << "\n";
+    
+    for(int i=0; i<c.function_intype.size(); i++)
+    for(int j=0; j<c.function_outtype.size(); j++)
+        if( c.pwfunction[i][j].size() > 0)
+        {
+            if( c.function_intype[i] == "VarContainer")
+            {
+                for( int k=0; k<var.size(); k++)
+                {
+                    sout << "        void PLibrary::checkout( std::string name, PPieceWiseFuncBase< " + var[k] + ", " + c.function_outtype[j] + " > *&func)\n";
+                    sout << "        {\n";
+                    for( int ii=0; ii<c.pwfunction[i][j].size(); ii++)
+                    sout << "            if( name == \"" + c.pwfunction[i][j][ii] + "\") func = new " + c.pwfunction[i][j][ii] + "< " + var[k] + " >();\n";
+                    sout << "        }\n";
+                }
+            }
+            else
+            {
+                sout << "        void PLibrary::checkout( std::string name, PPieceWiseFuncBase< " + c.function_intype[i] + ", " + c.function_outtype[j] + " > *&func)\n";
+                sout << "        {\n";
+                for( int ii=0; ii<c.pwfunction[i][j].size(); ii++)
+                sout << "            if( name == \"" + c.pwfunction[i][j][ii] + "\") func = new " + c.pwfunction[i][j][ii] + "();\n";
+                sout << "        }\n";
+            }
+        }
+    sout << "\n";
     
     for(int i=0; i<c.function_intype.size(); i++)
     for(int j=0; j<c.function_outtype.size(); j++)

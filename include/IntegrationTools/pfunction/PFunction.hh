@@ -56,9 +56,17 @@ namespace PRISMS
         {
             return (*ptr).size();
         }
+        std::vector<std::string> var_name()
+        {
+            return (*ptr).var_name();
+        }
         std::string var_name(int i)
         {
             return (*ptr).var_name(i);
+        }
+        std::vector<std::string> var_description()
+        {
+            return (*ptr).var_description();
         }
         std::string var_description(int i)
         {

@@ -80,7 +80,7 @@ namespace PRISMS
         //void code(  const std::string &json_str, std::ostream &sout);
         //void autodiff_writer( std::ostream &sout);
         //void series_writer( std::ostream &sout);
-        void head( std::ostream &sout) const;
+        void head( std::ostream &sout, bool piecewise = false) const;
         
         void foot( std::ostream &sout) const;
         

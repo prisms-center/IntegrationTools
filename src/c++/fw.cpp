@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
     }
     else if (vm.count("piecewise"))
     {
-        writer.head(outfile);
+        writer.head(outfile, true);
         try
         {
             writer.piecewise2code( piecewise, outfile);

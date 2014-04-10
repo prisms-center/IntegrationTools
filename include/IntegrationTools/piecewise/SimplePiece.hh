@@ -15,19 +15,19 @@ namespace PRISMS
     ///   This can be evaluated in or out of the piece in which it is declared valid
     ///
     template< class VarContainer, class OutType>
-    class SimplePiece : public PSimpleBase<class VarContainer, class OutType> 
+    class SimplePiece : public PSimpleBase<VarContainer, OutType> 
     {
         protected:
         
         PSimpleFunction<VarContainer, OutType> _expr;
-        std::vector< Condition<VarContainer, OutType> > _condition;
+        mutable std::vector< Condition<VarContainer, OutType> > _condition;
         
         public:
         
-        SimplePiece( const PSimpleFunction<VarContainer, OutType> &expr, const std::vector<Condition<VarContainer, OutType> &condition)
+        SimplePiece( const PSimpleFunction<VarContainer, OutType> &expr, const std::vector<Condition<VarContainer, OutType> > &condition)
         {
             _expr = expr;
-            _name = _expr._name;
+            this->_name = _expr.name();
         }
         
         virtual SimplePiece<VarContainer, OutType>* clone() const
@@ -45,6 +45,16 @@ namespace PRISMS
             return true;
         }
         
+        PSimpleFunction<VarContainer, OutType> expr() const
+        {
+            return _expr;
+        }
+        
+        std::vector< Condition<VarContainer, OutType> > condition() const
+        {
+            return _condition;
+        }
+        
         private:
         
         /// This will return '_expr' evaluated anywhere. Must check in_piece first. We
@@ -52,7 +62,7 @@ namespace PRISMS
         ///
         virtual OutType eval( const VarContainer &var) 
         { 
-            return _val = _expr(var);
+            return this->_val = _expr(var);
         }
     };
 

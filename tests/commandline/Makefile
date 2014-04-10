@@ -4,13 +4,13 @@ HOME = ../..
 SRC = $(HOME)/src/c++
 PLIB = $(HOME)/tests/testlib
 
-test : $(PLIB)/MyFunc.hh $(PLIB)/Monomial.hh $(PLIB)/Chebyshev.hh $(PLIB)/PLibrary.hh $(PLIB)/PLibrary.cc
+test : $(PLIB)/MyFunc.hh $(PLIB)/MyPieceWiseFunc.hh $(PLIB)/Monomial.hh $(PLIB)/Chebyshev.hh $(PLIB)/PLibrary.hh $(PLIB)/PLibrary.cc
 
 $(PLIB)/MyFunc.hh: 
 	fw -n "MyFunc" -v "x" "y" -d "x variable" "y variable"  --sym "x^3 + x^2*y + x*y^2 + y^3" --grad --hess -l $(PLIB)
 
 $(PLIB)/MyPieceWiseFunc.hh: 
-	fw -n "MyPieceWiseFunc" -v "x" "y" -d "x variable" "y variable"  --piecewise '[ { "func": "sqrt(pow(x,2) + pow(y,2))", "cond":[ ["pow(x,2) + pow(y,2)", "lt", "1.0"] ] }, { "func": "pow(x,2)", "cond":[["x", "ge", "0"], ["x", "lt", "1"]] }, { "func": "1",  "cond":[  ["x", "ge", "1"] ]' --grad --hess -l $(PLIB)
+	fw -n "MyPieceWiseFunc" -v "x" "y" -d "x variable" "y variable"  --piecewise '[ { "func": "pow(x,2) + pow(y,2)", "cond":["pow(x,2) + pow(y,2)<0.5*0.5"] }, { "func": "sqrt(pow(x,2) + pow(y,2)) - 0.25", "cond":["pow(x,2) + pow(y,2)>=0.5*0.5"] } ]' --grad --hess -l $(PLIB)
 
 $(PLIB)/Monomial.hh:
 	bsw -n "Monomial" -d "Monomials up to 30" -v "x" --index "i" -e "x^i" -m 30 --grad --hess -l $(PLIB)
@@ -27,4 +27,4 @@ $(PLIB)/PLibrary.cc:
 FORCE:
 
 clean: 
-	rm -f $(PLIB)/MyFunc.hh $(PLIB)/Monomial.hh $(PLIB)/Chebyshev.hh $(PLIB)/PLibrary.hh $(PLIB)/PLibrary.cc
+	rm -f $(PLIB)/MyFunc.hh $(PLIB)/MyPieceWiseFunc.hh $(PLIB)/Monomial.hh $(PLIB)/Chebyshev.hh $(PLIB)/PLibrary.hh $(PLIB)/PLibrary.cc

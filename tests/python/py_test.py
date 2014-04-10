@@ -179,6 +179,27 @@ os.remove('coeff.txt')
 f.delete()
 print "  deleted\n"
 
+
+# test PieceWise PFunc_dsd
+print "test PFunc_dsd"
+f = pfunction.PFunc_dsd("MyPieceWiseFunc")
+print "  created"
+print "  var:", a
+print "  evaluate", max, "times"
+for i in range(0,max):
+    v = f.calc(b)
+print "  result:", f.get()
+
+fig = plt.figure(4, figsize=(8,8))
+ax = fig.gca(projection='3d')
+for i in range(0,s[0]):
+    for j in range(0,s[1]):
+        Z[i,j] = f.calc(pfunction.c_dbl_array([X[i,j],Y[i,j]]))
+ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+
+f.delete()
+print "  deleted\n"
+
 show()
 
 

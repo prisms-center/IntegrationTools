@@ -371,7 +371,7 @@ namespace PRISMS
                 ss << j;
                 cond_name = piece_name.back() + "_cond" + ss.str();
                 lhs_cond_name[i].push_back( cond_name + "_lhs");
-                rhs_cond_name[i].push_back( cond_name + "_lhs");
+                rhs_cond_name[i].push_back( cond_name + "_rhs");
                 
                 // read the condition expressions and operation,
                 //   and write the condition expressions
@@ -397,8 +397,8 @@ namespace PRISMS
         
         // write the PPieceWiseFuncBase piecewise function
         int I = 1;
-        sout << indent(I) << "template< class VarContainer, class " << _outtype << ">\n";
-        sout << indent(I) << "class " << _name << " : public PPieceWiseFuncBase<class VarContainer, class " << _outtype << ">\n"; 
+        sout << indent(I) << "template< class VarContainer >\n";
+        sout << indent(I) << "class " << _name << " : public PPieceWiseFuncBase<VarContainer, " << _outtype << ">\n"; 
         sout << indent(I) << "{\n";
         sout << indent(I) << "public:\n";
         I++;
@@ -422,9 +422,9 @@ namespace PRISMS
         for( int j=0; j< lhs_cond_name[i].size(); j++)
         {
         std::cout << "  j: " << j << std::endl;
-        sout << indent(I) << "cond.push_back( Cond( psf("<< lhs_cond_name[i][j] << "()), \"" << operation[i][j] << "\", psf(" << rhs_cond_name[i][j] << "())));\n";
+        sout << indent(I) << "cond.push_back( Cond( psf("<< lhs_cond_name[i][j] << "<VarContainer>()), \"" << operation[i][j] << "\", psf(" << rhs_cond_name[i][j] << "<VarContainer>())));\n";
         }
-        sout << indent(I) << "_piece.push_back( Pc( pf(" << piece_name[i] << "()), cond) );\n";
+        sout << indent(I) << "this->_piece.push_back( Pc( pf(" << piece_name[i] << "<VarContainer>()), cond) );\n";
         sout << indent(I) << "cond.clear();\n\n";
         }
         I--;
@@ -1220,7 +1220,7 @@ namespace PRISMS
         return tmp;
     }
     
-    void PFunctionWriter::head( std::ostream &sout) const
+    void PFunctionWriter::head( std::ostream &sout, bool piecewise) const
     {
         int I = 0;
         
@@ -1236,7 +1236,9 @@ namespace PRISMS
         sout << indent(I) << "#define " + _name + "_HH\n\n"; 
         sout << indent(I) << "#include <cmath>\n";
         sout << indent(I) << "#include <cstdlib>\n";
-        sout << indent(I) << "#include \"IntegrationTools/PFunction.hh\"\n\n";
+        sout << indent(I) << "#include \"IntegrationTools/PFunction.hh\"\n";
+        if( piecewise) sout << indent(I) << "#include \"IntegrationTools/PPieceWise.hh\"\n\n";
+        else sout << "\n";
         sout << indent(I) << "namespace PRISMS\n"; 
         sout << indent(I) << "{\n";
         I++;

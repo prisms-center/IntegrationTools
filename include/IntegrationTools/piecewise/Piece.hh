@@ -17,21 +17,21 @@ namespace PRISMS
     ///   This can be evaluated in or out of the piece in which it is declared valid
     ///
     template< class VarContainer, class OutType>
-    class Piece : public PFuncBase<class VarContainer, class OutType> 
+    class Piece : public PFuncBase<VarContainer, OutType> 
     {
         protected:
         
         PFunction<VarContainer, OutType> _expr;
-        std::vector< Condition<VarContainer, OutType> > _condition;
+        mutable std::vector< Condition<VarContainer, OutType> > _condition;
         
         public:
-        Piece( const PFunction<VarContainer, OutType> &expr, const std::vector<Condition<VarContainer, OutType> &condition)
+        Piece( const PFunction<VarContainer, OutType> &expr, const std::vector<Condition<VarContainer, OutType> > &condition)
         {
             _expr = expr;
             _condition = condition;
-            _name = _expr._name;
-            _var_name = _expr._var_name;
-            _var_description = _expr._var_description;
+            this->_name = _expr.name();
+            this->_var_name = _expr.var_name();
+            this->_var_description = _expr.var_description();
         }
         
         bool in_piece( const VarContainer &var) const
@@ -44,24 +44,49 @@ namespace PRISMS
             return true;
         }
         
+        PFunction<VarContainer, OutType> expr() const
+        {
+            return _expr;
+        }
+        
+        std::vector< Condition<VarContainer, OutType> > condition() const
+        {
+            return _condition;
+        }
+        
+        SimplePiece<VarContainer, OutType> simplepiece() const
+        {
+            return SimplePiece<VarContainer, OutType>(_expr.simplefunction(), _condition);
+        }
+        
+        SimplePiece<VarContainer, OutType> grad_simplepiece(int di) const
+        {
+            return SimplePiece<VarContainer, OutType>(_expr.grad_simplefunction(di), _condition);
+        }
+        
+        SimplePiece<VarContainer, OutType> hess_simplepiece(int di, int dj) const
+        {
+            return SimplePiece<VarContainer, OutType>(_expr.hess_simplefunction(di, dj), _condition);
+        }
+        
         virtual Piece<VarContainer, OutType> *clone() const
         {
             return new Piece<VarContainer, OutType>(*this);
         }
         
-        virtual SimplePiece<VarContainer, OutType> simplefunction() const
+        virtual PSimpleFunction<VarContainer, OutType> simplefunction() const
         {
-            return SimplePiece<VarContainer, OutType>(_expr.simplefunction, _condition, _zero);
+            return PSimpleFunction<VarContainer, OutType>( SimplePiece<VarContainer, OutType>(_expr.simplefunction(), _condition));
         }
         
-        virtual SimplePiece<VarContainer, OutType> grad_simplefunction(int di) const
+        virtual PSimpleFunction<VarContainer, OutType> grad_simplefunction(int di) const
         {
-            return SimplePiece<VarContainer, OutType>(_expr.grad_simplefunction(di), _condition, _zero);
+            return PSimpleFunction<VarContainer, OutType>( SimplePiece<VarContainer, OutType>(_expr.grad_simplefunction(di), _condition));
         }
         
-        virtual SimplePiece<VarContainer, OutType> hess_simplefunction(int di, int dj) const
+        virtual PSimpleFunction<VarContainer, OutType> hess_simplefunction(int di, int dj) const
         {
-            return SimplePiece<VarContainer, OutType>(_expr.hess_simplefunction(di,dj), _condition, _zero);
+            return PSimpleFunction<VarContainer, OutType>( SimplePiece<VarContainer, OutType>(_expr.hess_simplefunction(di,dj), _condition));
         }
 
         // ----------------------------------------------------------
@@ -72,30 +97,30 @@ namespace PRISMS
         ///
         virtual OutType operator()(const VarContainer &var)
         {
-            return _expr(var)
+            return _expr(var);
         }
         virtual OutType grad(const VarContainer &var, int di)
         {
-            return _expr.grad(var, di)
+            return _expr.grad(var, di);
         }
         virtual OutType hess(const VarContainer &var, int di, int dj)
         {
-            return _expr.hess(var, di, dj)
+            return _expr.hess(var, di, dj);
         }
 
         // ----------------------------------------------------------
         // Use these functions to evaluate several values, then use 'get' methods to access results
         virtual void eval(const VarContainer &var)
         {
-            _expr(var)
+            _expr(var);
         }
         virtual void eval_grad(const VarContainer &var)
         {
-            _expr.eval_grad(var)
+            _expr.eval_grad(var);
         }
         virtual void eval_hess(const VarContainer &var)
         {
-            _expr.eval_hess(var)
+            _expr.eval_hess(var);
         }
         
         /// These don't recheck the domain

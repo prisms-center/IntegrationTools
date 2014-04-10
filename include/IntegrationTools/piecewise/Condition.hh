@@ -29,11 +29,11 @@ namespace PRISMS
             _rhs = rhs;
         }
         
-        Condition( std::string operation)
+        Condition( const PSimpleFunction<VarContainer, OutType> &lhs, std::string operation, const PSimpleFunction<VarContainer, OutType> &rhs)
         {
             _lhs = lhs;
             _rhs = rhs;
-            _operation = Condtion::get_operation( operation);
+            _operation = Condition::get_operation( operation);
         }
         
         static COMPARISON get_operation( std::string operation)
@@ -83,7 +83,7 @@ namespace PRISMS
                 case NE:
                     return _lhs(var) != _rhs(var);
                 default:
-                    throw std::invalid_argument(_operation);
+                    throw std::invalid_argument("Invalid COMPARISON operation");
             }
         }
         

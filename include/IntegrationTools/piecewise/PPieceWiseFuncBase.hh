@@ -20,11 +20,14 @@ namespace PRISMS
     ///   is evaluated outside of the valid domain of any piece.
     ///
     template< class VarContainer, class OutType>
-    class PPieceWiseFuncBase : public PFuncBase<class VarContainer, class OutType> 
+    class PPieceWiseFuncBase : public PFuncBase<VarContainer, OutType> 
     {
         public:
         
+        int _curr_piece;
         std::vector<Piece<VarContainer, OutType> > _piece;
+        
+        PPieceWiseFuncBase() {}
         
         PPieceWiseFuncBase( const std::vector<Piece<VarContainer, OutType> > &piece)
         {
@@ -46,7 +49,7 @@ namespace PRISMS
             for( int i=0; i<_piece.size(); i++)
             {
                 if( _piece[i].in_piece(var))
-                    return i;
+                    return _curr_piece = i;
             }
             
             throw std::domain_error("PPieceWiseFuncBase: Not in any piece");
@@ -57,40 +60,40 @@ namespace PRISMS
             return new PPieceWiseFuncBase<VarContainer, OutType>(*this);
         }
         
-        virtual PPieceWiseSimpleBase<VarContainer, OutType> simplefunction() const
+        virtual PSimpleFunction<VarContainer, OutType> simplefunction() const
         {
             std::vector<SimplePiece<VarContainer, OutType> > piece;
             
             for( int i=0; i<_piece.size(); i++)
             {
-                piece.push_back( _piece.simplefunction());
+                piece.push_back( _piece[i].simplepiece() );
             }
             
-            return PPieceWiseSimpleBase<VarContainer, OutType>(piece);
+            return PSimpleFunction<VarContainer, OutType>( PPieceWiseSimpleBase<VarContainer, OutType>(piece) );
         }
         
-        virtual PPieceWiseSimpleBase<VarContainer, OutType> grad_simplefunction(int di) const
+        virtual PSimpleFunction<VarContainer, OutType> grad_simplefunction(int di) const
         {
             std::vector<SimplePiece<VarContainer, OutType> > piece;
             
             for( int i=0; i<_piece.size(); i++)
             {
-                piece.push_back( _piece.grad_simplefunction(di));
+                piece.push_back( _piece[i].grad_simplepiece(di));
             }
             
-            return PPieceWiseSimpleBase<VarContainer, OutType>(piece);
+            return PSimpleFunction<VarContainer, OutType>( PPieceWiseSimpleBase<VarContainer, OutType>(piece));
         }
         
-        virtual PPieceWiseSimpleBase<VarContainer, OutType> hess_simplefunction(int di, int dj) const
+        virtual PSimpleFunction<VarContainer, OutType> hess_simplefunction(int di, int dj) const
         {
             std::vector<SimplePiece<VarContainer, OutType> > piece;
             
             for( int i=0; i<_piece.size(); i++)
             {
-                piece.push_back( _piece.hess_simplefunction(di, dj) );
+                piece.push_back( _piece[i].hess_simplepiece(di,dj));
             }
             
-            return PPieceWiseSimpleBase<VarContainer, OutType>(piece);
+            return PSimpleFunction<VarContainer, OutType>( PPieceWiseSimpleBase<VarContainer, OutType>(piece) );
         }
 
         // ----------------------------------------------------------
@@ -98,80 +101,44 @@ namespace PRISMS
         
         virtual OutType operator()(const VarContainer &var)
         {
-            for( int i=0; i<_piece.size(); i++)
-            {
-                if( _piece[i].in_piece(var))
-                    return _expr(var);
-            }
-            
-            throw std::domain_error("PPieceWiseFuncBase: Not in any piece");
+            return _piece[piece(var)](var);
         }
         virtual OutType grad(const VarContainer &var, int di)
         {
-            for( int i=0; i<_piece.size(); i++)
-            {
-                if( _piece[i].in_piece(var))
-                    return _expr.grad(var, di);
-            }
-            
-            throw std::domain_error("PPieceWiseFuncBase: Not in any piece");
+            return _piece[piece(var)].grad(var, di);
         }
         virtual OutType hess(const VarContainer &var, int di, int dj)
         {
-            for( int i=0; i<_piece.size(); i++)
-            {
-                if( _piece[i].in_piece(var))
-                    return _expr.hess(var, di, dj);
-            }
-            
-            throw std::domain_error("PPieceWiseFuncBase: Not in any piece");
+            return _piece[piece(var)].hess(var, di, dj);
         }
 
         // ----------------------------------------------------------
         // Use these functions to evaluate several values, then use 'get' methods to access results
         virtual void eval(const VarContainer &var)
         {
-            for( int i=0; i<_piece.size(); i++)
-            {
-                if( _piece[i].in_piece(var))
-                    return _expr(var);
-            }
-            
-            throw std::domain_error("PPieceWiseFuncBase: Not in any piece");
+            _piece[piece(var)].eval(var);
         }
         virtual void eval_grad(const VarContainer &var)
         {
-            for( int i=0; i<_piece.size(); i++)
-            {
-                if( _piece[i].in_piece(var))
-                    return _expr.eval_grad(var);
-            }
-            
-            throw std::domain_error("PPieceWiseFuncBase: Not in any piece");
+            _piece[piece(var)].eval_grad(var);
         }
         virtual void eval_hess(const VarContainer &var)
         {
-            for( int i=0; i<_piece.size(); i++)
-            {
-                if( _piece[i].in_piece(var))
-                    return _expr.eval_hess(var);
-            }
-            
-            throw std::domain_error("PPieceWiseFuncBase: Not in any piece");
+            _piece[piece(var)].eval_hess(var);
         }
         
         /// These don't recheck the domain
         virtual OutType operator()() const
         {
-            return _expr();
+            return _piece[_curr_piece]();
         }
         virtual OutType grad(int di) const
         {
-            return _expr.grad(di);
+            return _piece[_curr_piece].grad(di);
         }
         virtual OutType hess(int di, int dj) const
         {
-            return _expr.hess(di, dj);
+            return _piece[_curr_piece].hess(di, dj);
         }
     };
 
