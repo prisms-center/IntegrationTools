@@ -132,12 +132,12 @@ class PSeries_dsis(object):
         config.lib.PSeriesFunction_dsis_calc_basis(self.ptr, ctypes.c_int(bindex), ctypes.c_int(term), var, ctypes.byref(self.tval))
         return self.tval.value
     
-    def calc_basis_grad(self, bindex, term, var):
-        config.lib.PSeriesFunction_dsis_calc_basis_grad(self.ptr, ctypes.c_int(bindex), ctypes.c_int(term), var, ctypes.byref(self.tval))
+    def calc_basis_grad(self, bindex, term, var, di):
+        config.lib.PSeriesFunction_dsis_calc_basis_grad(self.ptr, ctypes.c_int(bindex), ctypes.c_int(term), var, ctypes.c_int(di), ctypes.byref(self.tval))
         return self.tval.value
     
-    def calc_basis_hess(self, bindex, term, var):
-        config.lib.PSeriesFunction_dsis_calc_basis_hess(self.ptr, ctypes.c_int(bindex), ctypes.c_int(term), var, ctypes.byref(self.tval))
+    def calc_basis_hess(self, bindex, term, var, di, dj):
+        config.lib.PSeriesFunction_dsis_calc_basis_hess(self.ptr, ctypes.c_int(bindex), ctypes.c_int(term), var, ctypes.c_int(di), ctypes.c_int(dj), ctypes.byref(self.tval))
         return self.tval.value
     
     #   or use tensor indices to evaluate basis function product
@@ -146,12 +146,12 @@ class PSeries_dsis(object):
         config.lib.PSeriesFunction_dsis_calc_tensor_basis(self.ptr, tensor_indices, var, ctypes.byref(self.tval))
         return self.tval.value
     
-    def calc_tensor_basis_grad(self, tensor_indices, var):
-        config.lib.PSeriesFunction_dsis_calc_tensor_basis_grad(self.ptr, tensor_indices, var, ctypes.byref(self.tval))
+    def calc_tensor_basis_grad(self, tensor_indices, var, di):
+        config.lib.PSeriesFunction_dsis_calc_tensor_basis_grad(self.ptr, tensor_indices, var, ctypes.c_int(di), ctypes.byref(self.tval))
         return self.tval.value
     
-    def calc_tensor_basis_hess(self, bindex, tensor_indices, var):
-        config.lib.PSeriesFunction_dsis_calc_tensor_basis_hess(self.ptr, tensor_indices, var, ctypes.byref(self.tval))
+    def calc_tensor_basis_hess(self, tensor_indices, var, di, dj):
+        config.lib.PSeriesFunction_dsis_calc_tensor_basis_hess(self.ptr, tensor_indices, var, ctypes.c_int(di), ctypes.c_int(dj), ctypes.byref(self.tval))
         return self.tval.value
     
     # ----------------------------------------------------------
@@ -195,12 +195,12 @@ class PSeries_dsis(object):
         config.lib.PSeriesFunction_dsis_get_tensor_basis(self.ptr, tensor_indices, ctypes.byref(self.tval))
         return self.tval.value
     
-    def get_tensor_basis_grad(self, tensor_indices):
-        config.lib.PSeriesFunction_dsis_get_tensor_basis_grad(self.ptr, tensor_indices, ctypes.byref(self.tval))
+    def get_tensor_basis_grad(self, tensor_indices, di):
+        config.lib.PSeriesFunction_dsis_get_tensor_basis_grad(self.ptr, tensor_indices, ctypes.c_int(di), ctypes.byref(self.tval))
         return self.tval.value
     
-    def get_tensor_basis_hess(self, bindex, tensor_indices):
-        config.lib.PSeriesFunction_dsis_get_tensor_basis_hess(self.ptr, tensor_indices, ctypes.byref(self.tval))
+    def get_tensor_basis_hess(self, tensor_indices, di, dj):
+        config.lib.PSeriesFunction_dsis_get_tensor_basis_hess(self.ptr, tensor_indices, ctypes.c_int(di), ctypes.c_int(dj), ctypes.byref(self.tval))
         return self.tval.value
     
     def print_coeff(self, sout):
