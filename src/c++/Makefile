@@ -7,16 +7,35 @@ PSYM = $(TOOLS)/psymfunction
 WRITER = $(TOOLS)/writer
 INCLUDE = . $(HOME)/include
 
-INSTALL = /usr/local/bin
+ifeq "$(BIN)" ""
+	INSTALL = /usr/local/bin
+else
+	INSTALL = $(BIN)
+endif
 VERS = "develop"
 ID=$$(git rev-parse HEAD)
 URL=$$(git config --get remote.origin.url)
 
+ifeq "$(BOOST)" ""
+	LFLAGS = -lcln -lginac -lboost_program_options -lboost_filesystem -lboost_system -lboost_regex
+else
+	BOOSTLIB = libboost_filesystem.so libboost_program_options.so libboost_regex.so libboost_system.so
+	LFLAGS += $(foreach i, $(BOOSTLIB), $(BOOST)/lib/$(i))
+	INCLUDE += $(BOOST)/include
+endif
+
+LFLAGS_G = $(LFLAGS)
+ifeq "$(GINAC)" ""
+	LFLAGS_G += -lcln -lginac
+else
+	INCLUDE += $(GINAC)/include
+	LFLAGS_G += $(GINAC)/lib/libginac.so $(GINAC)/lib/libcln.so
+endif
+#LDFLAGS  = -lcln -lginac -lboost_program_options -lboost_filesystem -lboost_system -lboost_regex
+
 CXX      = g++
 CPPFLAGS += $(foreach i,$(INCLUDE),-I$(i))
 CPPFLAGS += -O3 
-LDFLAGS  = -lcln -lginac -lboost_program_options -lboost_filesystem -lboost_system -lboost_regex
-
 
 
 all : fw bsw lw
@@ -46,13 +65,13 @@ version.o: version.cc $(TOOLS)/version.hh
 	$(CXX) -c version.cc $(CPPFLAGS)
 
 fw: fw.cpp PFunctionWriter.o version.o
-	$(CXX) PFunctionWriter.o version.o -o fw fw.cpp $(CPPFLAGS) $(LDFLAGS)
+	$(CXX) PFunctionWriter.o version.o -o fw fw.cpp $(CPPFLAGS) $(LFLAGS_G)
 
 bsw: bsw.cpp PBasisSetWriter.o PFunctionWriter.o version.o
-	$(CXX) PBasisSetWriter.o PFunctionWriter.o version.o -o bsw bsw.cpp $(CPPFLAGS) $(LDFLAGS)
+	$(CXX) PBasisSetWriter.o PFunctionWriter.o version.o -o bsw bsw.cpp $(CPPFLAGS) $(LFLAGS_G)
 
 lw: lw.cpp version.o
-	$(CXX) version.o -o lw lw.cpp $(CPPFLAGS) $(LDFLAGS)
+	$(CXX) version.o -o lw lw.cpp $(CPPFLAGS) $(LFLAGS)
 
 clean: 
 	rm -f *.o bsw fw lw version.cc

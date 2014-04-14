@@ -3,9 +3,11 @@
 HOME = ../..
 PLIB = $(HOME)/tests/testlib
 
-test: $(PLIB)/libpextern.dylib
+test: $(PLIB)/libpextern.so
 	python py_test.py
 
-$(PLIB)/libpextern.dylib:
+$(PLIB)/libpextern.so:
 	cd $(PLIB); make
 
+clean:
+	rm -rf *.eps

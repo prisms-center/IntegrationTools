@@ -1,11 +1,16 @@
 #!/usr/bin/env python
+import os, sys
+import matplotlib
+
+if not "DISPLAY" in os.environ:
+    matplotlib.use('Agg')
+
 from mpl_toolkits.mplot3d import Axes3D
 from pylab import *
 
 import pfunction
 import ctypes
 import random
-import os, sys
 
 def hess_eig( f, term, var):
     n = len(term)
@@ -22,10 +27,11 @@ def hess_eig( f, term, var):
 
 
 rc('font',**{'family':'serif','sans-serif':['Times']})
-pfunction.set_lib("../testlib/libpextern.dylib")
+pfunction.set_lib("../testlib/libpextern.so")
 
 max = 1
 fignum = 1
+allfig = []
 
 # test PSimple_dd
 print "test PSimple_dd"
@@ -92,6 +98,7 @@ for i in range(0,30):
 
 # test plotting basis functions
 fig = plt.figure(fignum, figsize=(8,7))
+allfig.append(fig)
 fignum += 1
 fig.suptitle('Chebyshev polynomials', fontsize=12)
 a = np.arange(-1,1, 0.001)
@@ -132,6 +139,7 @@ Zb = 0.0*X
 s = X.shape
 
 fig = plt.figure(fignum, figsize=(8,8))
+allfig.append(fig)
 fignum += 1
 fig.suptitle('Chebyshev products', fontsize=12)
 index=1
@@ -148,6 +156,7 @@ for t in range(0,Nf):
         index = index+1
 
 fig = plt.figure(fignum, figsize=(8,8))
+allfig.append(fig)
 fignum += 1
 fig.suptitle('Chebyshev product Hessian eigenvalues', fontsize=12)
 index=1
@@ -190,6 +199,7 @@ for i in range(len(coeff)):
 f.set_tensor_coeff(pfunction.c_int_array([0,0]),-1.0*sum(coeff))
 
 fig = plt.figure(fignum, figsize=(8,8))
+allfig.append(fig)
 fig.suptitle('Function with Chebyshev basis', fontsize=12)
 fignum += 1
 ax = fig.gca(projection='3d')
@@ -238,6 +248,7 @@ for i in range(0,max):
 print "  result:", f.get()
 
 fig = plt.figure(fignum, figsize=(8,8))
+allfig.append(fig)
 fignum += 1
 fig.suptitle('Piecewise function: f(r)=r^2 if r<0.5; r-0.25 if r>=0.5', fontsize=12)
 ax = fig.gca(projection='3d')
@@ -247,6 +258,7 @@ for i in range(0,s[0]):
 ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
 
 fig = plt.figure(fignum, figsize=(8,8))
+allfig.append(fig)
 fignum += 1
 fig.suptitle('Piecewise function: df(r)/dx', fontsize=12)
 ax = fig.gca(projection='3d')
@@ -256,6 +268,7 @@ for i in range(0,s[0]):
 ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
 
 fig = plt.figure(fignum, figsize=(8,8))
+allfig.append(fig)
 fignum += 1
 fig.suptitle('Piecewise function: d^2f(r)/dx^2', fontsize=12)
 ax = fig.gca(projection='3d')
@@ -267,7 +280,12 @@ ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, an
 f.delete()
 print "  deleted\n"
 
-show()
+for i in range(0,fignum):
+    plt.figure(i)
+    savefig("fig_" + str(i) + ".eps")
+
+if "DISPLAY" in os.environ:
+    show()
 
 
 

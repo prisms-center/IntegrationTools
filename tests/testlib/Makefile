@@ -9,11 +9,15 @@ INSTALL = /usr/local/bin
 
 CXX      = g++
 CPPFLAGS += $(foreach i,$(INCLUDE),-I$(i))
-CPPFLAGS += -O3 
+CPPFLAGS += -O3 -fPIC
 
 
-extern: $(EXTERN)/PExtern.hh $(SRC)/PExtern.cc PLibrary.o
-	$(CXX) -o libpextern.dylib $(SRC)/PExtern.cc PLibrary.o -dynamiclib $(CPPFLAGS)
+libpextern.so: PExtern.o PLibrary.o
+	@#$(CXX) -o libpextern.dylib $(SRC)/PExtern.cc PLibrary.o -dynamiclib $(CPPFLAGS)
+	$(CXX) -shared -o libpextern.so PExtern.o PLibrary.o 
+
+PExtern.o: $(SRC)/PExtern.cc
+	$(CXX) -c $(SRC)/PExtern.cc $(CPPFLAGS)
 
 PLibrary.cc: CLI
 
@@ -28,4 +32,4 @@ CLI: FORCE
 FORCE:
 
 clean: 
-	rm -f *.o *.dylib
+	rm -f *.o *.so

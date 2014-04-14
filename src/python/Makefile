@@ -5,17 +5,22 @@ ID=$$(git rev-parse HEAD)
 URL=$$(git config --get remote.origin.url)
 
 
+
 all: setup.py
 
 install: setup.py
-	sudo python setup.py install
+ifeq "$(PYINSTALL)" ""
+	python setup.py install
+else
+	python setup.py install --prefix=$(PYINSTALL)
+endif
 
 uninstall:
-	@sudo pip uninstall pfunction
+	pip uninstall pfunction
 
 clean:
 	rm -f setup.py pfunction/__init__.py
-	sudo rm -rf build
+	rm -rf build
 
 setup.py:
 	@sed "s/VERSION_ID/$(VERS)/" pfunction/__init__.template.py > pfunction/__init__.tmp.0
