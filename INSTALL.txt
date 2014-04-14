@@ -1,0 +1,33 @@
+
+Requirements:
+
+Boost is used for program_options, filesystem, and regex: http://www.boost.org/
+
+The function and basis set writers require GiNaC: http://www.ginac.de/
+
+The python example script py_test.py uses matplotlib: http://matplotlib.org/
+
+
+Installing:
+
+You might need to set the following environments variables:
+
+BIN: Where to install 'fw', 'bsw', and 'lw'. If not set, uses /usr/local/bin.
+PYINSTALL: Where to install 'pfunction' package.  If not set, uses default distutils location.
+BOOST: Where to find boost include files and libraries. Assumes $(BOOST)/include for headers and $(BOOST)/lib for libraries. If not set, uses default compiler search path.
+GINAC: Where to find GiNaC and CLN include files and libraries. Assumes $(GINAC)/include for headers and $(GINAC)/lib for libraries. If not set, uses default compiler search path.
+
+Currently, the PFunction header files are not installed anywhere, just the executables and python package.
+
+Then cd to the IntegrationTools root directory and make and install with: 'make install'
+
+'make install' will make and install:
+- 'fw': The Function Writer
+- 'bsw': The Basis Set Writer
+- 'lw': The Library Writer
+- 'pfunction': Python package (default distutils install location)
+
+
+Testing:
+
+You can run a test with: 'make test' 

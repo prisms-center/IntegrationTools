@@ -3,17 +3,37 @@ IntegrationTools
 
 Function and field passing tools for PRISMS model integration
 
-The function and basis set writers require GiNaC: http://www.ginac.de/
-
 Boost is used for program_options, filesystem, and regex: http://www.boost.org/
+
+The function and basis set writers require GiNaC: http://www.ginac.de/
 
 The python example script py_test.py uses matplotlib: http://matplotlib.org/
 
-'make install' will make and install:
-- 'fw': The Function Writer (/usr/local/bin)
-- 'bsw': The Basis Set Writer (/usr/local/bin)
-- 'lw': The Library Writer (/usr/local/bin)
-- 'pfunction': Python package (default distutils install location)
+
+Usage
+=======================
+
+Integration Tools specifies an interface for easily passing functions to a computer program. It is written in C++, but also provides a C interface so that functions can be used across coding languages.  It includes a Python package 'pfunction' that uses the C interface to allow access to your functions in Python. 
+
+The intended usage is something like this:
+
+1) You write a program that you wish to pass functions into without knowing their form ahead of time.
+
+2) You write the code for the functions themselves, either by hand or using the Function or Basis Set Writers ('fw' and 'bsw') to generate code from symbolic mathematical expressions.
+
+3) You compile the functions into a library and link it with your code.
+
+4) Run it!
+
+
+Installation
+=======================
+
+See 'INSTALL.txt' file.
+
+
+Release Notes
+=======================
 
 Release 0.1.0 will include:
 - PSimpleFunction, PFunction, and PBasisSet
