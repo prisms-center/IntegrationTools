@@ -30,7 +30,7 @@ rc('font',**{'family':'serif','sans-serif':['Times']})
 pfunction.set_lib("../testlib/libpextern.so")
 
 max = 1
-fignum = 1
+fignum = 0
 allfig = []
 
 # test PSimple_dd
