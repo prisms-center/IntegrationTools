@@ -10,7 +10,7 @@ $(PLIB)/MyFunc.hh:
 	fw -n "MyFunc" -v "x" "y" -d "x variable" "y variable"  --sym "x^3 + x^2*y + x*y^2 + y^3" --grad --hess -l $(PLIB)
 
 $(PLIB)/MyPieceWiseFunc.hh: 
-	fw -n "MyPieceWiseFunc" -v "x" "y" -d "x variable" "y variable"  --piecewise '[ { "func": "pow(x,2) + pow(y,2)", "cond":["pow(x,2) + pow(y,2)<0.5*0.5"] }, { "func": "sqrt(pow(x,2) + pow(y,2)) - 0.25", "cond":["pow(x,2) + pow(y,2)>=0.5*0.5"] } ]' --grad --hess -l $(PLIB)
+	fw -n "MyPieceWiseFunc" -v "x" "y" -d "x variable" "y variable"  --piecewise '[ {"func":"x","cond":["x<0"]},{ "func": "pow(x,2) + pow(y,2)", "cond":["pow(x,2) + pow(y,2)<0.5*0.5","x>=0"] }, { "func": "sqrt(pow(x,2) + pow(y,2)) - 0.25", "cond":["pow(x,2) + pow(y,2)>=0.5*0.5","x>=0"] } ]' --grad --hess -l $(PLIB)
 
 $(PLIB)/Monomial.hh:
 	bsw -n "Monomial" -d "Monomials up to 30" -v "x" --index "i" -e "x^i" -m 30 --grad --hess -l $(PLIB)
