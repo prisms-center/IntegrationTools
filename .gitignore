@@ -2,6 +2,7 @@
 *.pyc
 *.o
 *.dylib
+*.so
 bp_stylize.sh
 .cache
 .matplotlib

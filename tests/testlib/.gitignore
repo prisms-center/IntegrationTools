@@ -1,4 +1,5 @@
 Chebyshev.hh
 Monomial.hh
 MyFunc.hh
+MyPieceWiseFunc.hh
 PLibrary.*
