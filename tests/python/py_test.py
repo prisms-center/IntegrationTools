@@ -250,7 +250,7 @@ print "  result:", f.get()
 fig = plt.figure(fignum, figsize=(8,8))
 allfig.append(fig)
 fignum += 1
-fig.suptitle('Piecewise function: f(r)=r^2 if r<0.5; r-0.25 if r>=0.5', fontsize=12)
+fig.suptitle('Piecewise function: f(x) if x<0; else f(r)=r^2 if r<0.5; r-0.25 if r>=0.5', fontsize=12)
 ax = fig.gca(projection='3d')
 for i in range(0,s[0]):
     for j in range(0,s[1]):

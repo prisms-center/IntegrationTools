@@ -9,7 +9,7 @@ CXX      = g++
 CPPFLAGS += $(foreach i,$(INCLUDE),-I$(i))
 CPPFLAGS += -O3 
 
-test: test.cpp $(CPLIB)/PLibrary.o
+test: test.cpp $(CPLIB)/PLibrary.o FORCE
 	$(CXX) -o test $(CPLIB)/PLibrary.o test.cpp $(CPPFLAGS)
 	./test
 
