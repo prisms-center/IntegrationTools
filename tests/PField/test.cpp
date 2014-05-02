@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     Body2D body;
     
     
-    body.read_2d_vtk("2D.vtk");
+    body.read_vtk("2D.vtk");
     
     ScalarField2D &conc = body.find_scalar_field("c");
     

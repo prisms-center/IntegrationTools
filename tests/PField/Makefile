@@ -12,8 +12,12 @@ CPPFLAGS += -O3
 test: test.cpp FORCE
 	$(CXX) -o test test.cpp $(CPPFLAGS)
 
+test3d: test3d.cpp FORCE
+	$(CXX) -o test3d test3d.cpp $(CPPFLAGS)
+
+
 FORCE:
 	
 
 clean:
-	rm -f test
+	rm -f test test3d

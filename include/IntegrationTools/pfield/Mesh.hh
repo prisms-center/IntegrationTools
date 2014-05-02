@@ -11,9 +11,99 @@
 #include "../pfunction/PFuncBase.hh"
 #include "./interpolation/Interpolator.hh"
 #include "./interpolation/Quad.hh"
+#include "./interpolation/Hexahedron.hh"
 
 namespace PRISMS
 {
+    
+    void construct_basis_function( PFuncBase<std::vector<PRISMS::Coordinate<2> >, double>* &bfunc, const std::string &name)
+    {
+        if( name == "Quad")
+        {
+            bfunc = new Quad();
+        }
+        else
+        {
+            std::cout << "Error in construct_basis_function (2D): unknown name: " << name << std::endl;
+            exit(1);
+        }
+    }
+    
+    void construct_basis_function( PFuncBase<std::vector<PRISMS::Coordinate<3> >, double>* &bfunc, const std::string &name)
+    {
+        if( name == "Hexahedron")
+        {
+            bfunc = new Hexahedron();
+        }
+        else
+        {
+            std::cout << "Error in construct_basis_function (3D): unknown name: " << name << std::endl;
+            exit(1);
+        }
+    }
+    
+    template< class Coordinate>
+    void construct_interpolating_functions( std::vector<Interpolator<Coordinate, 2>* > &interp, 
+                                        const std::string &name,
+                                        unsigned long int cell,
+                                        PFuncBase<std::vector<PRISMS::Coordinate<2> >, double>* bfunc_ptr, 
+                                        const std::vector<unsigned long int> &cell_node, 
+                                        const std::vector<PRISMS::Coordinate<2> > &node)
+    {
+        if( name == "Quad")
+        {
+            Interpolator<Coordinate, 2>* interp_ptr;
+            
+            PRISMS::Coordinate<2> dim;
+            dim[0] = node[ cell_node[2]][0] - node[ cell_node[0]][0];
+            dim[1] = node[ cell_node[2]][1] - node[ cell_node[0]][1];
+            
+            // QuadValues(const Coordinate &node, const Coordinate &dim, int node_index)
+            for( int j=0; j<4; j++)
+            {
+                interp.push_back(interp_ptr);
+                interp.back() = new PRISMS::QuadValues<Coordinate>(cell_node[j], cell, bfunc_ptr, node[ cell_node[j]], dim, j);
+            }
+        }
+        else
+        {
+            std::cout << "Error in construct_interpolating_function (2D): unknown name: " << name << std::endl;
+            exit(1);
+        }
+    }
+    
+    template< class Coordinate>
+    void construct_interpolating_functions( std::vector<Interpolator<Coordinate, 3>* > &interp, 
+                                        const std::string &name,
+                                        unsigned long int cell,
+                                        PFuncBase<std::vector<PRISMS::Coordinate<3> >, double>* bfunc_ptr, 
+                                        const std::vector<unsigned long int> &cell_node, 
+                                        const std::vector<PRISMS::Coordinate<3> > &node)
+    {
+        if( name == "Hexahedron")
+        {
+            Interpolator<Coordinate, 3>* interp_ptr;
+            
+            PRISMS::Coordinate<3> dim;
+            dim[0] = node[ cell_node[6]][0] - node[ cell_node[0]][0];
+            dim[1] = node[ cell_node[6]][1] - node[ cell_node[0]][1];
+            dim[2] = node[ cell_node[6]][2] - node[ cell_node[0]][2];
+            
+            // QuadValues(const Coordinate &node, const Coordinate &dim, int node_index)
+            for( int j=0; j<8; j++)
+            {
+                interp.push_back(interp_ptr);
+                interp.back() = new PRISMS::HexahedronValues<Coordinate>(cell_node[j], cell, bfunc_ptr, node[ cell_node[j]], dim, j);
+            }
+        }
+        else
+        {
+            std::cout << "Error in construct_interpolating_function (3D): unknown name: " << name << std::endl;
+            exit(1);
+        }
+    }
+    
+    
     
     /// A template class for a finite element mesh
     ///   Needs: Coordinate::operator[]() for use in Bin
@@ -52,8 +142,21 @@ namespace PRISMS
         // still need a constructor
         Mesh(){};
         
+        ~Mesh()
+        {
+            for( int i=0; i<_interp.size(); i++)
+            {
+                delete _interp[i];
+            }
+            
+            for( int i=0; i<_bfunc.size(); i++)
+            {
+                delete _bfunc[i];
+            }
+        };
+        
         // reads vtk file through 'CELL_TYPES' and then returns
-        void read_2d_vtk(std::ifstream &infile)
+        void read_vtk(std::ifstream &infile)
         {
             std::istringstream ss;
             std::string line, str, type;
@@ -63,13 +166,14 @@ namespace PRISMS
             double d_dummy;
             
             unsigned long int Npoints, Ncells, Ncell_numbers;
-            unsigned long int cell_node[4];
+            std::vector<unsigned long int> cell_node;
             
             PRISMS::Coordinate<DIM> _coord;
             
             while(!infile.eof())
             {
                 std::getline( infile, line);
+                std::cout << "line: " << line << std::endl;
                 
                 if( line[0] == 'P')
                 {
@@ -87,18 +191,26 @@ namespace PRISMS
                         ss >> str >> Npoints >> type;
                         
                         // read points
-                        std::vector< std::vector<double> > value(2);
-                        std::vector< std::vector<int> > hist(2);
+                        std::vector< std::vector<double> > value(DIM);
+                        std::vector< std::vector<int> > hist(DIM);
                         
                         std::cout << "Read POINTS: " << Npoints << std::endl;
                         _node.reserve(Npoints);
+                        std::cout << "  reserve OK" << std::endl;
                         for( int i=0; i<Npoints; i++)
                         {
-                            infile >> _coord[0] >> _coord[1] >> d_dummy;
+                            if( DIM == 2)
+                            {
+                                infile >> _coord[0] >> _coord[1] >> d_dummy;
+                                //std::cout << _coord[0] << " " << _coord[1] << " " << d_dummy << std::endl;
+                            }
+                            else if( DIM == 3)
+                            {
+                                infile >> _coord[0] >> _coord[1] >> _coord[2];
+                                //std::cout << _coord[0] << " " << _coord[1] << " " << _coord[3] << std::endl;
+                            }
                             
-                            //std::cout << _coord[0] << " " << _coord[1] << " " << d_dummy << std::endl;
-                            
-                            for( int j=0; j<2; j++)
+                            for( int j=0; j<DIM; j++)
                                 add_once( value[j], hist[j], _coord[j]);
                             _node.push_back(_coord);
                         }
@@ -110,7 +222,7 @@ namespace PRISMS
                         std::vector<double> incr;
                         
                         std::cout << "Determine Body size" << std::endl;
-                        for( int j=0; j<2; j++)
+                        for( int j=0; j<DIM; j++)
                         {
                             for( int i=1; i<hist[j].size(); i++)
                             {
@@ -140,11 +252,11 @@ namespace PRISMS
                             N[j] += 2;
                         }
                         std::cout << "  Min Coordinate: ";
-                        for( int j=0; j<2; j++)
+                        for( int j=0; j<DIM; j++)
                             std::cout << _min[j] << " ";
                         std::cout << std::endl;
                         std::cout << "  Max Coordinate: ";
-                        for( int j=0; j<2; j++)
+                        for( int j=0; j<DIM; j++)
                             std::cout << _max[j] << " ";
                         std::cout << std::endl;
                         
@@ -169,40 +281,46 @@ namespace PRISMS
                         
                         ss >> str >> Ncells >> Ncell_numbers;
                         
-                        // add Quad basis function
-                        PFuncBase<std::vector<PRISMS::Coordinate<DIM> >, double>* quad_ptr;
-                        _bfunc.push_back( quad_ptr);
-                        _bfunc.back() = new Quad();
-                        quad_ptr = _bfunc.back();
+                        PFuncBase<std::vector<PRISMS::Coordinate<DIM> >, double>* bfunc_ptr;
+                        _bfunc.push_back( bfunc_ptr);
                         
-                        Interpolator<Coordinate, DIM>* _interp_ptr;
+                        if( DIM == 2)
+                        {
+                            // add Quad basis function
+                            _interp.reserve(Ncells*4);
+                            construct_basis_function(_bfunc.back(), "Quad");
+                        }
+                        else if( DIM == 3)
+                        {
+                            // add Hexahedron basis function
+                            _interp.reserve(Ncells*8);
+                            construct_basis_function(_bfunc.back(), "Hexahedron");
+                        }
+                        bfunc_ptr = _bfunc.back();
                         
                         std::cout << "Read CELLS: " << Ncells << std::endl;
                         for( int i=0; i<Ncells; i++)
                         {
-                            infile >> uli_dummy >> cell_node[0] >> cell_node[1] >> cell_node[2] >> cell_node[3];
+                            infile >> uli_dummy;
+                            
+                            cell_node.resize(uli_dummy);
+                            for( int j=0; j<uli_dummy; j++)
+                            {
+                                infile >> cell_node[j];
+                            }
                             
                             //std::cout << cell_node[0] << " " << cell_node[1] << " " << cell_node[2] << " " << cell_node[3] << std::endl;
                             
                             // create interpolator
-                            _coord[0] = _node[ cell_node[2]][0] - _node[ cell_node[0]][0];
-                            _coord[1] = _node[ cell_node[2]][1] - _node[ cell_node[0]][1];
-                            
-                            // QuadValues(const Coordinate &node, const Coordinate &dim, int node_index)
-                            for( int j=0; j<4; j++)
+                            if( DIM == 2)
                             {
-                                _interp.push_back( _interp_ptr );
-                                
-                                //std::cout << "cell_node: " << cell_node[j] << std::endl;
-                                //std::cout << "quad_ptr: " << quad_ptr << std::endl;
-                                //std::cout << "node_coord: " << _node[ cell_node[j]] << std::endl;
-                                //std::cout << "dim: " << _coord << std::endl;
-                                //std::cout << "j: " << j << std::endl;
-                                
-                                _interp.back() = new PRISMS::QuadValues<Coordinate>(cell_node[j], i, quad_ptr, _node[ cell_node[j]], _coord, j);
-                                
-                                //_interp.back() = new PRISMS::QuadValues<Coordinate>(cell_node[j], i, quad_ptr, _node[ cell_node[0]], _coord, j);
+                                construct_interpolating_functions(_interp, "Quad", i, bfunc_ptr, cell_node, _node);
                             }
+                            else if(DIM == 3)
+                            {
+                                construct_interpolating_functions(_interp, "Hexahedron", i, bfunc_ptr, cell_node, _node);
+                            }
+                            
                         }
                         std::cout << "  done" << std::endl;
                         
@@ -230,9 +348,9 @@ namespace PRISMS
                         {
                             infile >> uli_dummy;
                             
-                            if( uli_dummy != 9)
+                            if( uli_dummy != 9 && uli_dummy != 12)
                             {
-                                std::cout << "Error reading CELL_TYPES: CELL TYPE != 9" << std::endl;
+                                std::cout << "Error reading CELL_TYPES: CELL TYPE != 9 && != 12" << std::endl;
                                 std::cout << "   CELL TYPE: " << uli_dummy << std::endl;
                                 exit(1);
                             }

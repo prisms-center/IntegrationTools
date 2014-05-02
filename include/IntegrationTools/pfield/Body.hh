@@ -38,16 +38,16 @@ namespace PRISMS
         ///      only rectilinear grids (though output as UNSTRUCTURED_GRID)
         ///      only (2d) Quad elements
         ///
-        void read_2d_vtk( const std::string &vtkfile)
+        void read_vtk( const std::string &vtkfile)
         {
-            std::cout << "Begin reading 2D vtk file" << std::endl;
+            std::cout << "Begin reading vtk file" << std::endl;
             
             
             // read in vtk file here
             std::ifstream infile(vtkfile);
             
             // read mesh info
-            mesh.read_2d_vtk(infile);
+            mesh.read_vtk(infile);
             
             // read point data
             std::istringstream ss;
@@ -82,50 +82,44 @@ namespace PRISMS
                         std::getline( infile, line);
                         
                         // read data
+                        std::cout << "begin reading data" << std::endl;
                         std::vector<double> data(Npoints);
                         for( int i=0; i<Npoints; i++)
                         {
                             infile >> data[i];
                         }
+                        std::cout << "  done" << std::endl;
+                        
                         
                         // construct field
                         std::vector<std::string> var_name(DIM);
                         std::vector<std::string> var_description(DIM);
                         
-                        var_name[0] = "x";
-                        var_name[1] = "y";
+                        if( DIM >= 2)
+                        {
+                            var_name[0] = "x";
+                            var_description[0] = "x coordinate";
+                            var_name[1] = "y";
+                            var_description[1] = "y coordinate";
                         
-                        var_description[0] = "x coordinate";
-                        var_description[1] = "y coordinate";
+                        }
+                        if( DIM >= 3)
+                        {
+                            var_name[2] = "z";
+                            var_description[2] = "z coordinate";
+                        
+                        }
+                        
                         
                         std::cout << "Construct PField '" << name << "'" << std::endl;
                         scalar_field.push_back( PField<Coordinate, double, DIM>( name, var_name, var_description, mesh, data, 0.0) );
+                        std::cout << "  done" << std::endl;
+                        
                     }
                 }
             }
             
             infile.close();
-        }
-        
-        /// Read from a 3D vtk file
-        ///   For now:
-        ///      only ASCII files
-        ///      only rectilinear grids (though output as UNSTRUCTURED_GRID)
-        ///      only (3d) Hexahedron elements
-        ///
-        void read_3d_vtk( const std::string &vtkfile)
-        {
-            // read in vtk file here
-            std::ifstream infile(vtkfile);
-            
-            std::string line;
-            
-            while(!infile.eof())
-            {
-                std::getline( infile, line);
-                std::cout << line << "\n";
-            }
-            
         }
         
         PField<Coordinate, double, DIM>& find_scalar_field(std::string name)
