@@ -90,7 +90,8 @@ namespace PRISMS
         }
         
         /// Add a new item to all bins that fall in cuboid defined by 'min' and 'max' Coordinates
-        void add_range( const T &newitem, const Coordinate &min, const Coordinate &max)
+        template<class PCoord>
+        void add_range( const T &newitem, const PCoord &min, const PCoord &max)
         {
             //std::cout << "begin add_range()" << std::endl;
             
@@ -170,7 +171,8 @@ namespace PRISMS
     
         /// Set 'term' to be the indices into '_item' PNDArray of the bin that contains 'coord'
         ///   Return 'false' if unsuccesful, 'true' if succesful
-        void indices(const Coordinate &coord, std::vector<int> &term)
+        template< class PCoord>
+        void indices(const PCoord &coord, std::vector<int> &term)
         {
             for( int i=0; i<_item.order(); i++)
             {
@@ -183,6 +185,38 @@ namespace PRISMS
                 if( (coord[i] < _min[i]) || (coord[i] > _max[i]) )
                     throw std::domain_error("Invalid coord, out of bin range");
                 term[i] = std::floor( (coord[i] - _min[i])/_incr[i]);
+            }
+        }
+        
+        /// Set 'term' to be the indices into '_item' PNDArray of the bin that contains 'coord'
+        ///   Return 'false' if unsuccesful, 'true' if succesful
+        template< class PCoord>
+        void max_indices(const PCoord &coord, std::vector<int> &term)
+        {
+            for( int i=0; i<_item.order(); i++)
+            {
+                //std::cout << "i: " << i << std::endl;
+                //std::cout << "coord: " << coord[i] << std::endl;
+                //std::cout << "_min: " << _min[i] << std::endl;
+                //std::cout << "_max: " << _max[i] << std::endl;
+                //std::cout << "_incr: " << _incr[i] << std::endl;
+                
+                if( (coord[i] < _min[i]) || (coord[i] > _max[i]) )
+                    throw std::domain_error("Invalid coord, out of bin range");
+                
+                //std::cout << "coord: " << coord[i] << "  _min: " << _min[i] << "  _incr: " << _incr[i] << std::endl;
+                //std::cout << std::floor( (coord[i] - _min[i])/_incr[i]) << " " << (coord[i] - _min[i])/_incr[i] << std::endl;
+                
+                if( std::floor( (coord[i] - _min[i])/_incr[i]) == (coord[i] - _min[i])/_incr[i])
+                {
+                    //std::cout << "reduce max" << std::endl;
+                    term[i] = std::floor( (coord[i] - _min[i])/_incr[i]);
+                    term[i]--;
+                }
+                else
+                {
+                    term[i] = std::floor( (coord[i] - _min[i])/_incr[i]);
+                }
             }
         }
     };

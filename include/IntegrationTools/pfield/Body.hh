@@ -14,25 +14,23 @@ namespace PRISMS
     
     /// A class for a Body: a combination of Mesh and Field(s))
     ///
-    template< class Coordinate>
+    template< class Coordinate, int DIM>
     class Body
     {
-        Coordinate _coord;
-        
     public:
         
-        Mesh<Coordinate> mesh;
+        Mesh<Coordinate, DIM> mesh;
         
-        std::vector< PField<Coordinate, double> > scalar_field;
+        std::vector< PField<Coordinate, double, DIM> > scalar_field;
         
-        //std::vector< PField<Coordinate, std::vector<double> > > vector_field;
+        //std::vector< PField<Coordinate, std::vector<double>, DIM > > vector_field;
         
-        //std::vector< PField<Coordinate, Tensor<double> > > tensor_field;
+        //std::vector< PField<Coordinate, Tensor<double>, DIM > > tensor_field;
         
         
         // ----------------------------------------------------------
         // Constructors
-        Body(const Coordinate &coord):mesh(coord){_coord = coord;}; 
+        Body(){}; 
         
         /// Read from a 2D vtk file
         ///   For now:
@@ -91,8 +89,8 @@ namespace PRISMS
                         }
                         
                         // construct field
-                        std::vector<std::string> var_name(_coord.size());
-                        std::vector<std::string> var_description(_coord.size());
+                        std::vector<std::string> var_name(DIM);
+                        std::vector<std::string> var_description(DIM);
                         
                         var_name[0] = "x";
                         var_name[1] = "y";
@@ -101,7 +99,7 @@ namespace PRISMS
                         var_description[1] = "y coordinate";
                         
                         std::cout << "Construct PField '" << name << "'" << std::endl;
-                        scalar_field.push_back( PField<Coordinate, double>( name, var_name, var_description, mesh, data, 0.0) );
+                        scalar_field.push_back( PField<Coordinate, double, DIM>( name, var_name, var_description, mesh, data, 0.0) );
                     }
                 }
             }
@@ -130,7 +128,7 @@ namespace PRISMS
             
         }
         
-        PField<Coordinate, double>& find_scalar_field(std::string name)
+        PField<Coordinate, double, DIM>& find_scalar_field(std::string name)
         {
             for( int i=0; i<scalar_field.size(); i++)
             {

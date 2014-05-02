@@ -280,6 +280,34 @@ ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, an
 f.delete()
 print "  deleted\n"
 
+
+
+#### Test PField
+body2d = pfunction.Body2D("2D.vtk")
+
+X = np.arange(0.0, 1.0, 0.01)
+Y = np.arange(0.0, 1.0, 0.01)
+X, Y = np.meshgrid(X, Y)
+Z = 0.0*X
+s = X.shape
+
+f = pfunction.PFunc_dsd("c", body2d)
+
+fig = plt.figure(fignum, figsize=(8,8))
+allfig.append(fig)
+fignum += 1
+fig.suptitle('Concentration Field', fontsize=12)
+ax = fig.gca(projection='3d')
+for i in range(0,s[0]):
+    for j in range(0,s[1]):
+        Z[i,j] = f.calc(pfunction.c_dbl_array([X[i,j],Y[i,j]]))
+ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+
+body2d.delete()
+
+
+#### Displaying/Writing Figures
+
 for i in range(0,fignum):
     plt.figure(i)
     savefig("fig_" + str(i) + ".eps")

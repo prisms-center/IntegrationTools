@@ -20,13 +20,13 @@ namespace PRISMS
     ///       for instance 'double' for temperature or 'std::vector<double>' for vector displacement
     ///
     ///   A field consists of a pointer to a mesh, a list field values (at mesh nodes)
-    template<class Coordinate, class FieldType>
+    template<class Coordinate, class FieldType, int DIM>
     class PField : public PFuncBase<Coordinate, FieldType>
     {
     public:
         
         // pointer to a Mesh that lives in a Body
-        Mesh<Coordinate> *_mesh;
+        Mesh<Coordinate, DIM> *_mesh;
         
         // array of field values at mesh nodes
         std::vector<FieldType> _field;
@@ -44,7 +44,7 @@ namespace PRISMS
         PField(   const std::string &name,
                   const std::vector<std::string> &var_name,
                   const std::vector<std::string> &var_description,
-                  Mesh<Coordinate> &mesh, 
+                  Mesh<Coordinate, DIM> &mesh, 
                   const std::vector<FieldType> &field, 
                   const FieldType &zero) :
                   PFuncBase<Coordinate, FieldType>(name, var_name, var_description),
@@ -56,14 +56,18 @@ namespace PRISMS
             int max = mesh.max_bin_size();
             _bfunc.resize(max);
             _node_index.resize(max);
+            _grad_val.resize(DIM);
+            _hess_val.resize(DIM);
+            for( int i=0; i<DIM; i++)
+                _hess_val[i].resize(DIM);
         }
         
         // ----------------------------------------------------------
         // Clone
         
-        PField<Coordinate,FieldType>* clone() const
+        PField<Coordinate,FieldType, DIM>* clone() const
         {
-            return new PField<Coordinate,FieldType>(*this);
+            return new PField<Coordinate,FieldType, DIM>(*this);
         }
         
         
@@ -95,22 +99,35 @@ namespace PRISMS
 
     };
     
-    template<class Coordinate, class FieldType>
-    FieldType PField<Coordinate,FieldType>::operator()( const Coordinate &coord)
+    template<class Coordinate, class FieldType, int DIM>
+    FieldType PField<Coordinate,FieldType, DIM>::operator()( const Coordinate &coord)
     {
+        //std::cout << "begin calc" << std::endl;
+        
+        //std::cout << "coord: ";
+        //for( int i=0; i<DIM; i++)
+        //    std::cout << coord[i] << " ";
+        //std::cout << std::endl;
+        
+        
         // get evaluated basis functions
 		(*_mesh).basis_functions(coord, _bfunc, _node_index, _Nbfunc);
 		
         // sum them
         _val = _zero;
 		for( int i=0; i<_Nbfunc; i++)
-			_val += _bfunc[i]*_field[_node_index[i]];
+		{
+        	//std::cout << "i: " << i << "  node: " << _node_index[i] << "  bfunc: " << _bfunc[i] << "  val: " << _field[_node_index[i]] << std::endl;
+            _val += _bfunc[i]*_field[_node_index[i]];
+        }
+        //std::cout << "val: " << _val << std::endl << std::endl;
 		return _val;
     }
     
-    template<class Coordinate, class FieldType>
-    FieldType PField<Coordinate,FieldType>::grad( const Coordinate &coord, int di)
+    template<class Coordinate, class FieldType, int DIM>
+    FieldType PField<Coordinate,FieldType, DIM>::grad( const Coordinate &coord, int di)
     {
+        //std::cout << "begin PField::grad()" << std::endl;
         // get evaluated basis functions
 		(*_mesh).grad_basis_functions(coord, di, _bfunc, _node_index, _Nbfunc);
 		
@@ -118,11 +135,13 @@ namespace PRISMS
         _grad_val[di] = _zero;
 		for( int i=0; i<_Nbfunc; i++)
 			_grad_val[di] += _bfunc[i]*_field[_node_index[i]];
-		return _grad_val[di];
+        return _grad_val[di];
+        //std::cout << "finish PField::grad()" << std::endl;
+        
     }
     
-    template<class Coordinate, class FieldType>
-    FieldType PField<Coordinate,FieldType>::hess( const Coordinate &coord, int di, int dj)
+    template<class Coordinate, class FieldType, int DIM>
+    FieldType PField<Coordinate,FieldType, DIM>::hess( const Coordinate &coord, int di, int dj)
     {
         // get evaluated basis functions
 		(*_mesh).hess_basis_functions(coord, di, dj, _bfunc, _node_index, _Nbfunc);
@@ -134,41 +153,41 @@ namespace PRISMS
 		return _hess_val[di][dj];
     }
 
-    template<class Coordinate, class FieldType>
-    void PField<Coordinate,FieldType>::eval( const Coordinate &coord)
+    template<class Coordinate, class FieldType, int DIM>
+    void PField<Coordinate,FieldType, DIM>::eval( const Coordinate &coord)
     {
         (*this)(coord);
     }
     
-    template<class Coordinate, class FieldType>
-    void PField<Coordinate,FieldType>::eval_grad( const Coordinate &coord)
+    template<class Coordinate, class FieldType, int DIM>
+    void PField<Coordinate,FieldType, DIM>::eval_grad( const Coordinate &coord)
     {
-        for( int di=0; di<coord.size(); di++)
+        for( int di=0; di<DIM; di++)
             (*this).grad(coord, di);
     }
     
-    template<class Coordinate, class FieldType>
-    void PField<Coordinate,FieldType>::eval_hess( const Coordinate &coord)
+    template<class Coordinate, class FieldType, int DIM>
+    void PField<Coordinate,FieldType, DIM>::eval_hess( const Coordinate &coord)
     {
-        for( int di=0; di<coord.size(); di++)
-            for( int dj=0; dj<coord.size(); dj++)
+        for( int di=0; di<DIM; di++)
+            for( int dj=0; dj<DIM; dj++)
                 (*this).hess(coord, di, dj);
     }
     
-    template<class Coordinate, class FieldType>
-    FieldType PField<Coordinate,FieldType>::operator()() const
+    template<class Coordinate, class FieldType, int DIM>
+    FieldType PField<Coordinate,FieldType, DIM>::operator()() const
     {
         return _val;
     }
     
-    template<class Coordinate, class FieldType>
-    FieldType PField<Coordinate,FieldType>::grad( int di) const
+    template<class Coordinate, class FieldType, int DIM>
+    FieldType PField<Coordinate,FieldType, DIM>::grad( int di) const
     {
         return _grad_val[di];
     }
     
-    template<class Coordinate, class FieldType>
-    FieldType PField<Coordinate,FieldType>::hess( int di, int dj) const
+    template<class Coordinate, class FieldType, int DIM>
+    FieldType PField<Coordinate,FieldType, DIM>::hess( int di, int dj) const
     {
         return _hess_val[di][dj];
     }

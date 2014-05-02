@@ -18,41 +18,39 @@ namespace PRISMS
     /// A template class for a finite element mesh
     ///   Needs: Coordinate::operator[]() for use in Bin
     ///
-    template< class Coordinate>
+    template<class Coordinate, int DIM>
     class Mesh
     {
-        Coordinate _coord;
-        
         // min and max coordinate of cuboid surrounding the body
-        Coordinate _min;
-        Coordinate _max;
+        PRISMS::Coordinate<DIM> _min;
+        PRISMS::Coordinate<DIM> _max;
         
         /// Vector of nodal coordinates
         ///    nodal values live in 'Field' class
         ///
-        std::vector<Coordinate> _node;          
+        std::vector<PRISMS::Coordinate<DIM> > _node;          
         
         /// array containing interpolating functions: 
         ///    owns the interpolating functions
         ///    interpolating functions contain basis function / element info, 
         ///    these point to _bfunc pfunctions which are used to evaluate
         ///
-        std::vector<Interpolator<Coordinate>* > _interp;  
+        std::vector<Interpolator<Coordinate, DIM>* > _interp;  
         
         /// array containing PFunctions evaluated by interpolating functions
         ///    owns the pfunctions, which are pointed to by the interpolating functions
         ///    !!! do not modify after initial construction or pointers will be messed up !!!
         ///
-        std::vector< PFuncBase<std::vector<Coordinate>, double>* > _bfunc;
+        std::vector< PFuncBase<std::vector<PRISMS::Coordinate<DIM> >, double>* > _bfunc;
         
         /// bin of interpolating functions (this might be updated to be either Element or Spline Bins)
         ///
-        Bin<Interpolator<Coordinate>*, Coordinate> _bin;
+        Bin<Interpolator<Coordinate, DIM>*, Coordinate > _bin;
 	
 	public:
     
         // still need a constructor
-        Mesh(const Coordinate &coord){_coord = coord; _min = coord; _max = coord;};
+        Mesh(){};
         
         // reads vtk file through 'CELL_TYPES' and then returns
         void read_2d_vtk(std::ifstream &infile)
@@ -66,6 +64,8 @@ namespace PRISMS
             
             unsigned long int Npoints, Ncells, Ncell_numbers;
             unsigned long int cell_node[4];
+            
+            PRISMS::Coordinate<DIM> _coord;
             
             while(!infile.eof())
             {
@@ -151,7 +151,7 @@ namespace PRISMS
                         std::cout << "  done" << std::endl;
                         
                         std::cout << "Initialize Bin" << std::endl;
-                        _bin = Bin<Interpolator<Coordinate>*, Coordinate>(min, incr, N);
+                        _bin = Bin<Interpolator<Coordinate, DIM>*, Coordinate>(min, incr, N);
                         std::cout << "  done" << std::endl;
                         
                     }
@@ -170,12 +170,12 @@ namespace PRISMS
                         ss >> str >> Ncells >> Ncell_numbers;
                         
                         // add Quad basis function
-                        PFuncBase<std::vector<Coordinate>, double>* quad_ptr;
+                        PFuncBase<std::vector<PRISMS::Coordinate<DIM> >, double>* quad_ptr;
                         _bfunc.push_back( quad_ptr);
-                        _bfunc.back() = new PRISMS::Quad<std::vector<Coordinate> >();
+                        _bfunc.back() = new Quad();
                         quad_ptr = _bfunc.back();
                         
-                        Interpolator<Coordinate>* _interp_ptr;
+                        Interpolator<Coordinate, DIM>* _interp_ptr;
                         
                         std::cout << "Read CELLS: " << Ncells << std::endl;
                         for( int i=0; i<Ncells; i++)
@@ -198,7 +198,10 @@ namespace PRISMS
                                 //std::cout << "node_coord: " << _node[ cell_node[j]] << std::endl;
                                 //std::cout << "dim: " << _coord << std::endl;
                                 //std::cout << "j: " << j << std::endl;
-                                _interp.back() = new PRISMS::QuadValues<Coordinate>(cell_node[j], quad_ptr, _node[ cell_node[j]], _coord, j);
+                                
+                                _interp.back() = new PRISMS::QuadValues<Coordinate>(cell_node[j], i, quad_ptr, _node[ cell_node[j]], _coord, j);
+                                
+                                //_interp.back() = new PRISMS::QuadValues<Coordinate>(cell_node[j], i, quad_ptr, _node[ cell_node[0]], _coord, j);
                             }
                         }
                         std::cout << "  done" << std::endl;
@@ -242,8 +245,28 @@ namespace PRISMS
             }
         }
         
-        Coordinate min(){ return _min;}
-        Coordinate max(){ return _max;}
+        void min( Coordinate &coord)
+        { 
+            for( int i=0; i<DIM; i++)
+                coord[i] = _min[i];
+        }
+        
+        void max( Coordinate &coord)
+        { 
+            for( int i=0; i<DIM; i++)
+                coord[i] = _max[i];
+        }
+        
+        double min( int i)
+        { 
+            return _min[i];
+        }
+        
+        double max( int i)
+        { 
+            return _max[i];
+        }
+        
         
         int max_bin_size()
         {
@@ -257,40 +280,118 @@ namespace PRISMS
         //
         void basis_functions(const Coordinate &coord, std::vector<double> &bfunc, std::vector<unsigned long int> &node_index, int &s) 
         {
-            //std::cout << "begin Mesh::basis_functions()" << std::endl;
-            std::vector<Interpolator<Coordinate>* > &bin = _bin.contents(coord);
+            std::vector<Interpolator<Coordinate,DIM>* > &bin = _bin.contents(coord);
             s = bin.size();
-            for( int i=0; i<s; i++)
+            
+            int i=0;
+            unsigned long int element;
+            
+            for( i=0; i<s; i++)
             {
-                bfunc[i] = (*bin[i])(coord); 
-                node_index[i] = (*bin[i]).node();
-                //std::cout << "i: " << i << "  bfunc: " << bfunc[i] << "  node: " << node_index[i] << std::endl;
+                if( (*bin[i]).is_in_range(coord))
+                {
+                    element = (*bin[i]).element();
+                    for( i=0; i<s; i++)
+                    {
+                        if( (*bin[i]).element() == element)
+                        {
+                            bfunc[i] = (*bin[i])(coord);
+                        }
+                        else
+                        {
+                            bfunc[i] = 0.0;
+                        }
+                        node_index[i] = (*bin[i]).node();
+                        //std::cout << "i: " << i << "  bfunc: " << bfunc[i] << "  node: " << _node[ node_index[i]] << std::endl;
+                    }
+                    return;
+                }
+                //else
+                //{
+                //    bfunc[i] = 0.0;
+                //    node_index[i] = (*bin[i]).node();
+                //}
+                //std::cout << "i: " << i << "  bfunc: " << bfunc[i] << "  node: " << _node[ node_index[i]] << std::endl;
             }
-            //std::cout << "finish Mesh::basis_functions()" << std::endl;
             
         };
         
         // Set 'bfunc' to evaluated grad basis functions at coord, and 's' is the length
         void grad_basis_functions(const Coordinate &coord, int di, std::vector<double> &bfunc, std::vector<unsigned long int> &node_index, int &s)
         {
-            std::vector<Interpolator<Coordinate>* > &bin = _bin.contents(coord);
+            //std::cout << "begin Mesh::grad_basis_functions()" << std::endl;
+            std::vector<Interpolator<Coordinate,DIM>* > &bin = _bin.contents(coord);
             s = bin.size();
-            for( int i=0; i<s; i++)
+            
+            int i=0;
+            unsigned long int element;
+            
+            for( i=0; i<s; i++)
             {
-                bfunc[i] = (*bin[i]).grad(coord, di);
-                node_index[i] = (*bin[i]).node();
+                if( (*bin[i]).is_in_range(coord))
+                {
+                    element = (*bin[i]).element();
+                    for( i=0; i<s; i++)
+                    {
+                        if( (*bin[i]).element() == element)
+                        {
+                            bfunc[i] = (*bin[i]).grad(coord, di);
+                        }
+                        else
+                        {
+                            bfunc[i] = 0.0;
+                        }
+                        node_index[i] = (*bin[i]).node();
+                        //std::cout << "i: " << i << "  bfunc: " << bfunc[i] << "  node: " << _node[ node_index[i]] << std::endl;
+                    }
+                    return;
+                }
+                //else
+                //{
+                //    bfunc[i] = 0.0;
+                //    node_index[i] = (*bin[i]).node();
+                //}
+                //std::cout << "i: " << i << "  bfunc: " << bfunc[i] << "  node: " << _node[ node_index[i]] << std::endl;
             }
+            //std::cout << "finish Mesh::grad_basis_functions()" << std::endl;
+            
         }
         
         // Set 'bfunc' to evaluated hess basis functions at coord, and 's' is the length
         void hess_basis_functions(Coordinate coord, int di, int dj, std::vector<double> &bfunc, std::vector<unsigned long int> &node_index, int &s)
         {
-            std::vector<Interpolator<Coordinate>* > &bin = _bin.contents(coord);
+            std::vector<Interpolator<Coordinate,DIM>* > &bin = _bin.contents(coord);
             s = bin.size();
-            for( int i=0; i<s; i++)
+            
+            int i=0;
+            unsigned long int element;
+            
+            for( i=0; i<s; i++)
             {
-                bfunc[i] = (*bin[i]).hess(coord, di, dj);
-                node_index[i] = (*bin[i]).node();
+                if( (*bin[i]).is_in_range(coord))
+                {
+                    element = (*bin[i]).element();
+                    for( i=0; i<s; i++)
+                    {
+                        if( (*bin[i]).element() == element)
+                        {
+                            bfunc[i] = (*bin[i]).hess(coord, di, dj);
+                        }
+                        else
+                        {
+                            bfunc[i] = 0.0;
+                        }
+                        node_index[i] = (*bin[i]).node();
+                        //std::cout << "i: " << i << "  bfunc: " << bfunc[i] << "  node: " << _node[ node_index[i]] << std::endl;
+                    }
+                    return;
+                }
+                //else
+                //{
+                //    bfunc[i] = 0.0;
+                //    node_index[i] = (*bin[i]).node();
+                //}
+                //std::cout << "i: " << i << "  bfunc: " << bfunc[i] << "  node: " << _node[ node_index[i]] << std::endl;
             }
         }
     

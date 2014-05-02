@@ -9,6 +9,7 @@
 
 #include "IntegrationTools/PExtern.hh"
 #include "IntegrationTools/PFunction.hh"
+#include "IntegrationTools/PField.hh"
 
 // In future, might have more complicated OutType, 
 //   so make all have 'void' return and pass everything by reference
@@ -509,6 +510,34 @@ extern "C"
     {
         val = (*f).basis_hess(term,di,dj);
     }
+    
+    // Functions for using constructing a 2D PRISMS::Body externally (say Python or Fortran),
+    //   allowing access to PFields
+    //   written for Coordinate=double*, OutType=double, DIM=2
+    
+    void Body2D_new(char* vtkfile, PRISMS::Body<double*,2>* &b)
+    {
+        b = new PRISMS::Body<double*,2>();
+        (*b).read_2d_vtk(std::string(vtkfile));
+    };
+    
+    void Body2D_delete(PRISMS::Body<double*,2>* &b)
+    {
+        delete b;
+        b = NULL;
+    };
+    
+    
+    // Functions for using a 2D scalar PField externally (say Python or Fortran), as a PFunction.
+    //   From a Body pointer, returns a pointer to a PFuncBase
+    //   written for Coordinate=double*, OutType=double, DIM=2
+    //   don't delete this! it will be deleted by deleting the Body
+    
+    void ScalarField2D(char* name, PRISMS::Body<double*,2>* b, PRISMS::PFuncBase<double*,double>* &f)
+    {
+        f = &((*b).find_scalar_field(std::string(name)));
+    };
+    
     
 }
 

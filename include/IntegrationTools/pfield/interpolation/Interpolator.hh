@@ -3,24 +3,26 @@
 #define Interpolator_HH
 
 #include "../../pfunction/PFuncBase.hh"
+#include "../Coordinate.hh"
 
 namespace PRISMS
 {
     
     /// A base class for interpolating functions
     ///
-    template <class Coordinate>
+    template <class Coordinate, int DIM>
     class Interpolator
     {
     protected:
     
-        unsigned long int _node;    //index of nodal value or control point
-        PFuncBase<std::vector<Coordinate>, double>* _bfunc;          // basis function to evaluate
+        unsigned long int _node;        //index of nodal value or control point
+        unsigned long int _element;     //index of element
+        PFuncBase<std::vector<PRISMS::Coordinate<DIM> >, double>* _bfunc;          // basis function to evaluate
         
     public:
         
-        Interpolator( unsigned long int node, PFuncBase<std::vector<Coordinate>, double>* bfunc):
-        _node(node), _bfunc(bfunc)
+        Interpolator( unsigned long int node, unsigned long int element, PFuncBase<std::vector<PRISMS::Coordinate<DIM> >, double>* bfunc):
+        _node(node), _element(element), _bfunc(bfunc)
         {};
         
         unsigned long int node()
@@ -28,16 +30,21 @@ namespace PRISMS
             return _node;
         }
         
-        virtual Coordinate min() const
+        unsigned long int element()
         {
-            undefined("Coordinate min() const");
-            return Coordinate();
+            return _element;
         }
         
-        virtual Coordinate max() const
+        virtual PRISMS::Coordinate<DIM> min() const
         {
-            undefined("Coordinate max() const");
-            return Coordinate();
+            undefined("void min(Coordinate &coord) const");
+            return PRISMS::Coordinate<DIM>();
+        }
+        
+        virtual PRISMS::Coordinate<DIM> max() const
+        {
+            undefined("void max(Coordinate &coord) const");
+            return PRISMS::Coordinate<DIM>();
         }
         
         virtual bool is_in_range(const Coordinate &coord)
