@@ -26,6 +26,11 @@ int main(int argc, char *argv[])
     
     ScalarField3D &conc = body.find_scalar_field("c");
     
+    int i;
+    std::cout << "pause: ";
+    std::cin >> i;
+    std::cout << std::endl;
+    
     double incr[DIM];
     incr[0] = (body.mesh.max(0) - body.mesh.min(0))/10.0;
     incr[1] = (body.mesh.max(1) - body.mesh.min(1))/10.0;

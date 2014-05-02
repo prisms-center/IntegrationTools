@@ -262,6 +262,23 @@ extern "C"
     void ScalarField2D(char* name, PRISMS::Body<double*,2>* b, PRISMS::PFuncBase<double*,double>* &f);
     
     
+    
+    // Functions for using constructing a 3D PRISMS::Body externally (say Python or Fortran),
+    //   allowing access to PFields
+    //   written for Coordinate=double*, DIM=3
+    
+    void Body3D_new(char* vtkfile, PRISMS::Body<double*,3>* &b);
+    
+    void Body3D_delete(PRISMS::Body<double*,3>* &b);
+    
+    
+    // Functions for using a 3D scalar PField externally (say Python or Fortran), as a PFunction.
+    //   From a Body pointer, returns a pointer to a PFuncBase
+    //   written for Coordinate=double*, OutType=double, DIM=3
+    
+    void ScalarField3D(char* name, PRISMS::Body<double*,3>* b, PRISMS::PFuncBase<double*,double>* &f);
+    
+    
 }
 
 

@@ -32,7 +32,7 @@ X, Y = np.meshgrid(X, Y)
 Z = 0.0*X
 s = X.shape
 
-f = pfunction.PFunc_dsd("c", body2d)
+f = pfunction.PFunc_dsd("c", body2d=body2d)
 
 
 

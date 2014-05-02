@@ -3,15 +3,17 @@ import config
 
 # expects a PFunction.c_dbl_array for input (var), returns a number for output
 class PFunc_dsd(object):
-    def __init__(self,name,body=None):
+    def __init__(self,name, body2d=None, body3d=None):
         self.ptr = ctypes.c_void_p(None)
-        if body == None:
+        if body2d == None and body3d == None:
             config.lib.PFunction_dsd_new(name,ctypes.byref(self.ptr))
             if( self.ptr.value == None):
                 print "Error, PFunc_dsd '" + name + "' not found"
                 exit()
-        else:
-            config.lib.ScalarField2D(name, body.ptr, ctypes.byref(self.ptr))
+        elif body2d != None:
+            config.lib.ScalarField2D(name, body2d.ptr, ctypes.byref(self.ptr))
+        elif body3d != None:
+            config.lib.ScalarField3D(name, body3d.ptr, ctypes.byref(self.ptr))
         
         # use this to avoid allocating memory each time something is evaluated
         self.tval = ctypes.c_double()

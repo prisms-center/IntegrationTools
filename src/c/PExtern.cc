@@ -518,7 +518,7 @@ extern "C"
     void Body2D_new(char* vtkfile, PRISMS::Body<double*,2>* &b)
     {
         b = new PRISMS::Body<double*,2>();
-        (*b).read_2d_vtk(std::string(vtkfile));
+        (*b).read_vtk(std::string(vtkfile));
     };
     
     void Body2D_delete(PRISMS::Body<double*,2>* &b)
@@ -534,6 +534,34 @@ extern "C"
     //   don't delete this! it will be deleted by deleting the Body
     
     void ScalarField2D(char* name, PRISMS::Body<double*,2>* b, PRISMS::PFuncBase<double*,double>* &f)
+    {
+        f = &((*b).find_scalar_field(std::string(name)));
+    };
+    
+    
+    // Functions for using constructing a 3D PRISMS::Body externally (say Python or Fortran),
+    //   allowing access to PFields
+    //   written for Coordinate=double*, OutType=double, DIM=3
+    
+    void Body3D_new(char* vtkfile, PRISMS::Body<double*,3>* &b)
+    {
+        b = new PRISMS::Body<double*,3>();
+        (*b).read_vtk(std::string(vtkfile));
+    };
+    
+    void Body3D_delete(PRISMS::Body<double*,3>* &b)
+    {
+        delete b;
+        b = NULL;
+    };
+    
+    
+    // Functions for using a 3D scalar PField externally (say Python or Fortran), as a PFunction.
+    //   From a Body pointer, returns a pointer to a PFuncBase
+    //   written for Coordinate=double*, OutType=double, DIM=2
+    //   don't delete this! it will be deleted by deleting the Body
+    
+    void ScalarField3D(char* name, PRISMS::Body<double*,3>* b, PRISMS::PFuncBase<double*,double>* &f)
     {
         f = &((*b).find_scalar_field(std::string(name)));
     };
