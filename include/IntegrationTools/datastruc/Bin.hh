@@ -29,7 +29,7 @@ namespace PRISMS
 	
 	public:
         
-        Bin<T>(){};
+        Bin(){};
         
         /// Construct a Bin
         ///   'min': minimum value of each coordinate component
@@ -39,7 +39,7 @@ namespace PRISMS
         /// For example, to bin the range (0->10, 0->20, 10->100), with size 1 bin spacing:
         ///    Bin<T>( {0,0,10}, {1,1,1}, {10, 20, 90})
         ///
-        Bin<T>(const std::vector<double> &min, std::vector<double> &incr, std::vector<int> &N)
+        Bin(const std::vector<double> &min, std::vector<double> &incr, std::vector<int> &N)
         {
             _min = min;
             _incr = incr;
@@ -50,11 +50,26 @@ namespace PRISMS
             _indices = _N;
             _item.resize(_N);
         }
+        
+        void clear()
+        {
+            (*this) = Bin<T, Coordinate>();
+        }
+        
+        std::vector<double>& min()
+        {
+            return _min;
+        }
+        
+        std::vector<double>& max()
+        {
+            return _max;
+        }
             
         /// Add a new item to the bin containing a given coordinate
         void add( const T &newitem, const Coordinate &coord)
         {
-            indices( coord, &_indices);
+            indices( coord, _indices);
             _item(_indices).push_back(newitem);
         }
         
@@ -63,7 +78,7 @@ namespace PRISMS
         /// return 'true' if added succesfully, 'false' if not
         void add_once( const T &newitem, const Coordinate &coord)
         {
-            indices( coord, &_indices);
+            indices( coord, _indices);
             std::vector<T> &singlebin = _item(_indices);
             for( int i=0; i<singlebin.size(); i++)
             {
@@ -73,10 +88,71 @@ namespace PRISMS
             
             singlebin.push_back(newitem);
         }
+        
+        /// Add a new item to all bins that fall in cuboid defined by 'min' and 'max' Coordinates
+        void add_range( const T &newitem, const Coordinate &min, const Coordinate &max)
+        {
+            //std::cout << "begin add_range()" << std::endl;
+            
+            //std::cout << "min: " << min << " max: " << max << std::endl;
+            
+            int i, j;
+            std::vector<int> index_min(_item.order());
+            std::vector<int> index_max(_item.order());
+            indices( min, index_min);
+            indices( max, index_max);
+            
+            //std::cout << "MIN: ";
+            //for( j=0; j<index_min.size(); j++)
+            //    std::cout << index_min[j] << " ";
+            //std::cout << std::endl;
+            
+            //std::cout << "MAX: ";
+            //for( j=0; j<index_max.size(); j++)
+            //    std::cout << index_max[j] << " ";
+            //std::cout << std::endl;
+            
+            _indices = index_min;
+            
+            while( true)
+            {
+                //std::cout << "begin loop" << std::endl;
+                
+                //std::cout << "ADD: ";
+                //for( j=0; j<_indices.size(); j++)
+                //    std::cout << _indices[j] << " ";
+                //std::cout << std::endl;
+                
+                _item(_indices).push_back(newitem);
+                
+                //////////////
+                // counter
+                i = 0;
+                while( _indices[i] == index_max[i])
+                {
+                    i++;
+                    if( i == _item.order())
+                    {
+                        return;
+                    }
+                }
+                
+                _indices[i]++;
+                
+                for(i=i-1; i>=0; i--)
+                {
+                    _indices[i]=index_min[i];
+                }
+                ///////////////
+            }
+            
+            //std::cout << "finish add_range()" << std::endl;
+            
+        }
                 
         std::vector<T>& contents( const Coordinate &coord)
         {    
-            indices( coord, &_indices);
+            indices( coord, _indices);
             return _item(_indices);
         }
         
@@ -94,13 +170,19 @@ namespace PRISMS
     
         /// Set 'term' to be the indices into '_item' PNDArray of the bin that contains 'coord'
         ///   Return 'false' if unsuccesful, 'true' if succesful
-        void indices(const Coordinate &coord, std::vector<int> *term)
+        void indices(const Coordinate &coord, std::vector<int> &term)
         {
             for( int i=0; i<_item.order(); i++)
             {
+                //std::cout << "i: " << i << std::endl;
+                //std::cout << "coord: " << coord[i] << std::endl;
+                //std::cout << "_min: " << _min[i] << std::endl;
+                //std::cout << "_max: " << _max[i] << std::endl;
+                //std::cout << "_incr: " << _incr[i] << std::endl;
+                
                 if( (coord[i] < _min[i]) || (coord[i] > _max[i]) )
                     throw std::domain_error("Invalid coord, out of bin range");
-                (*term)[i] = std::floor( (coord[i] - _min[i])/_incr[i]);
+                term[i] = std::floor( (coord[i] - _min[i])/_incr[i]);
             }
         }
     };

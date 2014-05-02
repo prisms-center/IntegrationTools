@@ -64,7 +64,7 @@ namespace PRISMS
     {
         double eval( const VarContainer &var) const
         {
-            return -var[3][1]*(1.0 - var[3][0]*(var[0][0] - var[1][0])/var[2][0])/var[2][1]);
+            return -var[3][1]*(1.0 - var[3][0]*(var[0][0] - var[1][0])/var[2][0])/var[2][1];
         
         }
 
@@ -173,7 +173,8 @@ namespace PRISMS
         PSimpleBase<VarContainer, double>* _val;
         PSimpleBase<VarContainer, double>** _grad_val;
         PSimpleBase<VarContainer, double>*** _hess_val;
-        
+    
+    public:    
         Quad()
         {
             construct();
@@ -203,7 +204,7 @@ namespace PRISMS
         
         Quad<VarContainer>* clone() const
         {
-            return new MyFunc<VarContainer>(*this);
+            return new Quad<VarContainer>(*this);
         }
 
         PSimpleFunction< VarContainer, double> simplefunction() const
@@ -315,38 +316,68 @@ namespace PRISMS
         
     public:
     
-        // node: Coordinate of node
+        // node_index: index of node in mesh
+        // bfunc: PFuncBase<std::vector<Coordinate>, double>* 
+        // node_coord: Coordinate of node
         // dim: Coordinate containing x and y dimension of element
-        // node_index: 0 == bottom left, proceed counter clockwise to 3 == top left of element
+        // element_node_index: 0 == bottom left, proceed counter clockwise to 3 == top left of element
         
-        QuadValues(const Coordinate &node, const Coordinate &dim, int node_index)
-        : _var(4, node)
+        QuadValues( unsigned long int node_index, 
+                    PFuncBase<std::vector<Coordinate>, double>* bfunc, 
+                    const Coordinate &node_coord, 
+                    const Coordinate &dim, 
+                    int element_node_index)
+        : Interpolator<Coordinate>(node_index, bfunc), _var(4, node_coord)
         {
             _var[2] = dim;
             
-            if( node_index == 0)
+            if( element_node_index == 0)
             {
                 _var[3][0] = 1.0;
                 _var[3][1] = 1.0;
             }
-            else if( node_index == 1)
+            else if( element_node_index == 1)
             {
                 _var[3][0] = -1.0;
                 _var[3][1] = 1.0;
             }
-            else if( node_index == 1)
+            else if( element_node_index == 2)
             {
                 _var[3][0] = -1.0;
                 _var[3][1] = -1.0;
             }
-            else if( node_index == 1)
+            else if( element_node_index == 3)
             {
                 _var[3][0] = 1.0;
                 _var[3][1] = -1.0;
             }
         }
+        
+        Coordinate min() const
+        {
+            Coordinate point(_var[1]);
+            
+            if( _var[3][0] == -1.0)
+                point[0] -= _var[2][0];
+            if( _var[3][1] == -1.0)
+                point[1] -= _var[2][1];
+            
+            return point;
+        }
+        
+        Coordinate max() const
+        {
+            Coordinate point(_var[1]);
+            
+            if( _var[3][0] == 1.0)
+                point[0] += _var[2][0];
+            if( _var[3][1] == 1.0)
+                point[1] += _var[2][1];
+            
+            return point;
+        }
     
-        bool is_in_range(const Coordinate &coord) const
+        bool is_in_range(const Coordinate &coord)
         {
             _var[0] = coord;
             double e;
@@ -363,20 +394,23 @@ namespace PRISMS
         
         double operator()(const Coordinate &coord)
         {
-            _var[0] = coord;
-            return (*_bfunc)(var);
+            if( !is_in_range(coord))
+                return 0.0;
+            return (*this->_bfunc)(_var);
         }
         
-        double grad()(const Coordinate &coord, int di)
+        double grad(const Coordinate &coord, int di)
         {
-            _var[0] = coord;
-            return (*_bfunc).grad(var,di);
+            if( !is_in_range(coord))
+                return 0.0;
+            return (*this->_bfunc).grad(_var,di);
         }
         
-        double hess()(const Coordinate &coord, int di, int dj)
+        double hess(const Coordinate &coord, int di, int dj)
         {
-            _var[0] = coord;
-            return (*_bfunc).hess(var,di,dj);
+            if( !is_in_range(coord))
+                return 0.0;
+            return (*this->_bfunc).hess(_var,di,dj);
         }
 
     };

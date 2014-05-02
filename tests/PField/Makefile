@@ -9,8 +9,11 @@ CXX      = g++
 CPPFLAGS += $(foreach i,$(INCLUDE),-I$(i))
 CPPFLAGS += -O3 
 
-test: test.cpp
+test: test.cpp FORCE
 	$(CXX) -o test test.cpp $(CPPFLAGS)
+
+FORCE:
+	
 
 clean:
 	rm -f test

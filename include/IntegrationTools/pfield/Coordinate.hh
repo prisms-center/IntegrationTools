@@ -32,9 +32,20 @@ namespace PRISMS
             return _coord[i];
         }
         
+        template< int D> friend std::ostream &operator<<(std::ostream &outstream, const Coordinate<D> &coord);
         
     };
-
+    
+    template<int D> std::ostream &operator<<(std::ostream &outstream, const Coordinate<D> &coord)
+    {
+        for( int i=0; i<coord.size(); i++)
+        {
+            outstream << coord[i];
+            if( i < coord.size()-1)
+                outstream << " ";
+        }
+        return outstream;
+    }
 }
 
 
