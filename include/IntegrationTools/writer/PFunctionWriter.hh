@@ -96,6 +96,8 @@ namespace PRISMS
         
         void write_basis_function(int I, const std::string &name, const std::string &f, std::ostream &sout) const;
         
+        void write_condition_function(int I, const std::string &name, const std::string &f_lhs, const std::string &oper, const std::string &f_rhs, std::ostream &sout) const;
+    
         // use polymorphic basis functions
         void code_poly( std::ostream &sout) const;
         

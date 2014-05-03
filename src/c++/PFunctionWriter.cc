@@ -321,8 +321,7 @@ namespace PRISMS
         std::vector< std::vector<std::string> > operation( pieces.get_array().size(), std::vector<std::string>());
         
         // save a list of the condition names
-        std::vector< std::vector<std::string> > lhs_cond_name( pieces.get_array().size(), std::vector<std::string>());
-        std::vector< std::vector<std::string> > rhs_cond_name( pieces.get_array().size(), std::vector<std::string>());
+        std::vector< std::vector<std::string> > cond_name( pieces.get_array().size(), std::vector<std::string>());
         
         // save a list of the piece names
         std::vector< std::string > piece_name;
@@ -333,7 +332,7 @@ namespace PRISMS
             std::cout << "\n++++++++++++++++++++++++++++" << std::endl;
             std::cout << "Piece " << i << ": " << std::endl;
         
-            std::string func, cond_name;
+            std::string func;
             
             // for this piece of the function
             //   collect the function expression and the conditions array of arrays
@@ -369,18 +368,11 @@ namespace PRISMS
                 
                 ss.str("");
                 ss << j;
-                cond_name = piece_name.back() + "_cond" + ss.str();
-                lhs_cond_name[i].push_back( cond_name + "_lhs");
-                rhs_cond_name[i].push_back( cond_name + "_rhs");
+                cond_name[i].push_back( piece_name.back() + "_cond" + ss.str());
                 
                 // read the condition expressions and operation,
                 //   and write the condition expressions
-                write_basis_function(1, lhs_cond_name[i].back(), sym2string(lhs), sout); 
-                
-                operation[i].push_back(oper);
-                
-                write_basis_function(1, rhs_cond_name[i].back(), sym2string(rhs), sout);
-                
+                write_condition_function(1, cond_name[i].back(), sym2string(lhs), oper, sym2string(rhs), sout); 
             }
             std::cout << std::endl;
             
@@ -409,7 +401,7 @@ namespace PRISMS
         I++;
         
         sout << indent(I) << "typedef Piece<VarContainer, " << _outtype << "> Pc;\n";
-        sout << indent(I) << "typedef Condition<VarContainer, " << _outtype << "> Cond;\n";
+        sout << indent(I) << "typedef PSimpleFunction<VarContainer, bool> Cond;\n";
         sout << indent(I) << "typedef PSimpleFunction<VarContainer, " << _outtype << "> psf;\n";
         sout << indent(I) << "typedef PFunction<VarContainer, " << _outtype << "> pf;\n\n";
             
@@ -419,10 +411,10 @@ namespace PRISMS
         for( int i=0; i< piece_name.size(); i++)
         {
         std::cout << "i: " << i << std::endl;
-        for( int j=0; j< lhs_cond_name[i].size(); j++)
+        for( int j=0; j< cond_name[i].size(); j++)
         {
         std::cout << "  j: " << j << std::endl;
-        sout << indent(I) << "cond.push_back( Cond( psf("<< lhs_cond_name[i][j] << "<VarContainer>()), \"" << operation[i][j] << "\", psf(" << rhs_cond_name[i][j] << "<VarContainer>())));\n";
+        sout << indent(I) << "cond.push_back( Cond("<< cond_name[i][j] << "<VarContainer>()));\n";
         }
         sout << indent(I) << "this->_piece.push_back( Pc( pf(" << piece_name[i] << "<VarContainer>()), cond) );\n";
         sout << indent(I) << "cond.clear();\n\n";
@@ -502,6 +494,45 @@ namespace PRISMS
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "return " + f + ";\n";
+        I--;
+        sout << indent(I) << "}\n\n";
+        I--;
+        sout << indent(I) << "public:\n\n";
+        I++;
+        
+        sout << indent(I) << name + "()\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "this->_name = \"" + name + "\";\n";
+        I--;
+        sout << indent(I) << "}\n\n";
+        
+        sout << indent(I) << name + "* clone() const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "return new " + name + "(*this);\n";
+        I--;
+        sout << indent(I) << "}\n";
+        
+        I--;
+        sout << indent(I) << "};\n\n";
+    }
+    
+    void PFunctionWriter::write_condition_function(int I, const std::string &name, const std::string &f_lhs, const std::string &oper, const std::string &f_rhs, std::ostream &sout) const
+    {
+        std::string PSimpleBaseTemplate;
+        if( _template_intype) PSimpleBaseTemplate = "PSimpleBase< VarContainer, bool>";
+        else PSimpleBaseTemplate = "PSimpleBase< " + _intype + ", bool>";
+        
+        if( _template_intype) sout << indent(I) << "template< class VarContainer>\n";
+        sout << indent(I) << "class " + name + " : public " + PSimpleBaseTemplate + "\n";
+        sout << indent(I) << "{\n";
+        I++;
+        if( _template_intype) sout << indent(I) << "bool eval( const VarContainer &var) const\n";
+        else sout << indent(I) << "bool eval( const " + _intype + " &var) const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "return ( (" + f_lhs + ") " + oper + " (" + f_rhs + ") );\n";
         I--;
         sout << indent(I) << "}\n\n";
         I--;

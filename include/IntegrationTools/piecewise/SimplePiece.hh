@@ -5,7 +5,6 @@
 #include<iostream>
 #include<vector>
 
-#include "./Condition.hh"
 #include "../pfunction/PSimpleFunction.hh"
 
 namespace PRISMS
@@ -20,13 +19,14 @@ namespace PRISMS
         protected:
         
         PSimpleFunction<VarContainer, OutType> _expr;
-        mutable std::vector< Condition<VarContainer, OutType> > _condition;
+        mutable std::vector< PSimpleFunction<VarContainer, bool> > _condition;
         
         public:
         
-        SimplePiece( const PSimpleFunction<VarContainer, OutType> &expr, const std::vector<Condition<VarContainer, OutType> > &condition)
+        SimplePiece( const PSimpleFunction<VarContainer, OutType> &expr, const std::vector< PSimpleFunction<VarContainer, bool> > &condition)
         {
             _expr = expr;
+            _condition = condition;
             this->_name = _expr.name();
         }
         
@@ -39,7 +39,7 @@ namespace PRISMS
         {
             for( int i=0; i<_condition.size(); i++)
             {
-                if( _condition[i].is_false(var) )
+                if( !_condition[i](var) )
                     return false;
             }
             return true;
@@ -50,7 +50,7 @@ namespace PRISMS
             return _expr;
         }
         
-        std::vector< Condition<VarContainer, OutType> > condition() const
+        std::vector< PSimpleFunction<VarContainer, bool> > condition() const
         {
             return _condition;
         }
