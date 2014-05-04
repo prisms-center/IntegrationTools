@@ -132,6 +132,14 @@ namespace PRISMS
         _grad.clear();
         _hess.clear();
         
+        _phi_sym.clear();
+        _grad_sym.clear();
+        _hess_sym.clear();
+        
+        _phi_latex.clear();
+        _grad_latex.clear();
+        _hess_latex.clear();
+        
         // create a symbolic basis set
         
         // create GiNaC symbols & expression parser
@@ -155,22 +163,77 @@ namespace PRISMS
         // create recursive symbolic basis set
         PRISMS::PRealSymBasisSet bset( N, symindex, symvar, e_gen);
         
+        
+        // create GiNaC symbols & expression parser
+        GiNaC::symbol v_symvar(var), v_symindex("i");
+        GiNaC::symtab v_table;
+        v_table[ var] = v_symvar;
+        v_table[ index] = v_symindex;
+        GiNaC::parser v_reader(v_table,true);
+        
+        // create generating GiNaC expression
+        GiNaC::ex v_e_gen;
+        try
+        {
+            v_e_gen = v_reader(f);
+        }
+        catch (std::invalid_argument& err)
+        {
+            throw err;
+        }
+        
+        // create recursive symbolic basis set
+        PRISMS::PRealSymBasisSet v_bset( N, v_symindex, v_symvar, v_e_gen);
+        
+        
+        
         // generate phi
         if( _write_phi)
         {
             for( int i=0; i<N; i++)
             {
-                PRISMS::PRealSymBasisFunction* bf;
-                bf = bset.clone_basis_function(i);
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = bset.clone_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::csrc_double << bf->_e;    
+                    
+                    std::cout << i << ") f :: " << ss.str() << std::endl;
+                    
+                    _phi.push_back( ss.str());
+                    
+                    delete bf;
+                }
                 
-                std::ostringstream ss;
-                ss << GiNaC::csrc_double << bf->_e;    
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = v_bset.clone_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::dflt << bf->_e;    
+                    
+                    //std::cout << i << ") f :: " << ss.str() << std::endl;
+                    
+                    _phi_sym.push_back( ss.str());
+                    
+                    delete bf;
+                }
                 
-                std::cout << i << ") f :: " << ss.str() << std::endl;
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = v_bset.clone_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::latex << bf->_e;    
+                    
+                    //std::cout << i << ") f :: " << ss.str() << std::endl;
+                    
+                    _phi_latex.push_back( ss.str());
+                    
+                    delete bf;
+                }
                 
-                _phi.push_back( ss.str());
-                
-                delete bf;
             }
         }
         std::cout << std::endl;
@@ -180,17 +243,47 @@ namespace PRISMS
         {
             for( int i=0; i<N; i++)
             {
-                PRISMS::PRealSymBasisFunction* bf;
-                bf = bset.clone_grad_basis_function(i);
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = bset.clone_grad_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::csrc_double << bf->_e;    
+                    
+                    std::cout << i << ") grad :: " << ss.str() << std::endl;
+                    
+                    _grad.push_back( ss.str());
+                    
+                    delete bf;
+                }
                 
-                std::ostringstream ss;
-                ss << GiNaC::csrc_double << bf->_e;    
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = v_bset.clone_grad_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::dflt << bf->_e;    
+                    
+                    //std::cout << i << ") grad :: " << ss.str() << std::endl;
+                    
+                    _grad_sym.push_back( ss.str());
+                    
+                    delete bf;
+                }
                 
-                std::cout << i << ") grad :: " << ss.str() << std::endl;
-                
-                _grad.push_back( ss.str());
-                
-                delete bf;
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = v_bset.clone_grad_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::latex << bf->_e;    
+                    
+                    //std::cout << i << ") grad :: " << ss.str() << std::endl;
+                    
+                    _grad_latex.push_back( ss.str());
+                    
+                    delete bf;
+                }
             }
         }
         std::cout << std::endl;
@@ -200,17 +293,47 @@ namespace PRISMS
         {
             for( int i=0; i<N; i++)
             {
-                PRISMS::PRealSymBasisFunction* bf;
-                bf = bset.clone_hess_basis_function(i);
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = bset.clone_hess_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::csrc_double << bf->_e;    
+                    
+                    std::cout << i << ") hess :: " << ss.str() << std::endl;
+                    
+                    _hess.push_back( ss.str());
+                    
+                    delete bf;
+                }
                 
-                std::ostringstream ss;
-                ss << GiNaC::csrc_double << bf->_e;    
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = v_bset.clone_hess_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::dflt << bf->_e;    
+                    
+                    //std::cout << i << ") hess :: " << ss.str() << std::endl;
+                    
+                    _hess_sym.push_back( ss.str());
+                    
+                    delete bf;
+                }
                 
-                std::cout << i << ") hess :: " << ss.str() << std::endl;
-                
-                _hess.push_back( ss.str());
-                
-                delete bf;
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = v_bset.clone_hess_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::latex << bf->_e;    
+                    
+                    //std::cout << i << ") hess :: " << ss.str() << std::endl;
+                    
+                    _hess_latex.push_back( ss.str());
+                    
+                    delete bf;
+                }
             }
         }
         std::cout << std::endl;
@@ -231,6 +354,14 @@ namespace PRISMS
         _phi.clear();
         _grad.clear();
         _hess.clear();
+        
+        _phi_sym.clear();
+        _grad_sym.clear();
+        _hess_sym.clear();
+        
+        _phi_latex.clear();
+        _grad_latex.clear();
+        _hess_latex.clear();
         
         // create a symbolic basis set
         
@@ -270,22 +401,94 @@ namespace PRISMS
         // create recursive symbolic basis set
         PRISMS::PRealSymRecursBasisSet bset( N, symvec[ phi_sym.size()], tphi_sym, phi_ex_init, e_gen);
         
+        
+        
+        // create GiNaC symbols & expression parser
+        std::vector<GiNaC::symbol> v_symvec( phi_sym.size() + 1);
+        GiNaC::symtab v_table;
+        for( int i=0; i<phi_sym.size(); i++)
+        {
+            symvec[i] = GiNaC::symbol(phi_sym[i]);
+            v_table[ phi_sym[i]] = v_symvec[i];
+        }
+        v_symvec[ phi_sym.size()] = GiNaC::symbol(var);
+        v_table[ var] = v_symvec[ phi_sym.size()];
+        GiNaC::parser v_reader(v_table, true);
+        
+        // create list of phi_sym GiNaC symbols
+        std::vector<GiNaC::symbol> v_tphi_sym( phi_sym.size());
+        for( int i=0; i<phi_sym.size(); i++)
+            v_tphi_sym[i] = v_symvec[i];
+        
+        // create list of phi_init GiNaC expression
+        std::vector<GiNaC::ex> v_phi_ex_init( phi_init.size());
+        for( int i=0; i<phi_init.size(); i++)
+            v_phi_ex_init[i] = v_reader(phi_init[i]);
+        
+        // create generating GiNaC expression
+        GiNaC::ex v_e_gen;
+        try
+        {
+            v_e_gen = v_reader(f);
+        }
+        catch (std::invalid_argument& err)
+        {
+            throw err;
+        }
+        
+        // create recursive symbolic basis set
+        PRISMS::PRealSymRecursBasisSet v_bset( N, v_symvec[ phi_sym.size()], v_tphi_sym, v_phi_ex_init, v_e_gen);
+        
+        
+        
+        
+        
         // generate phi
         if( _write_phi)
         {
             for( int i=0; i<N; i++)
             {
-                PRISMS::PRealSymBasisFunction* bf;
-                bf = bset.clone_basis_function(i);
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = bset.clone_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::csrc_double << bf->_e;    
+                    
+                    std::cout << i << ") f :: " << ss.str() << std::endl;
+                    
+                    _phi.push_back( ss.str());
+                    
+                    delete bf;
+                }
                 
-                std::ostringstream ss;
-                ss << GiNaC::csrc_double << bf->_e;    
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = v_bset.clone_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::dflt << bf->_e;    
+                    
+                    //std::cout << i << ") f :: " << ss.str() << std::endl;
+                    
+                    _phi_sym.push_back( ss.str());
+                    
+                    delete bf;
+                }
                 
-                std::cout << i << ") f :: " << ss.str() << std::endl;
-                
-                _phi.push_back( ss.str());
-                
-                delete bf;
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = v_bset.clone_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::latex << bf->_e;    
+                    
+                    //std::cout << i << ") f :: " << ss.str() << std::endl;
+                    
+                    _phi_latex.push_back( ss.str());
+                    
+                    delete bf;
+                }
             }
         }
         std::cout << std::endl;
@@ -295,17 +498,47 @@ namespace PRISMS
         {
             for( int i=0; i<N; i++)
             {
-                PRISMS::PRealSymBasisFunction* bf;
-                bf = bset.clone_grad_basis_function(i);
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = bset.clone_grad_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::csrc_double << bf->_e;    
+                    
+                    std::cout << i << ") grad :: " << ss.str() << std::endl;
+                    
+                    _grad.push_back( ss.str());
+                    
+                    delete bf;
+                }
                 
-                std::ostringstream ss;
-                ss << GiNaC::csrc_double << bf->_e;    
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = v_bset.clone_grad_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::dflt << bf->_e;    
+                    
+                    //std::cout << i << ") grad :: " << ss.str() << std::endl;
+                    
+                    _grad_sym.push_back( ss.str());
+                    
+                    delete bf;
+                }
                 
-                std::cout << i << ") grad :: " << ss.str() << std::endl;
-                
-                _grad.push_back( ss.str());
-                
-                delete bf;
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = v_bset.clone_grad_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::latex << bf->_e;    
+                    
+                    //std::cout << i << ") grad :: " << ss.str() << std::endl;
+                    
+                    _grad_latex.push_back( ss.str());
+                    
+                    delete bf;
+                }
             }
         }
         std::cout << std::endl;
@@ -315,17 +548,47 @@ namespace PRISMS
         {
             for( int i=0; i<N; i++)
             {
-                PRISMS::PRealSymBasisFunction* bf;
-                bf = bset.clone_hess_basis_function(i);
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = bset.clone_hess_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::csrc_double << bf->_e;    
+                    
+                    std::cout << i << ") hess :: " << ss.str() << std::endl;
+                    
+                    _hess.push_back( ss.str());
+                    
+                    delete bf;
+                }
                 
-                std::ostringstream ss;
-                ss << GiNaC::csrc_double << bf->_e;    
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = v_bset.clone_hess_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::dflt << bf->_e;    
+                    
+                    //std::cout << i << ") hess :: " << ss.str() << std::endl;
+                    
+                    _hess_sym.push_back( ss.str());
+                    
+                    delete bf;
+                }
                 
-                std::cout << i << ") hess :: " << ss.str() << std::endl;
-                
-                _hess.push_back( ss.str());
-                
-                delete bf;
+                {
+                    PRISMS::PRealSymBasisFunction* bf;
+                    bf = v_bset.clone_hess_basis_function(i);
+                    
+                    std::ostringstream ss;
+                    ss << GiNaC::latex << bf->_e;    
+                    
+                    //std::cout << i << ") hess :: " << ss.str() << std::endl;
+                    
+                    _hess_latex.push_back( ss.str());
+                    
+                    delete bf;
+                }
             }
         }
         std::cout << std::endl;
@@ -362,7 +625,7 @@ namespace PRISMS
         
     
     
-    void PBasisSetWriter::write_basis_function(int I, const std::string &name, const std::string &f, std::ostream &sout) const
+    void PBasisSetWriter::write_basis_function(int I, const std::string &name, const std::string &csrc, const std::string &sym, const std::string &latex, std::ostream &sout) const
     {
         std::string PSimpleBaseTemplate = "PSimpleBase< " + _intype + ", " + _outtype + ">";
         
@@ -372,12 +635,35 @@ namespace PRISMS
         sout << indent(I) << _outtype + " eval( const " + _intype + " &var) const\n";
         sout << indent(I) << "{\n";
         I++;
-        sout << indent(I) << "return " + f + ";\n";
+        sout << indent(I) << "return " + csrc + ";\n";
         I--;
         sout << indent(I) << "}\n\n";
         I--;
+        
         sout << indent(I) << "public:\n";
         I++;
+        
+        sout << indent(I) << "std::string csrc() const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "return \"" + csrc + "\";\n";
+        I--;
+        sout << indent(I) << "}\n\n";
+        
+        sout << indent(I) << "std::string sym() const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "return \"" + sym + "\";\n";
+        I--;
+        sout << indent(I) << "}\n\n";
+        
+        sout << indent(I) << "std::string latex() const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "return \"" + latex + "\";\n";
+        I--;
+        sout << indent(I) << "}\n\n";
+        
         sout << indent(I) << name + "* clone() const\n";
         sout << indent(I) << "{\n";
         I++;
@@ -408,17 +694,17 @@ namespace PRISMS
         if( _write_phi)
         {
             for( int i=0; i<_phi.size(); i++)
-                write_basis_function(I, _name + "_" + itos(i), _phi[i], sout);
+                write_basis_function(I, _name + "_" + itos(i), _phi[i], _phi_sym[i], _phi_latex[i], sout);
         }
         if( _write_grad)
         {
             for( int i=0; i<_grad.size(); i++)
-                write_basis_function(I, _name + "_" + itos(i) + "_grad" , _grad[i], sout);
+                write_basis_function(I, _name + "_" + itos(i) + "_grad" , _grad[i], _grad_sym[i], _grad_latex[i], sout);
         }
         if( _write_hess)
         {
             for( int i=0; i<_hess.size(); i++)
-                write_basis_function(I, _name + "_" + itos(i) + "_hess" , _hess[i], sout);
+                write_basis_function(I, _name + "_" + itos(i) + "_hess" , _hess[i], _hess_sym[i], _hess_latex[i], sout);
         }
         
         /*

@@ -34,14 +34,18 @@ namespace PRISMS
         
         bool _write_f;
         std::string _f;
-        std::string _sym;
-        std::string _latex;
+        std::string _f_sym;
+        std::string _f_latex;
         
         bool _write_grad;
         std::vector<std::string> _grad;
+        std::vector<std::string> _grad_sym;
+        std::vector<std::string> _grad_latex;
         
         bool _write_hess;
         std::vector< std::vector<std::string> > _hess;
+        std::vector< std::vector<std::string> > _hess_sym;
+        std::vector< std::vector<std::string> > _hess_latex;
         
         //std::vector<std::string> _basis;
         //std::vector< std::vector<std::string> > _grad_basis;
@@ -92,7 +96,7 @@ namespace PRISMS
         
         // generate c src, sym, latex for symbolic expression string 'f'
         std::string sym_start() const;
-        std::string add_escapes(const std::string str) const;
+        static std::string add_escapes(const std::string str);
         std::string sym2csrc( const std::string &f, int di=-1, int dj=-1) const;
         std::string sym2sym( const std::string &f, int di=-1, int dj=-1) const;
         std::string sym2latex( const std::string &f, int di=-1, int dj=-1) const;
@@ -100,9 +104,9 @@ namespace PRISMS
         // parse a relational expression into a lhs expression, relational operator, and rhs expression
         void parse_condition( const std::string &cond, std::string &lhs, std::string &oper, std::string &rhs);
         
-        void write_basis_function(int I, const std::string &name, const std::string &f, std::ostream &sout) const;
+        void write_basis_function(int I, const std::string &name, const std::string &csrc, const std::string &sym, const std::string &latex, std::ostream &sout) const;
         
-        void write_condition_function(int I, const std::string &name, const std::string &f_lhs, const std::string &oper, const std::string &f_rhs, std::ostream &sout) const;
+        void write_condition_function(int I, const std::string &name, const std::string &csrc, const std::string &sym, const std::string &latex, std::ostream &sout) const;
     
         // use polymorphic basis functions
         void code_poly( std::ostream &sout) const;

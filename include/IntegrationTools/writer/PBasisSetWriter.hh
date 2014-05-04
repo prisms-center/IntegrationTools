@@ -25,12 +25,18 @@ namespace PRISMS
         
         bool _write_phi;
         std::vector< std::string> _phi;
+        std::vector< std::string> _phi_sym;
+        std::vector< std::string> _phi_latex;
         
         bool _write_grad;
         std::vector< std::string> _grad;
+        std::vector< std::string> _grad_sym;
+        std::vector< std::string> _grad_latex;
         
         bool _write_hess;
         std::vector< std::string> _hess;
+        std::vector< std::string> _hess_sym;
+        std::vector< std::string> _hess_latex;
         
         
         // Constructor initializes strings to call 'undefined' message
@@ -83,7 +89,7 @@ namespace PRISMS
         
         std::string indent(int step) const;
         
-        void write_basis_function(int I, const std::string &name, const std::string &f, std::ostream &sout) const;
+        void write_basis_function(int I, const std::string &name, const std::string &csrc, const std::string &sym, const std::string &latex, std::ostream &sout) const;
         
         void code( std::ostream &sout) const;
         

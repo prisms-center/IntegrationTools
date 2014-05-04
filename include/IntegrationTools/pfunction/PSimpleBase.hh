@@ -6,6 +6,7 @@
 #include<iostream>
 #include<vector>
 #include<cstdlib>
+#include<stdexcept>
 
 namespace PRISMS
 {
@@ -37,14 +38,31 @@ namespace PRISMS
             return new PSimpleBase<VarContainer, OutType>(*this);
         }
         
+        virtual std::string csrc() const
+        {
+            undefined("std::string csrc()"); 
+            return std::string();
+        }
+        
+        virtual std::string sym() const
+        {
+            undefined("std::string sym()"); 
+            return std::string();
+        }
+        
+        virtual std::string latex() const
+        {
+            undefined("std::string latex()"); 
+            return std::string();
+        }
+        
         private:
         virtual OutType eval( const VarContainer &var) const { undefined("OutType eval( const VarContainer &var)"); return OutType();}
         
         void undefined(std::string fname) const
         {
-            std::cout << "Error in PSimpleBase '" << _name << "'." << std::endl;
-            std::cout << "   The member function '" << fname << "' has not been defined." << std::endl;
-            exit(1);
+            std::string msg = "Error in PSimpleBase '" + _name + "'.\n" + "   The member function '" + fname + "' has not been defined.\n";
+            throw std::runtime_error(msg);
         }
     };
 

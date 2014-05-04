@@ -52,18 +52,6 @@ namespace PRISMS
         {
             return (*ptr).name();
         }
-        std::string csrc() const
-        {
-            return (*ptr).csrc();
-        }
-        std::string sym() const
-        {
-            return (*ptr).sym();
-        }
-        std::string latex() const
-        {
-            return (*ptr).latex();
-        }
         int size() const
         {
             return (*ptr).size();

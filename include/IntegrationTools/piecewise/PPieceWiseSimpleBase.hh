@@ -30,6 +30,71 @@ namespace PRISMS
             _piece = piece;
         }
         
+        virtual std::string csrc() const
+        {
+            std::string str = "";
+            for( int i=0; i<_piece.size(); i++)
+            {
+                if( i == 0)
+                {
+                    str += _piece[i].csrc();
+                }
+                else if( i == _piece.size()-1 )
+                {
+                    str += "; and " + _piece[i].csrc();
+                }
+                else
+                {
+                    str += "; " + _piece[i].csrc();
+                }
+            }
+            return str;
+        }
+        
+        virtual std::string sym() const
+        {
+            std::string str = "";
+            for( int i=0; i<_piece.size(); i++)
+            {
+                if( i == 0)
+                {
+                    str += _piece[i].sym();
+                }
+                else if( i == _piece.size()-1 )
+                {
+                    str += "; and " + _piece[i].sym();
+                }
+                else
+                {
+                    str += "; " + _piece[i].sym();
+                }
+            }
+            return str;
+        }
+        
+        virtual std::string latex() const
+        {
+            std::string str = "";
+            for( int i=0; i<_piece.size(); i++)
+            {
+                if( i == 0)
+                {
+                    str += "\\left\\{ \\begin{array}{ll} " + _piece[i].latex();
+                }
+                else if( i == _piece.size()-1 )
+                {
+                    str += " \\\\ " + _piece[i].latex();
+                }
+                else
+                {
+                    str += " \\\\ " + _piece[i].latex();
+                }
+            }
+            
+            str += " \\end{array} \\right.";
+            return str;
+        }
+        
         virtual PPieceWiseSimpleBase<VarContainer, OutType>* clone() const
         {
             return new PPieceWiseSimpleBase<VarContainer, OutType>(*this);

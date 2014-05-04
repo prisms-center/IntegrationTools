@@ -30,6 +30,69 @@ namespace PRISMS
             this->_name = _expr.name();
         }
         
+        virtual std::string csrc() const
+        {
+            std::string str = _expr.csrc();
+            for( int i=0; i<_condition.size(); i++)
+            {
+                if( i == 0)
+                {
+                    str += " if " + _condition[i].csrc();
+                }
+                else if( i == _condition.size()-1 )
+                {
+                    str += " and " + _condition[i].csrc();
+                }
+                else
+                {
+                    str += ", " + _condition[i].csrc();
+                }
+            }
+            return str;
+        }
+        
+        virtual std::string sym() const
+        {
+            std::string str = _expr.sym();
+            for( int i=0; i<_condition.size(); i++)
+            {
+                if( i == 0)
+                {
+                    str += " if " + _condition[i].sym();
+                }
+                else if( i == _condition.size()-1 )
+                {
+                    str += " and " + _condition[i].sym();
+                }
+                else
+                {
+                    str += ", " + _condition[i].sym();
+                }
+            }
+            return str;
+        }
+        
+        virtual std::string latex() const
+        {
+            std::string str = _expr.latex();
+            for( int i=0; i<_condition.size(); i++)
+            {
+                if( i == 0)
+                {
+                    str += " & \\mbox{ if } " + _condition[i].latex();
+                }
+                else if( i == _condition.size()-1 )
+                {
+                    str += " \\mbox{ and } " + _condition[i].latex();
+                }
+                else
+                {
+                    str += " \\mbox{, } " + _condition[i].sym();
+                }
+            }
+            return str;
+        }
+        
         virtual SimplePiece<VarContainer, OutType>* clone() const
         {
             return new SimplePiece<VarContainer, OutType>(*this);

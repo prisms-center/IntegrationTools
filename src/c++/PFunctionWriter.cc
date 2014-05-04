@@ -174,7 +174,7 @@ namespace PRISMS
         return str;
     }
     
-    std::string PFunctionWriter::add_escapes(const std::string str) const
+    std::string PFunctionWriter::add_escapes(const std::string str)
     {
         std::string _str = str;
         int pos;
@@ -329,20 +329,26 @@ namespace PRISMS
         std::cout << "Input f = " << f << std::endl;
         
         _f = "";
+        _f_sym = "";
+        _f_latex = "";
         _grad.clear();
+        _grad_sym.clear();
+        _grad_latex.clear();
         _hess.clear();
+        _hess_sym.clear();
+        _hess_latex.clear();
         
         std::cout << "\n";
         if( _write_f)
         {
-            _sym = sym2sym(f);
-            std::cout << " f :expr: " << _sym << std::endl;
+            _f_sym = sym2sym(f);
+            std::cout << " f :expr: " << _f_sym << std::endl;
             
             _f = sym2csrc(f);
             std::cout << " f :csrc: " << _f << std::endl;
             
-            _latex = sym2latex(f);
-            std::cout << " f :latex: " << _latex << std::endl;
+            _f_latex = sym2latex(f);
+            std::cout << " f :latex: " << _f_latex << std::endl;
         }
         
         std::cout << "\n";
@@ -351,6 +357,8 @@ namespace PRISMS
             for( int i=0; i<_var_name.size(); i++)
             {
                 _grad.push_back( sym2csrc(f,i) );
+                _grad_sym.push_back( sym2sym(f,i) );
+                _grad_latex.push_back( sym2latex(f,i) );
                 std::cout << " grad " << i << " :: " << _grad.back() << std::endl;
                 
             }
@@ -360,11 +368,15 @@ namespace PRISMS
         if( _write_hess)
         {
             _hess.resize(_var_name.size());
+            _hess_sym.resize(_var_name.size());
+            _hess_latex.resize(_var_name.size());
             for( int i=0; i<_var_name.size(); i++)
             {
                 for( int j=0; j<_var_name.size(); j++)
                 {
                     _hess[i].push_back( sym2csrc(f,i,j) );
+                    _hess_sym[i].push_back( sym2sym(f,i,j) );
+                    _hess_latex[i].push_back( sym2latex(f,i,j) );
                     std::cout << " hess " << i << " " << j << " :: " << _hess[i].back() << std::endl;
                     
                 }
@@ -412,10 +424,6 @@ namespace PRISMS
         json_spirit::write_stream( pieces, std::cout);
         std::cout << "\n";
         
-        // construct function strings
-        std::string csrc, sym, latex;
-        latex = "\\\\left\\\\{ \\\\begin{array}{ll} ";
-        
         // remember the piecewise function's name
         std::string piecewise_funcname = _name;
         
@@ -455,22 +463,6 @@ namespace PRISMS
             _name = piece_name.back();
             sym2code(func, sout);
             
-            std::string str = "";
-            std::string lstr = "";
-            if( i > 0)
-            {
-                str += "; ";
-                if( i == pieces.get_array().size()-1)
-                    str += "and ";
-                
-                lstr += " \\\\\\\\ ";
-                
-            }
-            
-            csrc += str + _f;
-            sym += str + _sym;
-            latex += lstr + _latex;
-            
             // write this piece's conditions
             _write_f = true;
             _write_grad = false;
@@ -494,35 +486,9 @@ namespace PRISMS
                 
                 // read the condition expressions and operation,
                 //   and write the condition expressions
-                write_condition_function(1, cond_name[i].back(), sym2csrc(lhs), oper, sym2csrc(rhs), sout); 
                 
-                str = "";
-                if( j == 0)
-                {
-                    str += " if ";
-                }
-                else if( j == all_cond.size() -1)
-                {
-                    str += " and ";
-                }
-                else
-                {
-                    str += ", ";
-                }
-                
-                lstr = "";
-                if( j == 0)
-                {
-                    lstr += " & \\\\mbox{if } ";
-                }
-                else if( j == all_cond.size() -1)
-                {
-                    lstr += " \\\\mbox{ and } ";
-                }
-                else
-                {
-                    lstr += " \\\\mbox{, } ";
-                }
+                // construct function strings
+                std::string csrc, sym, latex;
                 
                 std::string loper = oper;
                 if( loper == "<=")
@@ -534,9 +500,14 @@ namespace PRISMS
                 if( loper == "!=")
                     loper = "\\\\neq";
                 
-                csrc += str + sym2csrc(lhs) + " " + oper + " " + sym2csrc(rhs);
-                sym += str + sym2sym(lhs) + " " + oper + " " + sym2sym(rhs);
-                latex += lstr + sym2latex(lhs) + " " + loper + " " + sym2latex(rhs);
+                csrc = sym2csrc(lhs) + " " + oper + " " + sym2csrc(rhs);
+                sym = sym2sym(lhs) + " " + oper + " " + sym2sym(rhs);
+                latex = sym2latex(lhs) + " " + loper + " " + sym2latex(rhs);
+                
+                write_condition_function(1, cond_name[i].back(), csrc, sym, latex, sout); 
+                
+                
+                
                 
             }
             std::cout << std::endl;
@@ -547,8 +518,6 @@ namespace PRISMS
             _write_hess = piecewise_write_hess;
             
         }
-        
-        latex += " \\\\end{array} \\\\right.";
         
         //std::cout << "Begin writing PPieceWiseFuncBase" << std::endl;
         
@@ -566,9 +535,6 @@ namespace PRISMS
         sout << indent(I) << "{\n";
         I++;
         
-        sout << indent(I) << "this->_csrc = \"" + csrc + "\";\n";
-        sout << indent(I) << "this->_sym = \"" + sym_start() + sym + "\";\n";
-        sout << indent(I) << "this->_latex = \"" + sym_start() + latex + "\";\n";
         sout << indent(I) << "this->_name = \"" + _name + "\";\n";
         sout << indent(I) << "this->_var_name.clear();\n";
         for( int i=0; i<_var_name.size(); i++)
@@ -663,7 +629,7 @@ namespace PRISMS
         
     }
     
-    void PFunctionWriter::write_basis_function(int I, const std::string &name, const std::string &f, std::ostream &sout) const
+    void PFunctionWriter::write_basis_function(int I, const std::string &name, const std::string &csrc, const std::string &sym, const std::string &latex, std::ostream &sout) const
     {
         std::string PSimpleBaseTemplate;
         if( _template_intype) PSimpleBaseTemplate = "PSimpleBase< VarContainer, " + _outtype + ">";
@@ -677,7 +643,7 @@ namespace PRISMS
         else sout << indent(I) << _outtype + " eval( const " + _intype + " &var) const\n";
         sout << indent(I) << "{\n";
         I++;
-        sout << indent(I) << "return " + f + ";\n";
+        sout << indent(I) << "return " + csrc + ";\n";
         I--;
         sout << indent(I) << "}\n\n";
         I--;
@@ -688,6 +654,27 @@ namespace PRISMS
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "this->_name = \"" + name + "\";\n";
+        I--;
+        sout << indent(I) << "}\n\n";
+        
+        sout << indent(I) << "std::string csrc() const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "return \"" + csrc + "\";\n";
+        I--;
+        sout << indent(I) << "}\n\n";
+        
+        sout << indent(I) << "std::string sym() const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "return \"" + sym + "\";\n";
+        I--;
+        sout << indent(I) << "}\n\n";
+        
+        sout << indent(I) << "std::string latex() const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "return \"" + latex + "\";\n";
         I--;
         sout << indent(I) << "}\n\n";
         
@@ -702,7 +689,7 @@ namespace PRISMS
         sout << indent(I) << "};\n\n";
     }
     
-    void PFunctionWriter::write_condition_function(int I, const std::string &name, const std::string &f_lhs, const std::string &oper, const std::string &f_rhs, std::ostream &sout) const
+    void PFunctionWriter::write_condition_function(int I, const std::string &name, const std::string &csrc, const std::string &sym, const std::string &latex, std::ostream &sout) const
     {
         std::string PSimpleBaseTemplate;
         if( _template_intype) PSimpleBaseTemplate = "PSimpleBase< VarContainer, bool>";
@@ -716,7 +703,7 @@ namespace PRISMS
         else sout << indent(I) << "bool eval( const " + _intype + " &var) const\n";
         sout << indent(I) << "{\n";
         I++;
-        sout << indent(I) << "return ( (" + f_lhs + ") " + oper + " (" + f_rhs + ") );\n";
+        sout << indent(I) << "return " + csrc + ";\n";
         I--;
         sout << indent(I) << "}\n\n";
         I--;
@@ -727,6 +714,27 @@ namespace PRISMS
         sout << indent(I) << "{\n";
         I++;
         sout << indent(I) << "this->_name = \"" + name + "\";\n";
+        I--;
+        sout << indent(I) << "}\n\n";
+        
+        sout << indent(I) << "std::string csrc() const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "return \"" + csrc + "\";\n";
+        I--;
+        sout << indent(I) << "}\n\n";
+        
+        sout << indent(I) << "std::string sym() const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "return \"" + sym + "\";\n";
+        I--;
+        sout << indent(I) << "}\n\n";
+        
+        sout << indent(I) << "std::string latex() const\n";
+        sout << indent(I) << "{\n";
+        I++;
+        sout << indent(I) << "return \"" + latex + "\";\n";
         I--;
         sout << indent(I) << "}\n\n";
         
@@ -768,18 +776,18 @@ namespace PRISMS
         // write function classes for f, grad_f, hess_f
         if( _write_f)
         {
-            write_basis_function(I, _name + "_f", _f, sout);
+            write_basis_function(I, _name + "_f", _f, _f_sym, _f_latex, sout);
         }
         if( _write_grad)
         {
             for( int i=0; i<_var_name.size(); i++)
-                write_basis_function(I, _name + "_grad_" + itos(i), _grad[i], sout);
+                write_basis_function(I, _name + "_grad_" + itos(i), _grad[i], _grad_sym[i], _grad_latex[i], sout);
         }
         if( _write_hess)
         {
             for( int i=0; i<_var_name.size(); i++)
             for( int j=0; j<_var_name.size(); j++)
-                write_basis_function(I, _name + "_hess_" + itos(i) + "_" + itos(j), _hess[i][j], sout);
+                write_basis_function(I, _name + "_hess_" + itos(i) + "_" + itos(j), _hess[i][j], _hess_sym[i][j], _hess_latex[i][j], sout);
         }
         
         
@@ -1013,10 +1021,6 @@ namespace PRISMS
         sout << indent(I) << "{\n";
         I++;
         
-        sout << indent(I) << "this->_csrc = \"" + _f + "\";\n";
-        sout << indent(I) << "this->_sym = \"" + _sym + "\";\n";
-        sout << indent(I) << "this->_latex = \"" + _latex + "\";\n";
-        
         sout << indent(I) << "this->_name = \"" + _name + "\";\n";
         sout << indent(I) << "this->_var_name.clear();\n";
         for( int i=0; i<_var_name.size(); i++)
@@ -1082,18 +1086,18 @@ namespace PRISMS
         // write function classes for f, grad_f, hess_f
         if( _write_f)
         {
-            write_basis_function(I, _name + "_f", _f, sout);
+            write_basis_function(I, _name + "_f", _f, _f_sym, _f_latex, sout);
         }
         if( _write_grad)
         {
             for( int i=0; i<_var_name.size(); i++)
-                write_basis_function(I, _name + "_grad_" + itos(i), _grad[i], sout);
+                write_basis_function(I, _name + "_grad_" + itos(i), _grad[i], _grad_sym[i], _grad_latex[i], sout);
         }
         if( _write_hess)
         {
             for( int i=0; i<_var_name.size(); i++)
             for( int j=0; j<_var_name.size(); j++)
-                write_basis_function(I, _name + "_hess_" + itos(i) + "_" + itos(j), _hess[i][j], sout);
+                write_basis_function(I, _name + "_hess_" + itos(i) + "_" + itos(j), _hess[i][j], _hess_sym[i][j], _hess_latex[i][j], sout);
         }
         
         // write class header
