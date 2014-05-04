@@ -34,6 +34,8 @@ namespace PRISMS
         
         bool _write_f;
         std::string _f;
+        std::string _sym;
+        std::string _latex;
         
         bool _write_grad;
         std::vector<std::string> _grad;
@@ -88,8 +90,12 @@ namespace PRISMS
         
         std::string indent(int step) const;
         
-        // generate c string for symbolic expression string 'f'
-        std::string sym2string( const std::string &f);
+        // generate c src, sym, latex for symbolic expression string 'f'
+        std::string sym_start() const;
+        std::string add_escapes(const std::string str) const;
+        std::string sym2csrc( const std::string &f, int di=-1, int dj=-1) const;
+        std::string sym2sym( const std::string &f, int di=-1, int dj=-1) const;
+        std::string sym2latex( const std::string &f, int di=-1, int dj=-1) const;
         
         // parse a relational expression into a lhs expression, relational operator, and rhs expression
         void parse_condition( const std::string &cond, std::string &lhs, std::string &oper, std::string &rhs);

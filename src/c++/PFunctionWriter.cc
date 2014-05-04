@@ -159,12 +159,44 @@ namespace PRISMS
     }
     */
     
-    std::string PFunctionWriter::sym2string( const std::string &f)
+    std::string PFunctionWriter::sym_start() const
+    {
+        std::string str = "f(";
+        
+        for( int i=0; i<_var_name.size(); i++)
+        {
+            if( i>0)
+                str += ",";
+            str += _var_name[i];
+        }
+        str += ") = ";
+        
+        return str;
+    }
+    
+    std::string PFunctionWriter::add_escapes(const std::string str) const
+    {
+        std::string _str = str;
+        int pos;
+        for( int i=0; i<_str.size(); i++)
+        {
+            pos = _str.find("\\",i);
+            
+            if( pos == std::string::npos)
+                break;
+            
+            _str.replace(pos, 1, "\\\\");
+            
+            i = pos + 1;
+        }
+        return _str;
+    }
+    
+    std::string PFunctionWriter::sym2csrc( const std::string &f, int di, int dj) const
     {
         // read 'f' into a GiNaC expression 'symf', 
         //    using the variables names already given
         GiNaC::symtab table;
-        GiNaC::symtab all_symbol_table;
         std::vector<GiNaC::symbol> symvar(_var_name.size());
         
         for( int i=0; i<_var_name.size(); i++)
@@ -189,26 +221,31 @@ namespace PRISMS
         // use 'symf' to generate c code string for f
         
         std::ostringstream ss;
-        ss << GiNaC::csrc_double << symf;    
+        if( di == -1)
+        {
+            ss << GiNaC::csrc_double << symf;    
+        }
+        else if (dj == -1)
+        {
+            ss << GiNaC::csrc_double << symf.diff(symvar[di]);    
+        }
+        else
+        {
+            ss << GiNaC::csrc_double << symf.diff(symvar[di]).diff(symvar[dj]);    
+        }
         return ss.str();
     }
     
-    void PFunctionWriter::sym2code( const std::string &f, std::ostream &sout)
+    std::string PFunctionWriter::sym2sym( const std::string &f, int di, int dj) const
     {
-        std::cout << "Input f = " << f << std::endl;
-        
         // read 'f' into a GiNaC expression 'symf', 
         //    using the variables names already given
         GiNaC::symtab table;
-        GiNaC::symtab all_symbol_table;
         std::vector<GiNaC::symbol> symvar(_var_name.size());
         
-        std::cout << "\nvar:" << std::endl;
         for( int i=0; i<_var_name.size(); i++)
         {
-            std::cout << "var[" << i << "] = " << _var_name[i] << "    :: " << _var_description[i] << std::endl;
-            
-            symvar[i] = GiNaC::symbol( "var[" + itos(i) + "]");
+            symvar[i] = GiNaC::symbol( _var_name[i]);
             table[_var_name[i]] = symvar[i];
         }
         
@@ -225,7 +262,71 @@ namespace PRISMS
         }
         
         
-        // use 'symf' to generate c code strings for f, grad_f, hess_f
+        // use 'symf' to generate c code string for f
+        
+        std::ostringstream ss;
+        if( di == -1)
+        {
+            ss << GiNaC::dflt << symf;    
+        }
+        else if (dj == -1)
+        {
+            ss << GiNaC::dflt << symf.diff(symvar[di]);    
+        }
+        else
+        {
+            ss << GiNaC::dflt << symf.diff(symvar[di]).diff(symvar[dj]);    
+        }
+        return ss.str();
+    }
+    
+    std::string PFunctionWriter::sym2latex( const std::string &f, int di, int dj) const
+    {
+        // read 'f' into a GiNaC expression 'symf', 
+        //    using the variables names already given
+        GiNaC::symtab table;
+        std::vector<GiNaC::symbol> symvar(_var_name.size());
+        
+        for( int i=0; i<_var_name.size(); i++)
+        {
+            symvar[i] = GiNaC::symbol( _var_name[i]);
+            table[_var_name[i]] = symvar[i];
+        }
+        
+        GiNaC::parser reader(table, true);
+        GiNaC::ex symf;
+        
+        try
+        {
+            symf = reader(f);
+        }
+        catch (std::invalid_argument& err)
+        {
+            throw err;
+        }
+        
+        
+        // use 'symf' to generate c code string for f
+        
+        std::ostringstream ss;
+        if( di == -1)
+        {
+            ss << GiNaC::latex << symf;    
+        }
+        else if (dj == -1)
+        {
+            ss << GiNaC::latex << symf.diff(symvar[di]);    
+        }
+        else
+        {
+            ss << GiNaC::latex << symf.diff(symvar[di]).diff(symvar[dj]);    
+        }
+        return add_escapes(ss.str());
+    }
+    
+    void PFunctionWriter::sym2code( const std::string &f, std::ostream &sout)
+    {
+        std::cout << "Input f = " << f << std::endl;
         
         _f = "";
         _grad.clear();
@@ -234,10 +335,14 @@ namespace PRISMS
         std::cout << "\n";
         if( _write_f)
         {
-            std::ostringstream ss;
-            ss << GiNaC::csrc_double << symf;    
-            std::cout << " f :: " << ss.str() << std::endl;
-            _f = ss.str();
+            _sym = sym2sym(f);
+            std::cout << " f :expr: " << _sym << std::endl;
+            
+            _f = sym2csrc(f);
+            std::cout << " f :csrc: " << _f << std::endl;
+            
+            _latex = sym2latex(f);
+            std::cout << " f :latex: " << _latex << std::endl;
         }
         
         std::cout << "\n";
@@ -245,10 +350,9 @@ namespace PRISMS
         {
             for( int i=0; i<_var_name.size(); i++)
             {
-                std::ostringstream ss;
-                ss << GiNaC::csrc_double << symf.diff(symvar[i]);
-                std::cout << " grad " << i << " :: " << ss.str() << std::endl;
-                _grad.push_back( ss.str());
+                _grad.push_back( sym2csrc(f,i) );
+                std::cout << " grad " << i << " :: " << _grad.back() << std::endl;
+                
             }
         }
         
@@ -260,10 +364,9 @@ namespace PRISMS
             {
                 for( int j=0; j<_var_name.size(); j++)
                 {
-                    std::ostringstream ss;
-                    ss << GiNaC::csrc_double << symf.diff(symvar[i]).diff(symvar[j]);
-                    std::cout << " hess " << i << " " << j << " :: " << ss.str() << std::endl;
-                    _hess[i].push_back( ss.str());
+                    _hess[i].push_back( sym2csrc(f,i,j) );
+                    std::cout << " hess " << i << " " << j << " :: " << _hess[i].back() << std::endl;
+                    
                 }
             }
         }
@@ -284,8 +387,8 @@ namespace PRISMS
     ///              <= : less than or equal to
     ///              >  : greater than
     ///              >= : greater than or equal to
-    ///              == or = : equal to
-    ///              != or ~= : not equal to
+    ///              == : equal to
+    ///              != : not equal to
     ///
     ///   Format example: 
     ///   '[ { "func": "0", 
@@ -297,7 +400,7 @@ namespace PRISMS
     ///    ]'
     ///
     ///    Translates to:
-    ///      f(x) = 0 if x<0; x^2 if 0<=x<1; and 2x if 1<=x 
+    ///      f(x) = 0 if x < 0; x^2 if x >= 0 and x < 1; 2x if 1 <= x 
     
     void PFunctionWriter::piecewise2code( const std::string &f, std::ostream &sout)
     {
@@ -308,6 +411,10 @@ namespace PRISMS
         std::cout << "\n";
         json_spirit::write_stream( pieces, std::cout);
         std::cout << "\n";
+        
+        // construct function strings
+        std::string csrc, sym, latex;
+        latex = "\\\\left\\\\{ \\\\begin{array}{ll} ";
         
         // remember the piecewise function's name
         std::string piecewise_funcname = _name;
@@ -348,6 +455,21 @@ namespace PRISMS
             _name = piece_name.back();
             sym2code(func, sout);
             
+            std::string str = "";
+            std::string lstr = "";
+            if( i > 0)
+            {
+                str += "; ";
+                if( i == pieces.get_array().size()-1)
+                    str += "and ";
+                
+                lstr += " \\\\\\\\ ";
+                
+            }
+            
+            csrc += str + _f;
+            sym += str + _sym;
+            latex += lstr + _latex;
             
             // write this piece's conditions
             _write_f = true;
@@ -372,7 +494,50 @@ namespace PRISMS
                 
                 // read the condition expressions and operation,
                 //   and write the condition expressions
-                write_condition_function(1, cond_name[i].back(), sym2string(lhs), oper, sym2string(rhs), sout); 
+                write_condition_function(1, cond_name[i].back(), sym2csrc(lhs), oper, sym2csrc(rhs), sout); 
+                
+                str = "";
+                if( j == 0)
+                {
+                    str += " if ";
+                }
+                else if( j == all_cond.size() -1)
+                {
+                    str += " and ";
+                }
+                else
+                {
+                    str += ", ";
+                }
+                
+                lstr = "";
+                if( j == 0)
+                {
+                    lstr += " & \\\\mbox{if } ";
+                }
+                else if( j == all_cond.size() -1)
+                {
+                    lstr += " \\\\mbox{ and } ";
+                }
+                else
+                {
+                    lstr += " \\\\mbox{, } ";
+                }
+                
+                std::string loper = oper;
+                if( loper == "<=")
+                    loper = "\\\\leq";
+                if( loper == ">=")
+                    loper = "\\\\geq";
+                if( loper == "==")
+                    loper = "=";
+                if( loper == "!=")
+                    loper = "\\\\neq";
+                
+                csrc += str + sym2csrc(lhs) + " " + oper + " " + sym2csrc(rhs);
+                sym += str + sym2sym(lhs) + " " + oper + " " + sym2sym(rhs);
+                latex += lstr + sym2latex(lhs) + " " + loper + " " + sym2latex(rhs);
+                
             }
             std::cout << std::endl;
             
@@ -383,8 +548,9 @@ namespace PRISMS
             
         }
         
+        latex += " \\\\end{array} \\\\right.";
         
-        std::cout << "Begin writing PPieceWiseFuncBase" << std::endl;
+        //std::cout << "Begin writing PPieceWiseFuncBase" << std::endl;
         
         
         // write the PPieceWiseFuncBase piecewise function
@@ -400,6 +566,17 @@ namespace PRISMS
         sout << indent(I) << "{\n";
         I++;
         
+        sout << indent(I) << "this->_csrc = \"" + csrc + "\";\n";
+        sout << indent(I) << "this->_sym = \"" + sym_start() + sym + "\";\n";
+        sout << indent(I) << "this->_latex = \"" + sym_start() + latex + "\";\n";
+        sout << indent(I) << "this->_name = \"" + _name + "\";\n";
+        sout << indent(I) << "this->_var_name.clear();\n";
+        for( int i=0; i<_var_name.size(); i++)
+            sout << indent(I) << "this->_var_name.push_back(\"" + _var_name[i] + "\");\n";
+        sout << indent(I) << "this->_var_description.clear();\n";
+        for( int i=0; i<_var_description.size(); i++)
+            sout << indent(I) << "this->_var_description.push_back(\"" + _var_description[i] + "\");\n";
+        
         sout << indent(I) << "typedef Piece<VarContainer, " << _outtype << "> Pc;\n";
         sout << indent(I) << "typedef PSimpleFunction<VarContainer, bool> Cond;\n";
         sout << indent(I) << "typedef PSimpleFunction<VarContainer, " << _outtype << "> psf;\n";
@@ -410,10 +587,10 @@ namespace PRISMS
         // write each piece here
         for( int i=0; i< piece_name.size(); i++)
         {
-        std::cout << "i: " << i << std::endl;
+        //std::cout << "i: " << i << std::endl;
         for( int j=0; j< cond_name[i].size(); j++)
         {
-        std::cout << "  j: " << j << std::endl;
+        //std::cout << "  j: " << j << std::endl;
         sout << indent(I) << "cond.push_back( Cond("<< cond_name[i][j] << "<VarContainer>()));\n";
         }
         sout << indent(I) << "this->_piece.push_back( Pc( pf(" << piece_name[i] << "<VarContainer>()), cond) );\n";
@@ -426,7 +603,7 @@ namespace PRISMS
         I--;
         sout << indent(I) << "};\n\n\n";
         
-        std::cout << "Finish writing PPieceWiseFuncBase" << std::endl;
+        //std::cout << "Finish writing PPieceWiseFuncBase" << std::endl;
         
     }
     
@@ -450,9 +627,16 @@ namespace PRISMS
                 lhs = std::string(match[1]);
                 oper = std::string(match[2]);
                 rhs = std::string(match[3]);
+                
+                if( oper == "~=" )
+                    oper = "!=";
+                if( oper == "=")
+                    oper = "==";
+                
                 return;
             }
         }
+        
         
         throw std::invalid_argument("Could not parse condition: " + cond);
     }
@@ -828,6 +1012,11 @@ namespace PRISMS
         sout << indent(I) << "void construct()\n";
         sout << indent(I) << "{\n";
         I++;
+        
+        sout << indent(I) << "this->_csrc = \"" + _f + "\";\n";
+        sout << indent(I) << "this->_sym = \"" + _sym + "\";\n";
+        sout << indent(I) << "this->_latex = \"" + _latex + "\";\n";
+        
         sout << indent(I) << "this->_name = \"" + _name + "\";\n";
         sout << indent(I) << "this->_var_name.clear();\n";
         for( int i=0; i<_var_name.size(); i++)

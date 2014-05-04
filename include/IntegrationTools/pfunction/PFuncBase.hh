@@ -17,6 +17,10 @@ namespace PRISMS
     class PFuncBase
     {
     protected:
+        std::string _csrc;
+        std::string _sym;
+        std::string _latex;
+    
         std::string _name;
         std::vector<std::string> _var_name;
         std::vector<std::string> _var_description;
@@ -28,9 +32,8 @@ namespace PRISMS
         PFuncBase( const std::string &name,
                   const std::vector<std::string> &var_name,
                   const std::vector<std::string> &var_description) :
-                  _name(name), _var_name(var_name), _var_description(var_description)
+                  _csrc(""), _sym(""), _latex(""), _name(name), _var_name(var_name), _var_description(var_description)
         {
-        
         }
         
         virtual ~PFuncBase(){}
@@ -38,6 +41,18 @@ namespace PRISMS
         std::string name()
         {
             return _name;
+        }
+        std::string csrc()
+        {
+            return _csrc;
+        }
+        std::string sym()
+        {
+            return _sym;
+        }
+        std::string latex()
+        {
+            return _latex;
         }
         int size() const
         {

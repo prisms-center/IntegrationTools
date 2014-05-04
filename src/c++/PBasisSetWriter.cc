@@ -166,11 +166,14 @@ namespace PRISMS
                 std::ostringstream ss;
                 ss << GiNaC::csrc_double << bf->_e;    
                 
+                std::cout << i << ") f :: " << ss.str() << std::endl;
+                
                 _phi.push_back( ss.str());
                 
                 delete bf;
             }
         }
+        std::cout << std::endl;
         
         // generate grad
         if( _write_grad)
@@ -183,11 +186,14 @@ namespace PRISMS
                 std::ostringstream ss;
                 ss << GiNaC::csrc_double << bf->_e;    
                 
+                std::cout << i << ") grad :: " << ss.str() << std::endl;
+                
                 _grad.push_back( ss.str());
                 
                 delete bf;
             }
         }
+        std::cout << std::endl;
         
         // generate hess
         if( _write_hess)
@@ -200,11 +206,14 @@ namespace PRISMS
                 std::ostringstream ss;
                 ss << GiNaC::csrc_double << bf->_e;    
                 
+                std::cout << i << ") hess :: " << ss.str() << std::endl;
+                
                 _hess.push_back( ss.str());
                 
                 delete bf;
             }
         }
+        std::cout << std::endl;
         
         head(sout);
         code(sout);
@@ -272,11 +281,14 @@ namespace PRISMS
                 std::ostringstream ss;
                 ss << GiNaC::csrc_double << bf->_e;    
                 
+                std::cout << i << ") f :: " << ss.str() << std::endl;
+                
                 _phi.push_back( ss.str());
                 
                 delete bf;
             }
         }
+        std::cout << std::endl;
         
         // generate grad
         if( _write_grad)
@@ -289,11 +301,14 @@ namespace PRISMS
                 std::ostringstream ss;
                 ss << GiNaC::csrc_double << bf->_e;    
                 
+                std::cout << i << ") grad :: " << ss.str() << std::endl;
+                
                 _grad.push_back( ss.str());
                 
                 delete bf;
             }
         }
+        std::cout << std::endl;
         
         // generate hess
         if( _write_hess)
@@ -306,11 +321,15 @@ namespace PRISMS
                 std::ostringstream ss;
                 ss << GiNaC::csrc_double << bf->_e;    
                 
+                std::cout << i << ") hess :: " << ss.str() << std::endl;
+                
                 _hess.push_back( ss.str());
                 
                 delete bf;
             }
         }
+        std::cout << std::endl;
+        
         
         head(sout);
         code(sout);
