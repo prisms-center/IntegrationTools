@@ -173,7 +173,7 @@ namespace PRISMS
             while(!infile.eof())
             {
                 std::getline( infile, line);
-                std::cout << "line: " << line << std::endl;
+                //std::cout << "line: " << line << std::endl;
                 
                 if( line[0] == 'P')
                 {
@@ -238,7 +238,7 @@ namespace PRISMS
                             }
                             
                             std::sort( value[j].begin(), value[j].end());
-                            std::cout << "j: " << j << " back(): " << value[j].back() << std::endl;
+                            //std::cout << "j: " << j << " back(): " << value[j].back() << std::endl;
                             min.push_back( value[j][0]);
                             N.push_back( value[j].size());
                             incr.push_back( (value[j].back() - value[j][0])/(1.0*N.back()));

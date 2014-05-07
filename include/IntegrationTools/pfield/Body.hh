@@ -63,7 +63,7 @@ namespace PRISMS
                 {
                     if( line.size() > 9 && line.substr(0,10) == "POINT_DATA")
                     {
-                        std::cout << line << "\n";
+                        //std::cout << line << "\n";
                         ss.clear();
                         ss.str(line);
                         ss >> str >> Npoints;
