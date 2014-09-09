@@ -28,7 +28,6 @@
 #include<algorithm>
 #include<sstream>
 
-#include "IntegrationTools/writer/PFunctionWriter.hh"
 #include "IntegrationTools/version.hh"
 
 

@@ -19,15 +19,14 @@ libpextern.so: PExtern.o PLibrary.o
 PExtern.o: $(SRC)/PExtern.cc
 	$(CXX) -c $(SRC)/PExtern.cc $(CPPFLAGS)
 
-PLibrary.cc: CLI
+PLibrary.cc:
+	lw -h -d . -v "std::vector<double>" "double*" -l .
 
-PLibrary.hh: CLI
+PLibrary.hh: 
+	lw -c -d . -v "std::vector<double>" "double*" -l .
 
-PLibrary.o: PLibrary.cc PLibrary.hh CLI
+PLibrary.o: PLibrary.cc PLibrary.hh
 	g++ -c PLibrary.cc $(CPPFLAGS)
-
-CLI: FORCE
-	cd ../commandline; make
 
 FORCE:
 

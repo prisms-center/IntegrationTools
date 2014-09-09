@@ -5,8 +5,6 @@ Function and field passing tools for PRISMS model integration
 
 Boost is used for program_options, filesystem, and regex: http://www.boost.org/
 
-The function and basis set writers require GiNaC: http://www.ginac.de/
-
 The python example script py_test.py uses matplotlib: http://matplotlib.org/
 
 
@@ -19,7 +17,7 @@ The intended usage is something like this:
 
 1) You write a program that you wish to pass functions into without knowing their form ahead of time.
 
-2) You write the code for the functions themselves, either by hand or using the Function or Basis Set Writers ('fw' and 'bsw') to generate code from symbolic mathematical expressions.
+2) You write the code for the functions themselves, either by hand or code generation tool (See IntegrationToolsWriter).
 
 3) You compile the functions into a library and link it with your code.
 
@@ -34,6 +32,17 @@ See 'INSTALL.txt' file.
 
 Release Notes
 =======================
+
+Release 0.2.0 will include:
+- PSimpleFunction, PFunction, and PBasisSet
+- PSeriesFunction
+    - with tensor product output and coefficient input
+- Piecewise functions
+- The library writer: lw
+- PExtern for calls from C, Fortran, etc.
+- IntegrationTools wrapper for Python, 'pfunction'
+- The code writers: fw, and bsw have been moved to a separate project: IntegrationToolsWriter
+
 
 Release 0.1.0 will include:
 - PSimpleFunction, PFunction, and PBasisSet

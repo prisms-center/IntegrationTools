@@ -1,22 +1,22 @@
 # make PFunction src
 
 CSRC = c
-CPPSRC = c++
+LWSRC = lw
 PYTHONSRC = python
 
 all:
-	@cd $(CPPSRC); make
+	@cd $(LWSRC); make
 	@cd $(PYTHONSRC); make
 
 install:
-	@cd $(CPPSRC); make install
+	@cd $(LWSRC); make install
 	@cd $(PYTHONSRC); make install
 
 uninstall:
-	@cd $(CPPSRC); make uninstall
+	@cd $(LWSRC); make uninstall
 	@cd $(PYTHONSRC); make uninstall
 
 clean:
-	@cd $(CPPSRC); make clean
+	@cd $(LWSRC); make clean
 	@cd $(PYTHONSRC); make clean
 
