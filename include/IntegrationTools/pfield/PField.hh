@@ -111,17 +111,17 @@ namespace PRISMS
         
         
         // get evaluated basis functions
-		(*_mesh).basis_functions(coord, _bfunc, _node_index, _Nbfunc);
+        (*_mesh).basis_functions(coord, _bfunc, _node_index, _Nbfunc);
 		
         // sum them
         _val = _zero;
-		for( int i=0; i<_Nbfunc; i++)
-		{
-        	//std::cout << "i: " << i << "  node: " << _node_index[i] << "  bfunc: " << _bfunc[i] << "  val: " << _field[_node_index[i]] << std::endl;
+        for( int i=0; i<_Nbfunc; i++)
+        {
+              //std::cout << "i: " << i << "  node: " << _node_index[i] << "  bfunc: " << _bfunc[i] << "  val: " << _field[_node_index[i]] << std::endl;
             _val += _bfunc[i]*_field[_node_index[i]];
         }
         //std::cout << "val: " << _val << std::endl << std::endl;
-		return _val;
+        return _val;
     }
     
     template<class Coordinate, class FieldType, int DIM>
@@ -129,12 +129,12 @@ namespace PRISMS
     {
         //std::cout << "begin PField::grad()" << std::endl;
         // get evaluated basis functions
-		(*_mesh).grad_basis_functions(coord, di, _bfunc, _node_index, _Nbfunc);
+        (*_mesh).grad_basis_functions(coord, di, _bfunc, _node_index, _Nbfunc);
 		
         // sum them
         _grad_val[di] = _zero;
-		for( int i=0; i<_Nbfunc; i++)
-			_grad_val[di] += _bfunc[i]*_field[_node_index[i]];
+        for( int i=0; i<_Nbfunc; i++)
+            _grad_val[di] += _bfunc[i]*_field[_node_index[i]];
         return _grad_val[di];
         //std::cout << "finish PField::grad()" << std::endl;
         
@@ -144,13 +144,13 @@ namespace PRISMS
     FieldType PField<Coordinate,FieldType, DIM>::hess( const Coordinate &coord, int di, int dj)
     {
         // get evaluated basis functions
-		(*_mesh).hess_basis_functions(coord, di, dj, _bfunc, _node_index, _Nbfunc);
+        (*_mesh).hess_basis_functions(coord, di, dj, _bfunc, _node_index, _Nbfunc);
 		
         // sum them
         _hess_val[di][dj] = _zero;
-		for( int i=0; i<_Nbfunc; i++)
-			_hess_val[di][dj] += _bfunc[i]*_field[_node_index[i]];
-		return _hess_val[di][dj];
+        for( int i=0; i<_Nbfunc; i++)
+            _hess_val[di][dj] += _bfunc[i]*_field[_node_index[i]];
+        return _hess_val[di][dj];
     }
 
     template<class Coordinate, class FieldType, int DIM>

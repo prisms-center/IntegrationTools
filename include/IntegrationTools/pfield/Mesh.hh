@@ -16,7 +16,7 @@
 namespace PRISMS
 {
     
-    void construct_basis_function( PFuncBase<std::vector<PRISMS::Coordinate<2> >, double>* &bfunc, const std::string &name)
+    inline void construct_basis_function( PFuncBase<std::vector<PRISMS::Coordinate<2> >, double>* &bfunc, const std::string &name)
     {
         if( name == "Quad")
         {
@@ -29,7 +29,7 @@ namespace PRISMS
         }
     }
     
-    void construct_basis_function( PFuncBase<std::vector<PRISMS::Coordinate<3> >, double>* &bfunc, const std::string &name)
+    inline void construct_basis_function( PFuncBase<std::vector<PRISMS::Coordinate<3> >, double>* &bfunc, const std::string &name)
     {
         if( name == "Hexahedron")
         {
