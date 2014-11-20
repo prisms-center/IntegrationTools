@@ -35,7 +35,7 @@ install: all
 	install lw $(INSTALL)
 
 uninstall:
-	rm $(INSTALL)/lw
+	rm -f $(INSTALL)/lw
 
 version.cc: #FORCE
 	@sed "s/VERSION_ID/$(VERS)/" version.template.cc > version.tmp.0

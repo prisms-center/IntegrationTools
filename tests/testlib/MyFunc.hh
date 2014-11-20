@@ -1,8 +1,3 @@
-// created: 2014-9-8 12:27:31
-// version: develop
-// url: https://github.com/prisms-center/IntegrationTools.git
-// commit: ef1bd09854d368ff3c34036c1fc3f97128eee51f
-
 #ifndef MyFunc_HH
 #define MyFunc_HH
 
@@ -17,7 +12,7 @@ namespace PRISMS
     {
         double eval( const VarContainer &var) const
         {
-            return  (var[1]*var[1]*var[1])+(var[0]*var[0])*var[1]+(var[0]*var[0]*var[0])+var[0]*(var[1]*var[1]);
+            return  (var[0]*var[0])*var[1]+(var[0]*var[0]*var[0])+var[0]*(var[1]*var[1])+(var[1]*var[1]*var[1]);
         }
 
     public:
@@ -29,17 +24,17 @@ namespace PRISMS
 
         std::string csrc() const
         {
-            return " (var[1]*var[1]*var[1])+(var[0]*var[0])*var[1]+(var[0]*var[0]*var[0])+var[0]*(var[1]*var[1])";
+            return " (var[0]*var[0])*var[1]+(var[0]*var[0]*var[0])+var[0]*(var[1]*var[1])+(var[1]*var[1]*var[1])";
         }
 
         std::string sym() const
         {
-            return "x^3+y^2*x+y*x^2+y^3";
+            return "x*y^2+y^3+x^2*y+x^3";
         }
 
         std::string latex() const
         {
-            return " x^{2} y+y^{3}+ x y^{2}+x^{3}";
+            return " y^{2} x+y^{3}+ y x^{2}+x^{3}";
         }
 
         MyFunc_f* clone() const
@@ -53,7 +48,7 @@ namespace PRISMS
     {
         double eval( const VarContainer &var) const
         {
-            return  2.0*var[0]*var[1]+3.0*(var[0]*var[0])+(var[1]*var[1]);
+            return  2.0*var[1]*var[0]+3.0*(var[0]*var[0])+(var[1]*var[1]);
         }
 
     public:
@@ -65,17 +60,17 @@ namespace PRISMS
 
         std::string csrc() const
         {
-            return " 2.0*var[0]*var[1]+3.0*(var[0]*var[0])+(var[1]*var[1])";
+            return " 2.0*var[1]*var[0]+3.0*(var[0]*var[0])+(var[1]*var[1])";
         }
 
         std::string sym() const
         {
-            return "2*y*x+3*x^2+y^2";
+            return "y^2+2*x*y+3*x^2";
         }
 
         std::string latex() const
         {
-            return "y^{2}+3 x^{2}+2  x y";
+            return "3 x^{2}+y^{2}+2  x y";
         }
 
         MyFunc_grad_0* clone() const
@@ -89,7 +84,7 @@ namespace PRISMS
     {
         double eval( const VarContainer &var) const
         {
-            return  2.0*var[0]*var[1]+(var[0]*var[0])+3.0*(var[1]*var[1]);
+            return  3.0*(var[1]*var[1])+2.0*var[1]*var[0]+(var[0]*var[0]);
         }
 
     public:
@@ -101,17 +96,17 @@ namespace PRISMS
 
         std::string csrc() const
         {
-            return " 2.0*var[0]*var[1]+(var[0]*var[0])+3.0*(var[1]*var[1])";
+            return " 3.0*(var[1]*var[1])+2.0*var[1]*var[0]+(var[0]*var[0])";
         }
 
         std::string sym() const
         {
-            return "3*y^2+x^2+2*x*y";
+            return "x^2+3*y^2+2*x*y";
         }
 
         std::string latex() const
         {
-            return "2  y x+x^{2}+3 y^{2}";
+            return "3 y^{2}+2  x y+x^{2}";
         }
 
         MyFunc_grad_1* clone() const
@@ -142,12 +137,12 @@ namespace PRISMS
 
         std::string sym() const
         {
-            return "6*x+2*y";
+            return "2*y+6*x";
         }
 
         std::string latex() const
         {
-            return "2 y+6 x";
+            return "6 x+2 y";
         }
 
         MyFunc_hess_0_0* clone() const
@@ -161,7 +156,7 @@ namespace PRISMS
     {
         double eval( const VarContainer &var) const
         {
-            return  2.0*var[1]+2.0*var[0];
+            return  2.0*var[0]+2.0*var[1];
         }
 
     public:
@@ -173,17 +168,17 @@ namespace PRISMS
 
         std::string csrc() const
         {
-            return " 2.0*var[1]+2.0*var[0]";
+            return " 2.0*var[0]+2.0*var[1]";
         }
 
         std::string sym() const
         {
-            return "2*x+2*y";
+            return "2*y+2*x";
         }
 
         std::string latex() const
         {
-            return "2 x+2 y";
+            return "2 y+2 x";
         }
 
         MyFunc_hess_0_1* clone() const
@@ -219,7 +214,7 @@ namespace PRISMS
 
         std::string latex() const
         {
-            return "2 y+2 x";
+            return "2 x+2 y";
         }
 
         MyFunc_hess_1_0* clone() const
@@ -250,7 +245,7 @@ namespace PRISMS
 
         std::string sym() const
         {
-            return "2*x+6*y";
+            return "6*y+2*x";
         }
 
         std::string latex() const
@@ -280,19 +275,31 @@ namespace PRISMS
 
         MyFunc(const MyFunc &RHS )
         {
-            construct();
+            construct(false);
+            
+            _val = RHS._val->clone();
+            _grad_val[0] = RHS._grad_val[0]->clone();
+            _grad_val[1] = RHS._grad_val[1]->clone();
+            _hess_val[0][0] = RHS._hess_val[0][0]->clone();
+            _hess_val[0][1] = RHS._hess_val[0][1]->clone();
+            _hess_val[1][0] = RHS._hess_val[1][0]->clone();
+            _hess_val[1][1] = RHS._hess_val[1][1]->clone();
+            
         }
 
-        MyFunc& operator=(const MyFunc &RHS )
+        MyFunc& operator=( MyFunc RHS )
         {
-            _val = RHS._val;
+            using std::swap;
             
-            _grad_val[0] = RHS._grad_val[0];
-            _grad_val[1] = RHS._grad_val[1];
-            _hess_val[0][0] = RHS._hess_val[0][0];
-            _hess_val[0][1] = RHS._hess_val[0][1];
-            _hess_val[1][0] = RHS._hess_val[1][0];
-            _hess_val[1][1] = RHS._hess_val[1][1];
+            swap(_val, RHS._val);
+            swap(_grad_val[0], RHS._grad_val[0]);
+            swap(_grad_val[1], RHS._grad_val[1]);
+            swap(_hess_val[0][0], RHS._hess_val[0][0]);
+            swap(_hess_val[0][1], RHS._hess_val[0][1]);
+            swap(_hess_val[1][0], RHS._hess_val[1][0]);
+            swap(_hess_val[1][1], RHS._hess_val[1][1]);
+            
+            return *this;
         }
 
         ~MyFunc()
@@ -382,7 +389,7 @@ namespace PRISMS
         }
 
     private:
-        void construct()
+        void construct(bool allocate = true)
         {
             this->_name = "MyFunc";
             this->_var_name.clear();
@@ -390,17 +397,21 @@ namespace PRISMS
             this->_var_name.push_back("y");
             this->_var_description.clear();
             this->_var_description.push_back("x variable");
-            this->_var_description.push_back("y variable");
-            
-            _val = new MyFunc_f<VarContainer>();
+            this->_var_description.push_back("y_variable");
             
             _grad_val = new PSimpleBase< VarContainer, double>*[2];
-            _grad_val[0] = new MyFunc_grad_0<VarContainer>();
-            _grad_val[1] = new MyFunc_grad_1<VarContainer>();
             
             _hess_val = new PSimpleBase< VarContainer, double>**[2];
             _hess_val[0] = new PSimpleBase< VarContainer, double>*[2];
             _hess_val[1] = new PSimpleBase< VarContainer, double>*[2];
+            
+            if(!allocate) return;
+            
+            _val = new MyFunc_f<VarContainer>();
+            
+            _grad_val[0] = new MyFunc_grad_0<VarContainer>();
+            _grad_val[1] = new MyFunc_grad_1<VarContainer>();
+            
             _hess_val[0][0] = new MyFunc_hess_0_0<VarContainer>();
             _hess_val[0][1] = new MyFunc_hess_0_1<VarContainer>();
             _hess_val[1][0] = new MyFunc_hess_1_0<VarContainer>();

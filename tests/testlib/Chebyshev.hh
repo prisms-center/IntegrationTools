@@ -1,8 +1,3 @@
-// created: 2014-9-8 12:27:31
-// version: develop
-// url: https://github.com/prisms-center/IntegrationTools.git
-// commit: ef1bd09854d368ff3c34036c1fc3f97128eee51f
-
 #ifndef Chebyshev_HH
 #define Chebyshev_HH
 

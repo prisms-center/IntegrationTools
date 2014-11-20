@@ -9,12 +9,13 @@ all:
 	@cd $(PYTHONSRC); make
 
 install:
-	@cd $(LWSRC); make install
-	@cd $(PYTHONSRC); make install
+	@cd $(LWSRC) && make install
+	@cd $(PYTHONSRC) && make install
 
 uninstall:
-	@cd $(LWSRC); make uninstall
-	@cd $(PYTHONSRC); make uninstall
+	@cd $(LWSRC) && make uninstall
+	@#cd $(PYTHONSRC) && make uninstall
+	@echo "python module 'pfunction' must be uninstalled manually"
 
 clean:
 	@cd $(LWSRC); make clean

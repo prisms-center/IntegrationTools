@@ -7,6 +7,7 @@
 #include "Monomial.hh"
 #include "MyFunc.hh"
 #include "MyPieceWiseFunc.hh"
+#include "Quadratic.hh"
 #include "PLibrary.hh"
 
 namespace PRISMS
@@ -227,6 +228,9 @@ namespace PRISMS
             if( name == "MyPieceWiseFunc_piece2_hess_0_1") simplefunc = psf( MyPieceWiseFunc_piece2_hess_0_1< std::vector<double> >() );
             if( name == "MyPieceWiseFunc_piece2_hess_1_0") simplefunc = psf( MyPieceWiseFunc_piece2_hess_1_0< std::vector<double> >() );
             if( name == "MyPieceWiseFunc_piece2_hess_1_1") simplefunc = psf( MyPieceWiseFunc_piece2_hess_1_1< std::vector<double> >() );
+            if( name == "Quadratic_f") simplefunc = psf( Quadratic_f< std::vector<double> >() );
+            if( name == "Quadratic_grad_0") simplefunc = psf( Quadratic_grad_0< std::vector<double> >() );
+            if( name == "Quadratic_hess_0_0") simplefunc = psf( Quadratic_hess_0_0< std::vector<double> >() );
         }
         void PLibrary::checkout( std::string name, PSimpleFunction< double*, double > &simplefunc)
         {
@@ -259,6 +263,9 @@ namespace PRISMS
             if( name == "MyPieceWiseFunc_piece2_hess_0_1") simplefunc = psf( MyPieceWiseFunc_piece2_hess_0_1< double* >() );
             if( name == "MyPieceWiseFunc_piece2_hess_1_0") simplefunc = psf( MyPieceWiseFunc_piece2_hess_1_0< double* >() );
             if( name == "MyPieceWiseFunc_piece2_hess_1_1") simplefunc = psf( MyPieceWiseFunc_piece2_hess_1_1< double* >() );
+            if( name == "Quadratic_f") simplefunc = psf( Quadratic_f< double* >() );
+            if( name == "Quadratic_grad_0") simplefunc = psf( Quadratic_grad_0< double* >() );
+            if( name == "Quadratic_hess_0_0") simplefunc = psf( Quadratic_hess_0_0< double* >() );
         }
         void PLibrary::checkout( std::string name, PSimpleFunction< std::vector<double>, bool > &simplefunc)
         {
@@ -287,6 +294,7 @@ namespace PRISMS
             if( name == "MyPieceWiseFunc_piece1") func = pf( MyPieceWiseFunc_piece1< std::vector<double> >() );
             if( name == "MyPieceWiseFunc_piece2") func = pf( MyPieceWiseFunc_piece2< std::vector<double> >() );
             if( name == "MyPieceWiseFunc") func = pf( MyPieceWiseFunc< std::vector<double> >() );
+            if( name == "Quadratic") func = pf( Quadratic< std::vector<double> >() );
         }
         void PLibrary::checkout( std::string name, PFunction< double*, double > &func)
         {
@@ -296,6 +304,7 @@ namespace PRISMS
             if( name == "MyPieceWiseFunc_piece1") func = pf( MyPieceWiseFunc_piece1< double* >() );
             if( name == "MyPieceWiseFunc_piece2") func = pf( MyPieceWiseFunc_piece2< double* >() );
             if( name == "MyPieceWiseFunc") func = pf( MyPieceWiseFunc< double* >() );
+            if( name == "Quadratic") func = pf( Quadratic< double* >() );
         }
 
         void PLibrary::checkout( std::string name, PBasisSet< double, double > &basis_set, int N)
@@ -520,6 +529,9 @@ namespace PRISMS
             if( name == "MyPieceWiseFunc_piece2_hess_0_1") simplefunc = new MyPieceWiseFunc_piece2_hess_0_1< std::vector<double> >();
             if( name == "MyPieceWiseFunc_piece2_hess_1_0") simplefunc = new MyPieceWiseFunc_piece2_hess_1_0< std::vector<double> >();
             if( name == "MyPieceWiseFunc_piece2_hess_1_1") simplefunc = new MyPieceWiseFunc_piece2_hess_1_1< std::vector<double> >();
+            if( name == "Quadratic_f") simplefunc = new Quadratic_f< std::vector<double> >();
+            if( name == "Quadratic_grad_0") simplefunc = new Quadratic_grad_0< std::vector<double> >();
+            if( name == "Quadratic_hess_0_0") simplefunc = new Quadratic_hess_0_0< std::vector<double> >();
         }
         void PLibrary::checkout( std::string name, PSimpleBase< double*, double > *&simplefunc)
         {
@@ -551,6 +563,9 @@ namespace PRISMS
             if( name == "MyPieceWiseFunc_piece2_hess_0_1") simplefunc = new MyPieceWiseFunc_piece2_hess_0_1< double* >();
             if( name == "MyPieceWiseFunc_piece2_hess_1_0") simplefunc = new MyPieceWiseFunc_piece2_hess_1_0< double* >();
             if( name == "MyPieceWiseFunc_piece2_hess_1_1") simplefunc = new MyPieceWiseFunc_piece2_hess_1_1< double* >();
+            if( name == "Quadratic_f") simplefunc = new Quadratic_f< double* >();
+            if( name == "Quadratic_grad_0") simplefunc = new Quadratic_grad_0< double* >();
+            if( name == "Quadratic_hess_0_0") simplefunc = new Quadratic_hess_0_0< double* >();
         }
         void PLibrary::checkout( std::string name, PSimpleBase< std::vector<double>, bool > *&simplefunc)
         {
@@ -576,6 +591,7 @@ namespace PRISMS
             if( name == "MyPieceWiseFunc_piece1") func = new MyPieceWiseFunc_piece1< std::vector<double> >();
             if( name == "MyPieceWiseFunc_piece2") func = new MyPieceWiseFunc_piece2< std::vector<double> >();
             if( name == "MyPieceWiseFunc") func = new MyPieceWiseFunc< std::vector<double> >();
+            if( name == "Quadratic") func = new Quadratic< std::vector<double> >();
         }
         void PLibrary::checkout( std::string name, PFuncBase< double*, double > *&func)
         {
@@ -584,6 +600,7 @@ namespace PRISMS
             if( name == "MyPieceWiseFunc_piece1") func = new MyPieceWiseFunc_piece1< double* >();
             if( name == "MyPieceWiseFunc_piece2") func = new MyPieceWiseFunc_piece2< double* >();
             if( name == "MyPieceWiseFunc") func = new MyPieceWiseFunc< double* >();
+            if( name == "Quadratic") func = new Quadratic< double* >();
         }
 
 

@@ -1,4 +1,4 @@
-# make pextern.dylib
+# make pextern.dylib from the included PFunction src files
 
 HOME = ../..
 EXTERN = $(HOME)/include/IntegrationTools/extern
@@ -20,10 +20,10 @@ PExtern.o: $(SRC)/PExtern.cc
 	$(CXX) -c $(SRC)/PExtern.cc $(CPPFLAGS)
 
 PLibrary.cc:
-	lw -h -d . -v "std::vector<double>" "double*" -l .
+	lw -c -d . -v "std::vector<double>" "double*" -l .
 
 PLibrary.hh: 
-	lw -c -d . -v "std::vector<double>" "double*" -l .
+	lw -h -d . -v "std::vector<double>" "double*" -l .
 
 PLibrary.o: PLibrary.cc PLibrary.hh
 	g++ -c PLibrary.cc $(CPPFLAGS)
@@ -31,4 +31,4 @@ PLibrary.o: PLibrary.cc PLibrary.hh
 FORCE:
 
 clean: 
-	rm -f *.o *.so
+	rm -f *.o *.so PLibrary.hh PLibrary.cc
