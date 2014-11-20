@@ -22,7 +22,6 @@ extern "C"
     
     void PSimpleFunction_dsd_new(char* name, PRISMS::PSimpleBase<double*,double>* &f)
     { 
-        std::cout << "!!new: " << std::string(name) << "!!" << std::endl;
         PRISMS::PLibrary::checkout(std::string(name), f);
     }
     
@@ -56,7 +55,6 @@ extern "C"
     
     void PSimpleFunction_dd_new(char* name, PRISMS::PSimpleBase<double,double>* &f)
     { 
-        std::cout << "!!new: " << std::string(name) << "!!" << std::endl;
         PRISMS::PLibrary::checkout(std::string(name), f);
     }
     
