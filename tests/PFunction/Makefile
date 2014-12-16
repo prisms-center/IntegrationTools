@@ -4,8 +4,8 @@ H = $(HOME)/include
 PLIB = $(HOME)/tests/testlib
 INCLUDE = $(H) $(PLIB) 
 
-export LD_LIBRARY_PATH=$(PLIB) 
-export DYLD_LIBRARY_PATH=$(PLIB)
+LD_LIBRARY_PATH:=$(PLIB):$(LD_LIBRARY_PATH) 
+DYLD_LIBRARY_PATH:=$(PLIB):$(DYLD_LIBRARY_PATH)
 
 CXX      = g++
 CPPFLAGS += $(foreach i,$(INCLUDE),-I$(i))
