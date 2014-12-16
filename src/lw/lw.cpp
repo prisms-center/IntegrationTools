@@ -544,7 +544,7 @@ sout <<
 #include<cstring>\n\
 #include<vector>\n\
 #include \"IntegrationTools/PFunction.hh\"\n\
-#include \"IntegrationTools/PPiecewise.hh\"\n\
+#include \"IntegrationTools/PPieceWise.hh\"\n\
 \n\
 namespace PRISMS\n\
 {\n\

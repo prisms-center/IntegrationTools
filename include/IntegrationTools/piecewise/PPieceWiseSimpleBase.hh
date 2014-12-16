@@ -21,7 +21,7 @@ namespace PRISMS
     {
         public:
         
-        std::vector<SimplePiece<VarContainer, OutType> > _piece;
+        mutable std::vector<SimplePiece<VarContainer, OutType> > _piece;
         
         PPieceWiseSimpleBase() {}
         
@@ -122,12 +122,12 @@ namespace PRISMS
         }
         
         private:
-        virtual OutType eval( const VarContainer &var) 
+        virtual OutType eval( const VarContainer &var) const 
         { 
             for( int i=0; i<_piece.size(); i++)
             {
                 if( _piece[i].in_piece(var))
-                    return this->_val = _piece[i](var);
+                    return _piece[i](var);
             }
             
             throw std::domain_error("PPieceWiseSimpleBase: Not in any piece");

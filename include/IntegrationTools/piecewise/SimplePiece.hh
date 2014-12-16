@@ -18,7 +18,7 @@ namespace PRISMS
     {
         protected:
         
-        PSimpleFunction<VarContainer, OutType> _expr;
+        mutable PSimpleFunction<VarContainer, OutType> _expr;
         mutable std::vector< PSimpleFunction<VarContainer, bool> > _condition;
         
         public:
@@ -123,9 +123,9 @@ namespace PRISMS
         /// This will return '_expr' evaluated anywhere. Must check in_piece first. We
         ///    don't check it here to avoid double checking when evaluating PPieceWiseSimpleBase
         ///
-        virtual OutType eval( const VarContainer &var) 
+        virtual OutType eval( const VarContainer &var) const
         { 
-            return this->_val = _expr(var);
+            return _expr(var);
         }
     };
 

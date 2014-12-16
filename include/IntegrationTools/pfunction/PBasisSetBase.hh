@@ -60,7 +60,7 @@ namespace PRISMS
             
         }
         
-        virtual int max_size()
+        virtual int max_size() const
         {
             // default to (essentially) no limit
             return std::numeric_limits<int>::max();
