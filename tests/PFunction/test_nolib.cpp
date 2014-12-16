@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
   
   std::cout << "// ----------------------------------------------------------------------\n";
   std::cout << "// Create an input variable vector, for a function of a single variable. \n";
-  std::cout << "// PFunctions evalualte with [], so even a function of a single variable \n";
+  std::cout << "// PFunctions evalulate with [], so even a function of a single variable \n";
   std::cout << "// takes a container as input.                                           \n";
   std::cout << "std::vector<double> var(1, 2.1);\n";
   std::vector<double> var(1, 2.1);

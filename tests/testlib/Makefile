@@ -1,4 +1,4 @@
-# make pextern.dylib from the included PFunction src files
+# make libpextern.so from the included PFunction src files
 
 HOME = ../..
 EXTERN = $(HOME)/include/IntegrationTools/extern
@@ -12,23 +12,10 @@ CPPFLAGS += $(foreach i,$(INCLUDE),-I$(i))
 CPPFLAGS += -O3 -fPIC
 
 
-libpextern.so: PExtern.o PLibrary.o
-	@#$(CXX) -o libpextern.dylib $(SRC)/PExtern.cc PLibrary.o -dynamiclib $(CPPFLAGS)
-	$(CXX) -shared -o libpextern.so PExtern.o PLibrary.o 
-
-PExtern.o: $(SRC)/PExtern.cc
-	$(CXX) -c $(SRC)/PExtern.cc $(CPPFLAGS)
-
-PLibrary.cc:
-	lw -c -d . -v "std::vector<double>" "double*" -l .
-
-PLibrary.hh: 
-	lw -h -d . -v "std::vector<double>" "double*" -l .
-
-PLibrary.o: PLibrary.cc PLibrary.hh
-	g++ -c PLibrary.cc $(CPPFLAGS)
+libpextern.so:
+	lw -d . -v "std::vector<double>" "double*" -l . -c --cflags "-O3 -fPIC -I../../include"
 
 FORCE:
 
 clean: 
-	rm -f *.o *.so PLibrary.hh PLibrary.cc
+	rm -f *.o *.so PLibrary.hh PLibrary.cc PExtern.cc

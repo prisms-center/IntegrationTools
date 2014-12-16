@@ -25,7 +25,7 @@
 //#include<sstream>
 //#include "../../external/MersenneTwister/MersenneTwister.h"
 
-#include "PFunction.hh"
+#include "IntegrationTools/PFunction.hh"
 #include "MyFunc.hh"
 #include "BP_StopWatch.hh"
 
@@ -41,16 +41,16 @@ std::ostream& operator<<(std::ostream &sout, const std::vector<T> &v)
 template<class T>
 double nonvirtual(const T &var)
 {
-    return 2.0*(var[2]*var[2]*var[2])*(var[3]*var[3])*((var[0]*var[0])*(var[0]*var[0]))+2.0*var[2]*(var[3]*(var[3]*var[3])*(var[3]*var[3]))*var[1]+2.0*exp(var[2]*var[3])*(var[0]*var[0]);
+    return (var[0]*var[0])*var[1]+(var[0]*var[0]*var[0])+var[0]*(var[1]*var[1])+(var[1]*var[1]*var[1]);
 }
 
 template<class T>
 double nonvirtual(const T &var, int di)
 {
     if( di == 0)
-        return 4.0*var[0]+8.0*(var[0]*var[0]*var[0]);
+        return 2.0*var[1]*var[0]+3.0*(var[0]*var[0])+(var[1]*var[1]);
     else if( di == 1)
-        return 2.0;
+        return 3.0*(var[1]*var[1])+2.0*var[1]*var[0]+(var[0]*var[0]);
     return 0.0;
 }
 
@@ -60,16 +60,16 @@ double nonvirtual(const T &var, int di, int dj)
     if( di == 0)
     {
         if( dj == 0)
-            return 24.0*(var[0]*var[0])+4.0;
-        else if( dj == 0)
-            return 0.0;
+            return 6.0*var[0]+2.0*var[1];
+        else if( dj == 1)
+            return 2.0*var[0]+2.0*var[1];
     }
     else if( di == 1)
     {
         if( dj == 0)
-            return 0.0;
+            return 2.0*var[0]+2.0*var[1];
         else if( dj == 1)
-            return 0.0;
+            return 2.0*var[0]+6.0*var[1];
     }
     return 0.0;
 }
@@ -101,8 +101,9 @@ int main(int argc, char *argv[])
     std::cout << "f.hess(var,1,0): " << f.hess(var,1,0) << std::endl;
     std::cout << "f.hess(var,1,1): " << f.hess(var,1,1) << std::endl;
     
+    double codet;
     double d = 0.0;
-    double count = 1e7;
+    double count = 1e8;
     srand( time(NULL));
     int di = 0; //rand() % 2;
     int dj = 0; //rand() % 2;
@@ -111,49 +112,18 @@ int main(int argc, char *argv[])
     
     
     
-    d = 0.0;
-    timer.set_start();
-    for( double i=0; i<count; i++)
-    {
-        var[0]=(1.0*rand())/RAND_MAX;
-        d += f(var);
-    }
-    std::cout << "f sum: " << d << std::endl;
-    d = timer.total_time_s();
-    std::cout << "f time: " << d << std::endl;
-    
-    d = 0.0;
-    timer.set_start();
-    for( double i=0; i<count; i++)
-    {
-        var[0]=(1.0*rand())/RAND_MAX;
-        d += g(var);
-    }
-    std::cout << "g sum: " << d << std::endl;
-    d = timer.total_time_s();
-    std::cout << "g time: " << d << std::endl;
-    
-    /*
-    d = 0.0;
-    timer.set_start();
-    for( double i=0; i<count; i++)
-        d += h(var);
-    std::cout << "h sum: " << d << std::endl;
-    d = timer.total_time_s();
-    std::cout << "h time: " << d << std::endl;
-    */
-    
     timer.set_start();
     d = 0.0;
     for( double i=0; i<count; i++)
     {
         var[0]=(1.0*rand())/RAND_MAX;
         //d += 2.0*(var[0]*var[0])+2.0*var[1]+2.0*((var[0]*var[0])*(var[0]*var[0]));
-        d += 2.0*(var[2]*var[2]*var[2])*(var[3]*var[3])*((var[0]*var[0])*(var[0]*var[0]))+2.0*var[2]*(var[3]*(var[3]*var[3])*(var[3]*var[3]))*var[1]+2.0*exp(var[2]*var[3])*(var[0]*var[0]);
+        d += (var[0]*var[0])*var[1]+(var[0]*var[0]*var[0])+var[0]*(var[1]*var[1])+(var[1]*var[1]*var[1]);
     }
     std::cout << "code sum: " << d << std::endl;
     d = timer.total_time_s();
-    std::cout << "code time: " << d << std::endl;
+    std::cout << "code time: " << d << std::endl << std::endl;
+    codet = d;
     
     timer.set_start();
     d = 0.0;
@@ -165,40 +135,38 @@ int main(int argc, char *argv[])
     std::cout << "nonvirtual sum: " << d << std::endl;
     d = timer.total_time_s();
     std::cout << "nonvirtual time: " << d << std::endl;
+    std::cout << "relative to code: " << d/codet << std::endl << std::endl;
+    
+    timer.set_start();
+    d = 0.0;
+    for( double i=0; i<count; i++)
+    {
+        var[0]=(1.0*rand())/RAND_MAX;
+        d += f(var);
+    }
+    std::cout << "Specialized PFunction sum: " << d << std::endl;
+    d = timer.total_time_s();
+    std::cout << "Specialized PFunction time: " << d << std::endl;
+    std::cout << "relative to code: " << d/codet << std::endl << std::endl;
+    
+    timer.set_start();
+    d = 0.0;
+    for( double i=0; i<count; i++)
+    {
+        var[0]=(1.0*rand())/RAND_MAX;
+        d += g(var);
+    }
+    std::cout << "PFunction sum: " << d << std::endl;
+    d = timer.total_time_s();
+    std::cout << "PFunction time: " << d << std::endl;
+    std::cout << "relative to code: " << d/codet << std::endl << std::endl;
+    
+    
+    
+    
+    
     
     std::cout << "\n --- grad --- \n" << std::endl;
-    
-    d = 0.0;
-    timer.set_start();
-    for( double i=0; i<count; i++)
-    {
-        var[0]=(1.0*rand())/RAND_MAX;
-        d += f.grad(var,di);
-    }
-    std::cout << "f sum: " << d << std::endl;
-    d = timer.total_time_s();
-    std::cout << "f time: " << d << std::endl;
-    
-    d = 0.0;
-    timer.set_start();
-    for( double i=0; i<count; i++)
-    {
-        var[0]=(1.0*rand())/RAND_MAX;
-        d += g.grad(var, di);
-    }
-    std::cout << "g sum: " << d << std::endl;
-    d = timer.total_time_s();
-    std::cout << "g time: " << d << std::endl;
-    
-    /*
-    d = 0.0;
-    timer.set_start();
-    for( double i=0; i<count; i++)
-        d += hgrad(var);
-    std::cout << "h sum: " << d << std::endl;
-    d = timer.total_time_s();
-    std::cout << "h time: " << d << std::endl;
-    */
     
     timer.set_start();
     d = 0.0;
@@ -206,11 +174,12 @@ int main(int argc, char *argv[])
     {
         var[0]=(1.0*rand())/RAND_MAX;
         //d += 4.0*var[0]+8.0*(var[0]*var[0]*var[0]);
-        d += 8.0*(var[2]*var[2]*var[2])*(var[3]*var[3])*(var[0]*var[0]*var[0])+4.0*exp(var[2]*var[3])*var[0];
+        d += 2.0*var[1]*var[0]+3.0*(var[0]*var[0])+(var[1]*var[1]);
     }
     std::cout << "code sum: " << d << std::endl;
     d = timer.total_time_s();
-    std::cout << "code time: " << d << std::endl;
+    std::cout << "code time: " << d << std::endl << std::endl;
+    codet = d;
     
     timer.set_start();
     d = 0.0;
@@ -222,40 +191,39 @@ int main(int argc, char *argv[])
     std::cout << "nonvirtual sum: " << d << std::endl;
     d = timer.total_time_s();
     std::cout << "nonvirtual time: " << d << std::endl;
+    std::cout << "relative to code: " << d/codet << std::endl << std::endl;
+    
+    timer.set_start();
+    d = 0.0;
+    for( double i=0; i<count; i++)
+    {
+        var[0]=(1.0*rand())/RAND_MAX;
+        d += f.grad(var,di);
+    }
+    std::cout << "Specialized PFunction sum: " << d << std::endl;
+    d = timer.total_time_s();
+    std::cout << "Specialized PFunction time: " << d << std::endl;
+    std::cout << "relative to code: " << d/codet << std::endl << std::endl;
+    
+    timer.set_start();
+    d = 0.0;
+    for( double i=0; i<count; i++)
+    {
+        var[0]=(1.0*rand())/RAND_MAX;
+        d += g.grad(var, di);
+    }
+    std::cout << "PFunction sum: " << d << std::endl;
+    d = timer.total_time_s();
+    std::cout << "PFunction time: " << d << std::endl;
+    std::cout << "relative to code: " << d/codet << std::endl << std::endl;
+    
+    
+    
+    
+    
+    
     
     std::cout << "\n --- hess --- \n" << std::endl;
-    
-    d = 0.0;
-    timer.set_start();
-    for( double i=0; i<count; i++)
-    {
-        var[0]=(1.0*rand())/RAND_MAX;
-        d += f.hess(var,di,dj);
-    }
-    std::cout << "f sum: " << d << std::endl;
-    d = timer.total_time_s();
-    std::cout << "f time: " << d << std::endl;
-    
-    d = 0.0;
-    timer.set_start();
-    for( double i=0; i<count; i++)
-    {
-        var[0]=(1.0*rand())/RAND_MAX;
-        d += g.hess(var, di,dj);
-    }
-    std::cout << "g sum: " << d << std::endl;
-    d = timer.total_time_s();
-    std::cout << "g time: " << d << std::endl;
-    
-    /*
-    d = 0.0;
-    timer.set_start();
-    for( double i=0; i<count; i++)
-        d += hhess(var);
-    std::cout << "h sum: " << d << std::endl;
-    d = timer.total_time_s();
-    std::cout << "h time: " << d << std::endl;
-    */
     
     timer.set_start();
     d = 0.0;
@@ -263,11 +231,12 @@ int main(int argc, char *argv[])
     {
         var[0]=(1.0*rand())/RAND_MAX;
         //d += 24.0*(var[0]*var[0])+4.0;
-        d += 4.0*exp(var[2]*var[3])+24.0*(var[2]*var[2]*var[2])*(var[3]*var[3])*(var[0]*var[0]);
+        d += 6.0*var[0]+2.0*var[1];
     }
     std::cout << "code sum: " << d << std::endl;
     d = timer.total_time_s();
-    std::cout << "code time: " << d << std::endl;
+    std::cout << "code time: " << d << std::endl << std::endl;
+    codet = d;
     
     timer.set_start();
     d = 0.0;
@@ -279,6 +248,31 @@ int main(int argc, char *argv[])
     std::cout << "nonvirtual sum: " << d << std::endl;
     d = timer.total_time_s();
     std::cout << "nonvirtual time: " << d << std::endl;
-
+    std::cout << "relative to code: " << d/codet << std::endl << std::endl;
+    
+    timer.set_start();
+    d = 0.0;
+    for( double i=0; i<count; i++)
+    {
+        var[0]=(1.0*rand())/RAND_MAX;
+        d += f.hess(var,di,dj);
+    }
+    std::cout << "Specialized PFunction sum: " << d << std::endl;
+    d = timer.total_time_s();
+    std::cout << "Specialized PFunction time: " << d << std::endl;
+    std::cout << "relative to code: " << d/codet << std::endl << std::endl;
+    
+    timer.set_start();
+    d = 0.0;
+    for( double i=0; i<count; i++)
+    {
+        var[0]=(1.0*rand())/RAND_MAX;
+        d += g.hess(var, di,dj);
+    }
+    std::cout << "PFunction sum: " << d << std::endl;
+    d = timer.total_time_s();
+    std::cout << "PFunction time: " << d << std::endl;
+    std::cout << "relative to code: " << d/codet << std::endl << std::endl;
+    
     return 0;
 }

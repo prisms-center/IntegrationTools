@@ -1,3 +1,4 @@
 *.o
 test_nolib
 test_lib
+test_MyFunc
