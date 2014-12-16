@@ -3,7 +3,7 @@
 test:
 	cd PFunction && $(MAKE)
 	@#cd PField && $(MAKE)
-	cd python && $(MAKE)
+	@#cd python && $(MAKE)
 
 clean: 
 	cd PFunction && $(MAKE) clean
