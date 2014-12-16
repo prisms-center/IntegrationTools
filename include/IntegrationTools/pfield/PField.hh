@@ -25,6 +25,8 @@ namespace PRISMS
     {
     public:
         
+        typedef typename PFuncBase<Coordinate, FieldType>::size_type size_type;
+        
         // pointer to a Mesh that lives in a Body
         Mesh<Coordinate, DIM> *_mesh;
         
@@ -74,8 +76,8 @@ namespace PRISMS
         // ----------------------------------------------------------
         // Use these functions if you want to evaluate a single value
         FieldType operator()(const Coordinate &coord);
-        FieldType grad(const Coordinate &coord, int di);
-        FieldType hess(const Coordinate &coord, int di, int dj);
+        FieldType grad(const Coordinate &coord, size_type di);
+        FieldType hess(const Coordinate &coord, size_type di, size_type dj);
         
         // ----------------------------------------------------------
         // Use these functions to evaluate several values, then use 'get' methods to access results
@@ -84,8 +86,8 @@ namespace PRISMS
         void eval_hess(const Coordinate &coord);
         
         FieldType operator()() const;
-        FieldType grad(int di) const;
-        FieldType hess(int di, int dj) const;
+        FieldType grad(size_type di) const;
+        FieldType hess(size_type di, size_type dj) const;
         
         // PField unique members ------------------------------------------
 
@@ -125,7 +127,7 @@ namespace PRISMS
     }
     
     template<class Coordinate, class FieldType, int DIM>
-    FieldType PField<Coordinate,FieldType, DIM>::grad( const Coordinate &coord, int di)
+    FieldType PField<Coordinate,FieldType, DIM>::grad( const Coordinate &coord, size_type di)
     {
         //std::cout << "begin PField::grad()" << std::endl;
         // get evaluated basis functions
@@ -141,7 +143,7 @@ namespace PRISMS
     }
     
     template<class Coordinate, class FieldType, int DIM>
-    FieldType PField<Coordinate,FieldType, DIM>::hess( const Coordinate &coord, int di, int dj)
+    FieldType PField<Coordinate,FieldType, DIM>::hess( const Coordinate &coord, size_type di, size_type dj)
     {
         // get evaluated basis functions
         (*_mesh).hess_basis_functions(coord, di, dj, _bfunc, _node_index, _Nbfunc);
@@ -181,13 +183,13 @@ namespace PRISMS
     }
     
     template<class Coordinate, class FieldType, int DIM>
-    FieldType PField<Coordinate,FieldType, DIM>::grad( int di) const
+    FieldType PField<Coordinate,FieldType, DIM>::grad( size_type di) const
     {
         return _grad_val[di];
     }
     
     template<class Coordinate, class FieldType, int DIM>
-    FieldType PField<Coordinate,FieldType, DIM>::hess( int di, int dj) const
+    FieldType PField<Coordinate,FieldType, DIM>::hess( size_type di, size_type dj) const
     {
         return _hess_val[di][dj];
     }

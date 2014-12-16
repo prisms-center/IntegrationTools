@@ -18,6 +18,8 @@ namespace PRISMS
     {
         public:
         
+        typedef typename std::vector<OutType>::size_type size_type;
+        
         std::string _name;
         std::string _description;
         
@@ -33,12 +35,12 @@ namespace PRISMS
         {
             return _description;
         }
-        int size() const
+        size_type size() const
         {
             return _val.size();
         }
         
-        PBasisSetBase( int N)
+        PBasisSetBase( size_type N)
         {
             resize(N);
         }
@@ -48,7 +50,7 @@ namespace PRISMS
             return;
         }
         
-        virtual void resize( int N)
+        virtual void resize( size_type N)
         {
             _val.resize(N);
             _grad_val.resize(N);
@@ -60,10 +62,10 @@ namespace PRISMS
             
         }
         
-        virtual int max_size() const
+        virtual size_type max_size() const
         {
             // default to (essentially) no limit
-            return std::numeric_limits<int>::max();
+            return std::numeric_limits<size_type>::max();
         }
         
         virtual PBasisSetBase<InType,OutType>* clone() const
@@ -71,23 +73,23 @@ namespace PRISMS
             return new PBasisSetBase<InType, OutType>(*this);
         }
         
-        virtual PFunction<InType, OutType> basis_function(int term) const
+        virtual PFunction<InType, OutType> basis_function(size_type term) const
         {
-            undefined("const PFunction<InType, OutType>& basis_function(int term) const");
+            undefined("const PFunction<InType, OutType>& basis_function(size_type term) const");
             return PFunction<InType, OutType>();
         }
         
         // ----------------------------------------------------------
         // Use these functions if you want to evaluate a single value
-        OutType operator()(int term, const InType &var)
+        OutType operator()(size_type term, const InType &var)
         {
             return _val[term] = eval(term, var);
         }
-        OutType grad(int term, const InType &var)
+        OutType grad(size_type term, const InType &var)
         {
             return _grad_val[term] = eval_grad(term, var);
         }
-        OutType hess(int term, const InType &var)
+        OutType hess(size_type term, const InType &var)
         {
             return _hess_val[term] = eval_hess(term, var);
         }
@@ -101,33 +103,33 @@ namespace PRISMS
         //    Returns vector containing results
         virtual const std::vector<OutType>& eval(const InType &var)
         {
-            for( int i=0; i<_val.size(); i++)
+            for( size_type i=0; i<_val.size(); i++)
                 (*this)(i,var);
             return _val;
         }
         virtual const std::vector<OutType>& eval_grad(const InType &var)
         {
-            for( int i=0; i<_val.size(); i++)
+            for( size_type i=0; i<_val.size(); i++)
                 (*this).grad(i,var);
             return _grad_val;
         }
         virtual const std::vector<OutType>& eval_hess(const InType &var)
         {
-            for( int i=0; i<_val.size(); i++)
+            for( size_type i=0; i<_val.size(); i++)
                 (*this).hess(i,var);
             return _hess_val;
         }
 
         // Getters for individual terms
-        OutType operator()(int term) const
+        OutType operator()(size_type term) const
         {
             return _val[term];
         }
-        OutType grad(int term) const
+        OutType grad(size_type term) const
         {
             return _grad_val[term];
         }
-        OutType hess(int term) const
+        OutType hess(size_type term) const
         {
             return _hess_val[term];
         }
@@ -151,19 +153,19 @@ namespace PRISMS
         /// ----------------------------------------------------------
         /// !!! Derived classes must define these functions !!!
         ///   Usually this is done using PBasisSetWriter
-        virtual OutType eval(int term, const InType &var)
+        virtual OutType eval(size_type term, const InType &var)
         {
-            undefined("OutType PBasisSetBase::eval(int term, const InType &var)");
+            undefined("OutType PBasisSetBase::eval(size_type term, const InType &var)");
             return OutType();
         }
-        virtual OutType eval_grad(int term, const InType &var)
+        virtual OutType eval_grad(size_type term, const InType &var)
         {
-            undefined("OutType PBasisSetBase::eval_grad(int term, const InType &var)");
+            undefined("OutType PBasisSetBase::eval_grad(size_type term, const InType &var)");
             return OutType();
         }
-        virtual OutType eval_hess(int term, const InType &var)
+        virtual OutType eval_hess(size_type term, const InType &var)
         {
-            undefined("OutType PBasisSetBase::eval_hess(int term, const InType &var)");
+            undefined("OutType PBasisSetBase::eval_hess(size_type term, const InType &var)");
             return OutType();
         }
     

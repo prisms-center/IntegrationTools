@@ -20,6 +20,7 @@ namespace PRISMS
         
         mutable PSimpleFunction<VarContainer, OutType> _expr;
         mutable std::vector< PSimpleFunction<VarContainer, bool> > _condition;
+        typedef typename std::vector< PSimpleFunction<VarContainer, bool> >::size_type size_type;
         
         public:
         
@@ -33,7 +34,7 @@ namespace PRISMS
         virtual std::string csrc() const
         {
             std::string str = _expr.csrc();
-            for( int i=0; i<_condition.size(); i++)
+            for( size_type i=0; i<_condition.size(); i++)
             {
                 if( i == 0)
                 {
@@ -54,7 +55,7 @@ namespace PRISMS
         virtual std::string sym() const
         {
             std::string str = _expr.sym();
-            for( int i=0; i<_condition.size(); i++)
+            for( size_type i=0; i<_condition.size(); i++)
             {
                 if( i == 0)
                 {
@@ -75,7 +76,7 @@ namespace PRISMS
         virtual std::string latex() const
         {
             std::string str = _expr.latex();
-            for( int i=0; i<_condition.size(); i++)
+            for( size_type i=0; i<_condition.size(); i++)
             {
                 if( i == 0)
                 {
@@ -100,7 +101,7 @@ namespace PRISMS
         
         bool in_piece( const VarContainer &var) const
         {
-            for( int i=0; i<_condition.size(); i++)
+            for( size_type i=0; i<_condition.size(); i++)
             {
                 if( !_condition[i](var) )
                     return false;

@@ -44,7 +44,7 @@ namespace PRISMS
             
             
             // read in vtk file here
-            std::ifstream infile(vtkfile);
+            std::ifstream infile(vtkfile.c_str());
             
             // read mesh info
             mesh.read_vtk(infile);

@@ -23,6 +23,8 @@ namespace PRISMS
         std::vector< std::vector< PSimpleFunction< VarContainer, OutType> > > _hess_val;
         
     public:
+        
+        typedef typename PFuncBase< VarContainer, OutType>::size_type size_type;
     
         PFlexFunction()
         {
@@ -106,12 +108,12 @@ namespace PRISMS
             return  _val;
         }
 
-        PSimpleFunction< VarContainer, OutType> grad_simplefunction(int di) const
+        PSimpleFunction< VarContainer, OutType> grad_simplefunction(size_type di) const
         {
             return _grad_val[di];
         }
 
-        PSimpleFunction< VarContainer, OutType> hess_simplefunction(int di, int dj) const
+        PSimpleFunction< VarContainer, OutType> hess_simplefunction(size_type di, size_type dj) const
         {
             return _hess_val[di][dj];
         }
@@ -121,12 +123,12 @@ namespace PRISMS
             return _val(var);
         }
 
-        OutType grad(const VarContainer &var, int di)
+        OutType grad(const VarContainer &var, size_type di)
         {
             return _grad_val[di](var);
         }
 
-        OutType hess(const VarContainer &var, int di, int dj)
+        OutType hess(const VarContainer &var, size_type di, size_type dj)
         {
             return _hess_val[di][dj](var);
         }
@@ -138,14 +140,14 @@ namespace PRISMS
 
         void eval_grad(const VarContainer &var)
         {
-            for( int i=0; i<_grad_val.size(); i++)
+            for( size_type i=0; i<_grad_val.size(); i++)
                 _grad_val[i](var);
         }
 
         void eval_hess(const VarContainer &var)
         {
-            for( int i=0; i<_hess_val.size(); i++)
-                for( int j=0; j<_hess_val[i].size(); j++)
+            for( size_type i=0; i<_hess_val.size(); i++)
+                for( size_type j=0; j<_hess_val[i].size(); j++)
                     _hess_val[i][j](var);
         }
 
@@ -154,12 +156,12 @@ namespace PRISMS
             return _val();
         }
 
-        OutType grad(int di) const
+        OutType grad(size_type di) const
         {
             return _grad_val[di]();
         }
 
-        OutType hess(int di, int dj) const
+        OutType hess(size_type di, size_type dj) const
         {
             return _hess_val[di][dj]();
         }
@@ -168,7 +170,7 @@ namespace PRISMS
         
         void check()
         {
-            int n = this->_var_name.size();
+            size_type n = this->_var_name.size();
             if( this->_var_description.size() != n)
             {
                 std::cerr << "Error in PFlexFunction. _var_name.size() != _var_description.size()." << std::endl;
@@ -184,7 +186,7 @@ namespace PRISMS
                 std::cerr << "Error in PFlexFunction. _var_name.size() != _hess_val.size()." << std::endl;
                 exit(1);
             }
-            for( int i=0; i<_hess_val.size(); i++)
+            for( size_type i=0; i<_hess_val.size(); i++)
             {
                 if( _hess_val[i].size() != n)
                 {

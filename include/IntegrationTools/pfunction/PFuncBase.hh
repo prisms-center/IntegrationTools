@@ -23,6 +23,7 @@ namespace PRISMS
         std::vector<std::string> _var_description;
         
     public:
+        typedef std::vector<std::string>::size_type size_type;
         
         PFuncBase(){}
         
@@ -39,7 +40,7 @@ namespace PRISMS
         {
             return _name;
         }
-        int size() const
+        size_type size() const
         {
             return _var_name.size();
         }
@@ -47,7 +48,7 @@ namespace PRISMS
         {
             return _var_name;
         }
-        std::string var_name(int i)
+        std::string var_name(size_type i)
         {
             return _var_name[i];
         }
@@ -55,7 +56,7 @@ namespace PRISMS
         {
             return _var_description;
         }
-        std::string var_description(int i)
+        std::string var_description(size_type i)
         {
             return _var_description[i];
         }
@@ -76,15 +77,15 @@ namespace PRISMS
             return PSimpleFunction<VarContainer, OutType>();
         }
         
-        virtual PSimpleFunction<VarContainer, OutType> grad_simplefunction(int di) const
+        virtual PSimpleFunction<VarContainer, OutType> grad_simplefunction(size_type di) const
         {
             undefined("PSimpleFunction<VarContainer, OutType> grad_simplefunction() const");
             return PSimpleFunction<VarContainer, OutType>();
         }
         
-        virtual PSimpleFunction<VarContainer, OutType> hess_simplefunction(int di, int dj) const
+        virtual PSimpleFunction<VarContainer, OutType> hess_simplefunction(size_type di, size_type dj) const
         {
-            undefined("PSimpleFunction<VarContainer, OutType> hess_simplefunction(int di, int dj) const");
+            undefined("PSimpleFunction<VarContainer, OutType> hess_simplefunction(size_type di, size_type dj) const");
             return PSimpleFunction<VarContainer, OutType>();
         }
 
@@ -95,14 +96,14 @@ namespace PRISMS
             undefined("OutType operator()(const VarContainer &var)");
             return OutType();
         }
-        virtual OutType grad(const VarContainer &var, int di)
+        virtual OutType grad(const VarContainer &var, size_type di)
         {
-            undefined("OutType grad(const VarContainer &var, int di)");
+            undefined("OutType grad(const VarContainer &var, size_type di)");
             return OutType();
         }
-        virtual OutType hess(const VarContainer &var, int di, int dj)
+        virtual OutType hess(const VarContainer &var, size_type di, size_type dj)
         {
-            undefined("OutType hess(const VarContainer &var, int di, int dj)");
+            undefined("OutType hess(const VarContainer &var, size_type di, size_type dj)");
             return OutType();
         }
 
@@ -126,14 +127,14 @@ namespace PRISMS
             undefined("OutType operator()");
             return OutType();
         }
-        virtual OutType grad(int di) const
+        virtual OutType grad(size_type di) const
         {
-            undefined("OutType grad(int di)");
+            undefined("OutType grad(size_type di)");
             return OutType();
         }
-        virtual OutType hess(int di, int dj) const
+        virtual OutType hess(size_type di, size_type dj) const
         {
-            undefined("OutType hess(int di, int dj)");
+            undefined("OutType hess(size_type di, size_type dj)");
             return OutType();
         }
 

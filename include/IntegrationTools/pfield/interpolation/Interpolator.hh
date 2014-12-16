@@ -21,6 +21,8 @@ namespace PRISMS
         
     public:
         
+        typedef typename PFuncBase<std::vector<PRISMS::Coordinate<DIM> >, double>::size_type size_type;
+        
         Interpolator( unsigned long int node, unsigned long int element, PFuncBase<std::vector<PRISMS::Coordinate<DIM> >, double>* bfunc):
         _node(node), _element(element), _bfunc(bfunc)
         {};
@@ -59,15 +61,15 @@ namespace PRISMS
             return double();
         }
         
-        virtual double grad(const Coordinate &coord, int di)
+        virtual double grad(const Coordinate &coord, size_type di)
         {
-            undefined("double grad()(Coordinate coord, int di)");
+            undefined("double grad()(Coordinate coord, size_type di)");
             return double();
         }
         
-        virtual double hess(const Coordinate &coord, int di, int dj)
+        virtual double hess(const Coordinate &coord, size_type di, size_type dj)
         {
-            undefined("double hess()(Coordinate coord, int di, int dj)");
+            undefined("double hess()(Coordinate coord, size_type di, size_type dj)");
             return double();
         }
         

@@ -2621,9 +2621,11 @@ namespace PRISMS
     {
     public:
         
+        typedef PBasisSetBase<double, double>::size_type size_type;
+        
         std::vector< PFunction< double, double> > _basis_function;
         
-        Monomial(int N) : PBasisSetBase<double, double>(N)
+        Monomial(size_type N) : PBasisSetBase<double, double>(N)
         {
             construct(N);
         }
@@ -2651,9 +2653,9 @@ namespace PRISMS
             return new Monomial(*this);
         }
 
-        PFunction< double, double> basis_function( int term) const
+        PFunction< double, double> basis_function( size_type term) const
         {
-            if(term >= max_size()){ std::cout << "Error in Monomial::basis_function( int term). term >= max_size()." << std::endl; exit(1);}
+            if(term >= max_size()){ std::cout << "Error in Monomial::basis_function( size_type term). term >= max_size()." << std::endl; exit(1);}
 
             std::string name;
             std::vector< std::string> var_name(1, "x");
@@ -2852,12 +2854,12 @@ namespace PRISMS
             return PFunction< double, double>( tmp );
         }
 
-        int max_size() const
+        size_type max_size() const
         {
             return 30;
         }
 
-        void resize(int N) 
+        void resize(size_type N) 
         {
             Monomial tmp(*this);
             construct(N);
@@ -2865,22 +2867,22 @@ namespace PRISMS
         }
 
     private:
-        double eval(int term, const double &var)
+        double eval(size_type term, const double &var)
         {
             return _basis_function[term](var);
         }
 
-        double eval_grad(int term, const double &var)
+        double eval_grad(size_type term, const double &var)
         {
             return _basis_function[term].grad(var, 0);
         }
 
-        double eval_hess(int term, const double &var)
+        double eval_hess(size_type term, const double &var)
         {
             return _basis_function[term].hess(var, 0, 0);
         }
 
-        void construct(int N)
+        void construct(size_type N)
         {
             if( N > max_size() ){ std::cout << "Error in Monomial. Requested size " << N << ". Max size is" << max_size() << "."; exit(1);}
             this->_name = "Monomial";
@@ -2889,7 +2891,7 @@ namespace PRISMS
             this->_grad_val.resize(N);
             this->_hess_val.resize(N);
             _basis_function.resize(N);
-            for( int i=0; i<size(); i++)
+            for( size_type i=0; i<size(); i++)
             {
                 _basis_function[i] = basis_function(i);
             }
@@ -2899,8 +2901,8 @@ namespace PRISMS
         {
             this->_name = RHS._name;
             this->_description = RHS._description;
-            int lim = RHS.size() < this->size() ? RHS.size() : this->size();
-            for( int i=0; i<lim; i++)
+            size_type lim = RHS.size() < this->size() ? RHS.size() : this->size();
+            for( size_type i=0; i<lim; i++)
             {
                 this->_val[i] = RHS._val[i];
                 this->_grad_val[i] = RHS._grad_val[i];

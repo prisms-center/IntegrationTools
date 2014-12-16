@@ -23,8 +23,9 @@ namespace PRISMS
     class PPieceWiseFuncBase : public PFuncBase<VarContainer, OutType> 
     {
         public:
+        typedef typename PFuncBase<VarContainer, OutType>::size_type size_type;
         
-        int _curr_piece;
+        size_type _curr_piece;
         std::vector<Piece<VarContainer, OutType> > _piece;
         
         PPieceWiseFuncBase() {}
@@ -36,7 +37,7 @@ namespace PRISMS
         
         bool in_piece( const VarContainer &var) const
         {
-            for( int i=0; i<_piece.size(); i++)
+            for( size_type i=0; i<_piece.size(); i++)
             {
                 if( _piece[i].in_piece(var) )
                     return true;
@@ -44,9 +45,9 @@ namespace PRISMS
             return false;
         }
         
-        int piece(const VarContainer &var)
+        size_type piece(const VarContainer &var)
         {
-            for( int i=0; i<_piece.size(); i++)
+            for( size_type i=0; i<_piece.size(); i++)
             {
                 if( _piece[i].in_piece(var))
                     return _curr_piece = i;
@@ -64,7 +65,7 @@ namespace PRISMS
         {
             std::vector<SimplePiece<VarContainer, OutType> > piece;
             
-            for( int i=0; i<_piece.size(); i++)
+            for( size_type i=0; i<_piece.size(); i++)
             {
                 piece.push_back( _piece[i].simplepiece() );
             }
@@ -72,11 +73,11 @@ namespace PRISMS
             return PSimpleFunction<VarContainer, OutType>( PPieceWiseSimpleBase<VarContainer, OutType>(piece) );
         }
         
-        virtual PSimpleFunction<VarContainer, OutType> grad_simplefunction(int di) const
+        virtual PSimpleFunction<VarContainer, OutType> grad_simplefunction(size_type di) const
         {
             std::vector<SimplePiece<VarContainer, OutType> > piece;
             
-            for( int i=0; i<_piece.size(); i++)
+            for( size_type i=0; i<_piece.size(); i++)
             {
                 piece.push_back( _piece[i].grad_simplepiece(di));
             }
@@ -84,11 +85,11 @@ namespace PRISMS
             return PSimpleFunction<VarContainer, OutType>( PPieceWiseSimpleBase<VarContainer, OutType>(piece));
         }
         
-        virtual PSimpleFunction<VarContainer, OutType> hess_simplefunction(int di, int dj) const
+        virtual PSimpleFunction<VarContainer, OutType> hess_simplefunction(size_type di, size_type dj) const
         {
             std::vector<SimplePiece<VarContainer, OutType> > piece;
             
-            for( int i=0; i<_piece.size(); i++)
+            for( size_type i=0; i<_piece.size(); i++)
             {
                 piece.push_back( _piece[i].hess_simplepiece(di,dj));
             }
@@ -103,11 +104,11 @@ namespace PRISMS
         {
             return _piece[piece(var)](var);
         }
-        virtual OutType grad(const VarContainer &var, int di)
+        virtual OutType grad(const VarContainer &var, size_type di)
         {
             return _piece[piece(var)].grad(var, di);
         }
-        virtual OutType hess(const VarContainer &var, int di, int dj)
+        virtual OutType hess(const VarContainer &var, size_type di, size_type dj)
         {
             return _piece[piece(var)].hess(var, di, dj);
         }
@@ -132,11 +133,11 @@ namespace PRISMS
         {
             return _piece[_curr_piece]();
         }
-        virtual OutType grad(int di) const
+        virtual OutType grad(size_type di) const
         {
             return _piece[_curr_piece].grad(di);
         }
-        virtual OutType hess(int di, int dj) const
+        virtual OutType hess(size_type di, size_type dj) const
         {
             return _piece[_curr_piece].hess(di, dj);
         }

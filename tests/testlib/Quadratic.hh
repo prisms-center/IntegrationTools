@@ -120,6 +120,8 @@ namespace PRISMS
     {
     public:
         
+        typedef typename PFuncBase< VarContainer, double>::size_type size_type;
+        
         PSimpleBase< VarContainer, double> *_val;
         PSimpleBase< VarContainer, double> **_grad_val;
         PSimpleBase< VarContainer, double> ***_hess_val;
@@ -172,12 +174,12 @@ namespace PRISMS
             return PSimpleFunction< VarContainer, double>( *_val );
         }
 
-        PSimpleFunction< VarContainer, double> grad_simplefunction(int di) const
+        PSimpleFunction< VarContainer, double> grad_simplefunction(size_type di) const
         {
             return PSimpleFunction< VarContainer, double>( *_grad_val[di] );
         }
 
-        PSimpleFunction< VarContainer, double> hess_simplefunction(int di, int dj) const
+        PSimpleFunction< VarContainer, double> hess_simplefunction(size_type di, size_type dj) const
         {
             return PSimpleFunction< VarContainer, double>( *_hess_val[di][dj] );
         }
@@ -187,12 +189,12 @@ namespace PRISMS
             return (*_val)(var);
         }
 
-        double grad(const VarContainer &var, int di)
+        double grad(const VarContainer &var, size_type di)
         {
             return (*_grad_val[di])(var);
         }
 
-        double hess(const VarContainer &var, int di, int dj)
+        double hess(const VarContainer &var, size_type di, size_type dj)
         {
             return (*_hess_val[di][dj])(var);
         }
@@ -217,12 +219,12 @@ namespace PRISMS
             return (*_val)();
         }
 
-        double grad(int di) const
+        double grad(size_type di) const
         {
             return (*_grad_val[di])();
         }
 
-        double hess(int di, int dj) const
+        double hess(size_type di, size_type dj) const
         {
             return (*_hess_val[di][dj])();
         }

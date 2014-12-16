@@ -166,7 +166,10 @@ namespace PRISMS
         PSimpleBase<std::vector<PRISMS::Coordinate<2> >, double>** _grad_val;
         PSimpleBase<std::vector<PRISMS::Coordinate<2> >, double>*** _hess_val;
     
-    public:    
+    public: 
+        
+        typedef PFuncBase<std::vector<PRISMS::Coordinate<2> >, double>::size_type size_type;
+        
         Quad()
         {
             construct();
@@ -204,12 +207,12 @@ namespace PRISMS
             return PSimpleFunction< std::vector<PRISMS::Coordinate<2> >, double>( *_val );
         }
 
-        PSimpleFunction< std::vector<PRISMS::Coordinate<2> >, double> grad_simplefunction(int di) const
+        PSimpleFunction< std::vector<PRISMS::Coordinate<2> >, double> grad_simplefunction(size_type di) const
         {
             return PSimpleFunction< std::vector<PRISMS::Coordinate<2> >, double>( *_grad_val[di] );
         }
 
-        PSimpleFunction< std::vector<PRISMS::Coordinate<2> >, double> hess_simplefunction(int di, int dj) const
+        PSimpleFunction< std::vector<PRISMS::Coordinate<2> >, double> hess_simplefunction(size_type di, size_type dj) const
         {
             return PSimpleFunction< std::vector<PRISMS::Coordinate<2> >, double>( *_hess_val[di][dj] );
         }
@@ -219,12 +222,12 @@ namespace PRISMS
             return (*_val)(var);
         }
 
-        double grad(const std::vector<PRISMS::Coordinate<2> > &var, int di)
+        double grad(const std::vector<PRISMS::Coordinate<2> > &var, size_type di)
         {
             return (*_grad_val[di])(var);
         }
 
-        double hess(const std::vector<PRISMS::Coordinate<2> > &var, int di, int dj)
+        double hess(const std::vector<PRISMS::Coordinate<2> > &var, size_type di, size_type dj)
         {
             return (*_hess_val[di][dj])(var);
         }
@@ -253,12 +256,12 @@ namespace PRISMS
             return (*_val)();
         }
 
-        double grad(int di) const
+        double grad(size_type di) const
         {
             return (*_grad_val[di])();
         }
 
-        double hess(int di, int dj) const
+        double hess(size_type di, size_type dj) const
         {
             return (*_hess_val[di][dj])();
         }
@@ -308,6 +311,8 @@ namespace PRISMS
         
     public:
     
+        typedef typename Interpolator<Coordinate, 2>::size_type size_type;
+        
         // node_index: index of node in mesh
         // node_index: index of element in mesh
         // bfunc: PFuncBase<std::vector<Coordinate>, double>* 
@@ -428,14 +433,14 @@ namespace PRISMS
             return (*this->_bfunc)(_var);
         }
         
-        double grad(const Coordinate &coord, int di)
+        double grad(const Coordinate &coord, size_type di)
         {
             _var[0][0] = coord[0];
             _var[0][1] = coord[1];
             return (*this->_bfunc).grad(_var,di);
         }
         
-        double hess(const Coordinate &coord, int di, int dj)
+        double hess(const Coordinate &coord, size_type di, size_type dj)
         {
             _var[0][0] = coord[0];
             _var[0][1] = coord[1];
