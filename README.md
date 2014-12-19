@@ -324,7 +324,18 @@ int main(int argc, char *argv[]) {
 License
 =======================
 
-  This code is licensed under the GNU Lesser General Public License (LGPL). Please see the file LICENSE for details.
+This directory contains the IntegrationTools code developed by the PRISMS Center at the University of Michigan, Ann Arbor, USA.
+
+(c) 2014 The Regents of the University of Michigan
+
+PRISMS Center http://prisms.engin.umich.edu 
+
+This code is a free software; you can use it, redistribute it,
+and/or modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either version
+2.1 of the License, or (at your option) any later version.
+
+Please see the file LICENSE for details.
 
 
 Release Notes
