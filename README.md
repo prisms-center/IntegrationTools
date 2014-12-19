@@ -15,6 +15,7 @@ PFields:
 - Implement the same API as PFunctions for evaluating the value of a finite element field, its first derivatives, and it's second derivatives
 - Currently support exists for reading fields from .vtk files using "Quad" elements in 2D and "Hexahedron" elements in 3D
 
+This code is developed by the PRedictive Integrated Structural Materials Science Center (PRISMS), at the University of Michigan, which is supported by the U.S. Department of Energy, Office of Basic Energy Sciences, Division of Materials Sciences and Engineering under Award #DE-SC0008637.
 
 Dependencies
 ============
@@ -320,6 +321,11 @@ int main(int argc, char *argv[]) {
 
 ```
 
+License
+=======================
+
+  This code is licensed under the GNU Lesser General Public License (LGPL). Please see the file LICENSE for details.
+
 
 Release Notes
 =======================
@@ -327,22 +333,9 @@ Release Notes
 Release 1.0.0 will include:
 
 - PSimpleFunction, PFunction, and PBasisSet
-- PSeriesFunction
-    - with tensor product output and coefficient input
+- PSeriesFunction, with tensor product output and coefficient input
 - Piecewise functions: PPieceWise
+- PFields, read from .vtk files, using Quad and Hexahedron elements
 - The library writer: lw
 - PExtern for calls from C, Fortran, etc.
 - IntegrationTools wrapper for Python, 'pfunction'
-- The code writers: fw, and bsw have been moved to a separate project: IntegrationToolsWriter
-
-
-Release 0.1.0 will include:
-
-- PSimpleFunction, PFunction, and PBasisSet
-- PSeriesFunction
-    - with tensor product output and coefficient input
-- code writers: fw, bsw, lw
-    - with input and output as 'double' only
-- PExtern for calls from C, Fortran, etc.
-- PFunction wrapper for Python (later renamed 'pfunction')
-
