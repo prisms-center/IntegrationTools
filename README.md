@@ -19,18 +19,25 @@ PFields:
 Dependencies
 ============
 
-IntegrationTools is a header only library with no dependencies besides the C++ standard library.
-
-[Boost](http://www.boost.org/) is used by the Library Writer program, ``lw``, for the program_options, filesystem, and regex libraries.
-
-Python module ``pfunction`` has been tested using Python v2.7.5. The Python example script py_test.py uses [matplotlib](http://matplotlib.org/).
+- IntegrationTools is a header only library with no dependencies besides the C++ standard library.
+- [Boost](http://www.boost.org/) is used by the Library Writer program, ``lw``, for the program_options, filesystem, and regex libraries.
+- The Python module ``pfunction`` has been tested using Python v2.7.5. The Python example script py_test.py uses [matplotlib](http://matplotlib.org/).
 
 
 Installation
 ============
 
-1. Clone the repository.
-2. From the root directory of the repository, run ``make install``. You might need to set the following environment variables:
+1. Clone the repository
+
+        cd /path/to/
+        git clone https://github.com/prisms-center/IntegrationTools.git
+        cd IntegrationTools
+
+2. From the root directory of the repository:
+
+        make install
+
+    You might need to set the following environment variables:
     	
     - BIN: This specifies where ``lw`` will be installed. If not set, the default location is ``/usr/local/bin``
     	
@@ -40,88 +47,271 @@ Installation
 
 3. The directory ``include/IntegrationTools`` contains all the header files necessary. You can copy it somewhere in your default header search path, often:
 
-```
-cp -r include/IntegrationTools /usr/local/include
-```
+        cp -r include/IntegrationTools /usr/local/include
+
 
 
 Usage
 =====
 
-## As a user who want to pass a function into a program that supports PFunctions ##
+## Writing and using PFunctions in a program ##
+
+The program supporting PFunctions should be linked to a shared library, typically with the name ``libpextern.so``. To use your own custom functions in the program, they must be written as C++ code in the PFunction format and compiled into a library that replaces ``libpextern.so``, typically by using a symbolic link. To do this:
 
 1. Write a PFunction for the function you wish to input to the program. This can be done most easily using the code generation tools in the [IntegrationToolsWriter](https://github.com/prisms-center/IntegrationToolsWriter) software package. This describes what the code generator is doing:
-	
-    1. Write classes, such as ``MyFunc_X``, for each of the individual expressions needed to evaluate the function and its first and second derivatives which inherit from [``PSimpleBase<VarContainer, OutType>``](https://github.com/prisms-center/IntegrationTools/blob/develop/include/IntegrationTools/pfunction/PSimpleBase.hh). By convention we use ``MyFunc_f`` for evaluating the function itself, ``MyFunc_0``, ``MyFunc_1``, ... for first derivatives, and ``MyFunc_0_0``, ``MyFunc_0_1``, ... for second derivatives. Each of these derived classes should implement the virtual members in ``PSimpleBase`` that specify how to evaluate function, or return strings expressing the function in as a symbolic expression, in latex form, and as C source code.
-    
-    2.  Write a class, ``MyFunc``, that inherits from [``PFuncBase<VarContainer, OutType>``](https://github.com/prisms-center/IntegrationTools/blob/develop/include/IntegrationTools/pfunction/PFuncBase.hh), and implements the virtual methods. The virtual methods define how to evaluate the function and its derivatives, usually using the code written in the previous step.
+    - Write classes, such as ``MyFunc_X``, which inherit from ``PSimpleBase<VarContainer, OutType>`` for each of the individual expressions needed to evaluate the function and its first and second derivatives. By convention we use ``MyFunc_f`` for evaluating the function itself, ``MyFunc_0``, ``MyFunc_1``, ... for first derivatives, and ``MyFunc_0_0``, ``MyFunc_0_1``, ... for second derivatives. Each of these derived classes should implement the virtual members in ``PSimpleBase`` that specify how to evaluate function, or return strings expressing the function in as a symbolic expression, in latex form, and as C source code.
+    -  Write a class, ``MyFunc``, that inherits from ``PFuncBase<VarContainer, OutType>``, and implements the virtual methods. The virtual methods define how to evaluate the function and its derivatives, usually using the code written in the previous step.
+    - For an example, see ``tests/testlib/MyFunc.hh``3. 
+2. Use the Library Writer, 'lw', to collect all the PFunctions you want to use and compile them into a shared library called, for example,``libpextern_custom.so``:
 
-2. Use the Library Writer, 'lw', to collect all the PFunctions you want to use in a compiled library and 
+        lw -d /path/to/search -v "std::vector<double>" -l /path/to/write -c 
+        mv /path/to/write/libpextern.so /path/to/write/libpextern_custom.so
 
-## As a developer who wants to allow users to pass functions into their program ##
+   - ``-d`` Directories to check for ``*.hh`` files containing classes that inherit from ``PSimpleBase``, ``PFuncBase``, ``PBasisSet``, ``PPieceWiseSimpleBase``, or ``PPieceWiseFuncBase`` 
+   - ``-v`` Types to use for ``VarContainer`` template parameter. What types to use should be documented by the program in which you are going to use the PFunctions.
+   - ``-l`` Location to write library.
+   - ``-c`` Compile library after writing.
+   - Check ``lw -h`` help documentation to see how to set compiler options.
+   - This also creates files named ``PLibrary.hh`` and ``PLibrary.cc`` which declare and define methods for "checking out" PFunctions from the PLibrary by name.
 
-Suppose you are writing a program that evaluates functions that have a known signature (input type and output type), but unknown form, and you wish for users to be able to specify the form of the equation without having to recompile your code (runtime polymorphism). To proceed you:
+3. Replace ``libpextern.so`` with a symbolic link to ``libpextern_custom.so``: 
+    - ``ln -s /path/to/write/libpextern_custom.so /path/to/libpextern.so``. 
 
-1. Write an template PFunction with the desired signature using the PFunction interface. For instance, if the desired signature is ``double = MyFunc(double)``:
-	
-    1. Write classes, such as ``MyFunc_X``, for each of the individual expressions needed to evaluate the function and its first and second derivatives which inherit from [``PSimpleBase<VarContainer, OutType>``](https://github.com/prisms-center/IntegrationTools/blob/develop/include/IntegrationTools/pfunction/PSimpleBase.hh). By convention we use ``MyFunc_f`` for evaluating the function itself, ``MyFunc_0``, ``MyFunc_1``, ... for first derivatives, and ``MyFunc_0_0``, ``MyFunc_0_1``, ... for second derivatives. Each of these derived classes should implement the virtual members in ``PSimpleBase`` that specify how to evaluate function, or return strings expressing the function in as a symbolic expression, in latex form, and as C source code.
-    
-    2.  Write a class, ``MyFunc``, that inherits from [``PFuncBase<VarContainer, OutType>``](https://github.com/prisms-center/IntegrationTools/blob/develop/include/IntegrationTools/pfunction/PFuncBase.hh), and implements the virtual methods. The virtual methods define how to evaluate the function and its derivatives, usually using the code written in the previous step.
-    
-    	- The derived classes ``MyFunc_X`` and ``MyFunc`` can either specify the ``VarContainer`` template parameters or themselves be template classes of ``VarContainer``. Currently, they must specify the ``OutType``.
-    	
-2. 
-    
 
-2. You write a program that you wish to pass functions into without knowing their specific form ahead of time, just the required inputs and outputs. This can be done with:
+## Writing piece-wise defined PFunctions ##
+
+To write a piece-wise defined PFunction, you must:
+
+1. Write a PFunction for each piece:
+	- Follow the same steps as for ``MyFunc`` above.
+2. Define the domain over which each piece should be evaluated:
+ 	- For each piece, you must write a set of PSimpleFunctions (classes inheriting from PSimpleBase, as ``MyFunc_X`` above) that all evaluate to true in the domain of the piece.
+3. Write a class inheriting from ``PPieceWiseFuncBase<VarContainer, OutType>`` (which itself inherits from ``PFuncBase<VarContainer, OutType>``) that adds all the necessary Pieces when constructed.
+
+For an example, see ``tests/testlib/MyPieceWiseFun.hh``.
+
+
+## Writing a PBasisSet ##
+
+To write a PBasisSet, you must:
+
+1. Write a set of classes that inherit from ``PSimpleBase<InType, OutType>`` that evaluate the individual basis functions, and their first and second derivatives.
+    - Typically ``InType`` and ``OutType`` are ``double``
+2. Write a class that inherits from ``PBasisSetBase<InType, OutType>`` implementing the PBasisSet
+    - Typically this will contain the individual basis functions as a vector of PFunctions
+
+For an example, see ``tests/testlib/Monomial.hh`` and ``tests/testlib/Chebyshev.hh``.
+
+
+## Writing a program that can use PFunctions ##
+
+Suppose you are writing a program that evaluates functions that have a known signature (input type and output type), but unknown form, and want users to be able to specify the form of the equation without having to recompile your code. 
+
+1. Create a PFunction library (``PLibrary.hh`` and ``libpextern.so``) as in the previous section, using dummy PFunctions that implement the desired signatures.
+
+2. Write a program that uses PFunctions that are checked out from the PLibrary by name. An example program using PFunctions is located at ``tests/PFunction/test_lib.cpp``. 
+
+3. Include the dummy ``PLibrary.hh`` (which needs the ``IntegrationTools`` header file library in your search path) and link ``libpextern.so``.
+
+4. Users can then update the available PFunctions using the steps in the previous section and re-run your program without re-compiling the entire thing. 
+
+The example program at ``tests/PFunction/test_lib.cpp`` prints the following output documenting the use of PFunctions:
 
 ```
-#include "IntegrationTools/PFunction.hh"
 #include "PLibrary.hh"
+
+using namespace PRISMS;
+// ----------------------------------------------------------------------
+// Create an input variable vector, for a function of a single variable. 
+// PFunctions typically evalulate with [], so even a function of a single  
+// variable takes a container as input.                                           
+std::vector<double> var(1, 2.1);
+
+double result;
+
+// ----------------------------------------------------------------------
+// Construct a PFunction that takes input of type std::vector<double>
+// and returns output of type double.                    
+PFunction<std::vector<double>, double> func;       
+
+// Checkout the Quadratic function.                             
+PLibrary::checkout("Quadratic", func);                            
+
+// PFunction::operator()([x]) = 1+x+x^2
+result = func([2.1]); // = 7.51
+
+// PFunction::grad([x], x); //  = 1+2*x
+result = func.grad([2.1], 0); //  = 5.2
+
+// PFunction::hess([x], x, x); //  = 2
+result = func.hess([2.1], 0, 0); //  = 2
+
+// After evaluation, the latest result is stored and can be accessed
+// multiple times without recalculation:
+result = func(); //  = 7.51
+result = func.grad(0); //  = 5.2
+result = func.hess(0, x); //  = 2
+
+
+// Use eval_grad(var) or eval_hess(var) to evaluate 
+// the entire gradient vector or hessian matrix.                                
+func.eval_grad([2.1]);
+result = func.grad(0); //  = 5.2
+
+func.eval_hess([2.1]);
+result = func.hess(0, 0); //  = 2
+
+// ----------------------------------------------------------------------
+// Add another variable for a function of two variables. 
+var.push_back(3.5);
+
+// Checkout the MyFunc function.                             
+PLibrary::checkout("MyFunc", func);                            
+
+// PFunction::operator()([x, y]) = x*y^2+y^3+x^2*y+x^3
+result = func([2.1, 3.5]); //  = 93.296
+
+// PFunction::grad([x, y], x); //  = y^2+2*x*y+3*x^2
+result = func.grad([2.1, 3.5], 0); //  = 40.18
+
+// PFunction::hess([x, y], x, x); //  = 2*y+6*x
+result = func.hess([2.1, 3.5], 0, 0); //  = 19.6
+
+// After evaluation, the latest result is stored and can be accessed 
+// multiple times without recalculation:
+result = func() = 93.296
+result = func.grad(0); //  = 40.18
+result = func.hess(0, x); //  = 19.6
+
+
+// Use eval_grad(var) or eval_hess(var) to evaluate 
+// the entire gradient vector or hessian matrix.                                
+func.eval_grad([2.1, 3.5]);
+result = func.grad(0); //  = 40.18
+result = func.grad(1); //  = 55.86
+
+func.eval_hess([2.1, 3.5]);
+result = func.hess(0, 0); // = 19.6
+result = func.hess(0, 1); //  = 11.2
+result = func.hess(1, 0); //  = 11.2
+result = func.hess(1, 1); //  = 25.2
 ```
 
-2) You write the code for the functions themselves, either by hand or using code generation tool (See [IntegrationToolsWriter](https://github.com/prisms-center/IntegrationToolsWriter)).
 
-3) You compile the functions into a library and link it with your code.
+## Writing a program that can use PFields ##
 
-4) Run it!
+See ``tests/PFields/test.cpp`` for an example. 
 
+1. First construct an empty ``Body<Coordinate, DIM>``, which will contain the finite element mesh and all the fields.
+    - A ``Body`` is templated by coordinate type (typename), and coordinate dimension (int).
+    
+2. Read the mesh and fields from a ``.vtk`` file into the ``Body``.
 
-Boost is used for program_options, filesystem, and regex: http://www.boost.org/
-
-The python example script py_test.py uses matplotlib: http://matplotlib.org/
-
-
-Usage
-=======================
-
-Integration Tools specifies an interface for easily passing functions to a computer program. It is written in C++, but also provides a C interface so that functions can be used across coding languages.  It includes a Python package 'pfunction' that uses the C interface to allow access to your functions in Python. 
-
-The intended usage is something like this:
-
-1) You write a program that you wish to pass functions into without knowing their form ahead of time.
-
-2) You write the code for the functions themselves, either by hand or code generation tool (See IntegrationToolsWriter).
-
-3) You compile the functions into a library and link it with your code.
-
-4) Run it!
+3. Checkout a ``PField<Coordinate, OutType, DIM>`` from the ``Body`` by name, and use it just like a ``PFunction``.
+    - A ``PField`` is templated by coordinate type (typename), field type (typename), and coordinate dimension (int)
 
 
-Installation
-=======================
+## Writing a program that uses PBasisSets and PSeriesFucntions ##
 
-See 'INSTALL.txt' file.
+1. A PBasisSet can be checked out from a PLibrary just like a PFunction
+2. The API is similar, but the index of basis function to evaluate must be given along with the input value.
+
+```
+#include "PLibrary.hh"
+
+using namespace PRISMS;
+
+// ----------------------------------------------------------------------
+// Construct a PBasisSet of basis fucntions that takes input of type 
+// double and return output of type double.                    
+PBasisSet<double, double> bset;       
+
+double var = 0.8;
+double result;
+std::vector<double> result_vec;
+
+// Checkout the Monomial PBasisSet, including 30 basis functions                             
+PLibrary::checkout("Monomial", bset);                            
+
+// PBasisSet::operator()(i, x) = x^i
+result = bset(0, var); // = 1.0
+result = bset(1, var); // = 0.8
+result = bset(2, var); // = 0.64
+// ... up to i = 29
+
+
+// PBasisSet::grad(i, x) = i*x^(i-1)
+result = bset.grad(0, var); // = 0.0
+result = bset.grad(1, var); // = 1.0
+result = bset.grad(2, var); // = 1.6
+// ... up to i = 29
+
+// PBasisSet::hess(i, x) = i*(i-1)*x^(i-2)
+result = bset.hess(0, var); // = 0.0
+result = bset.hess(1, var); // = 0.0
+result = bset.hess(2, var); // = 2.0
+// ... up to i = 29
+
+
+// ----------------------------------------------------------------------
+// Construct a vector of PBasisSets to be used by the PSeriesFunction 
+std::vector<PBasisSet<double, double> > bsets;
+bsets.push_back(bset);
+bsets.push_back(bset);
+
+// Construct a vector of ints to index the tensor basis
+std::vector<int> indices(bsets.size(), 0);
+
+// Construct a vector of doubles giving the input variables
+std::vector<double> vars(bsets.size(), 0.0);
+
+// Construct a PSeriesFunction using the PBasisSets
+// Pass in 0.0 and 1.0 to set zero and identity
+PSeriesFunction<double, double, std::vector<double>, std::vector<int> > series(0.0, 1.0, bsets);
+
+// Set the coefficients
+
+// Set a constant term
+series.coeff()(indices) = 1.0;
+
+// Set a term linear in x, constant in y
+indices[0] = 1;
+indices[1] = 0;
+series.coeff()(indices) = 2.0;
+
+// Set a term linear in x, quadratic in y
+indices[0] = 1;
+indices[1] = 2;
+series.coeff()(indices) = 3.0;
+
+// Set a term quadratic in x, cubic in y
+indices[0] = 2;
+indices[1] = 3;
+series.coeff()(indices) = 4.0;
+
+// Evaluate the PSeriesFunction at (0.5, 0.7)
+vars[0] = 0.5;
+vars[1] = 0.7;
+result = series(vars); // = 1.0 + 2.0*x + 3.0*x*y*y + 4.0*x*x*y*y*y 
+
+// Evaluate the first derivative w/ x at (0.5, 0.7)
+result = series.grad(vars, 0); // = 2.0 + 3.0*y*y + 8.0*x*y*y*y 
+
+// Evaluate the second derivative w/ x, y at (0.5, 0.7)
+result = series.hess(vars, 0, 1); // = 6.0*y + 24.0*x*y*y 
+
+```
 
 
 Release Notes
 =======================
 
-Release 0.2.0 will include:
+Release 1.0.0 will include:
+
 - PSimpleFunction, PFunction, and PBasisSet
 - PSeriesFunction
     - with tensor product output and coefficient input
-- Piecewise functions
+- Piecewise functions: PPieceWise
 - The library writer: lw
 - PExtern for calls from C, Fortran, etc.
 - IntegrationTools wrapper for Python, 'pfunction'
@@ -129,6 +319,7 @@ Release 0.2.0 will include:
 
 
 Release 0.1.0 will include:
+
 - PSimpleFunction, PFunction, and PBasisSet
 - PSeriesFunction
     - with tensor product output and coefficient input
