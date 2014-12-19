@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 import os, sys
-import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
 
 if not "DISPLAY" in os.environ:
     matplotlib.use('Agg')
 
 from mpl_toolkits.mplot3d import Axes3D
-from pylab import *
 
 import pfunction
 import ctypes
@@ -26,7 +26,7 @@ def hess_eig( f, term, var):
     return e
 
 
-rc('font',**{'family':'serif','sans-serif':['Times']})
+plt.rc('font',**{'family':'serif','sans-serif':['Times']})
 pfunction.set_lib("../testlib/libpextern.so")
 
 max = 1
@@ -106,7 +106,7 @@ for i in range(0,10):
     bf = np.zeros( (a.size))
     for j in range(0,a.size):
         bf[j] = f.calc(i,a[j])
-    p = plot( a, bf)
+    p = plt.plot( a, bf)
 #show()
 f.delete()
 print "  deleted\n"
@@ -149,7 +149,7 @@ for t in range(0,Nf):
             for j in range(0,s[1]):
                 Z[i,j] = f.calc_tensor_basis(pfunction.c_int_array([t,u]),pfunction.c_dbl_array([X[i,j],Y[i,j]]))
         ax = fig.add_subplot(Nf,Nf,index, projection='3d')
-        ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+        ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=plt.get_cmap('coolwarm'), linewidth=0, antialiased=False)
         ax.set_xticklabels([])
         ax.set_yticklabels([])
         ax.set_zticklabels([])
@@ -167,9 +167,9 @@ for t in range(0,Nf):
                 Z[i,j] = hess_eig(f, pfunction.c_int_array([t,u]), pfunction.c_dbl_array([X[i,j],Y[i,j]]))[0]
                 Zb[i,j] = hess_eig(f, pfunction.c_int_array([t,u]), pfunction.c_dbl_array([X[i,j],Y[i,j]]))[1]
         ax = fig.add_subplot(Nf,Nf,index, projection='3d')
-        p1 = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+        p1 = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=plt.get_cmap('coolwarm'), linewidth=0, antialiased=False)
         my_norm = p1.norm
-        p2 = ax.plot_surface(X, Y, Zb, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+        p2 = ax.plot_surface(X, Y, Zb, rstride=1, cstride=1, cmap=plt.get_cmap('coolwarm'), linewidth=0, antialiased=False)
         p2.set_norm(my_norm)
         my_norm.vmax = np.amax( np.maximum(Z,Zb))
         my_norm.vmin = np.amin( np.minimum(Z,Zb))
@@ -206,7 +206,7 @@ ax = fig.gca(projection='3d')
 for i in range(0,s[0]):
     for j in range(0,s[1]):
         Z[i,j] = f.calc(pfunction.c_dbl_array([X[i,j],Y[i,j]]))
-ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=plt.get_cmap('coolwarm'), linewidth=0, antialiased=False)
 
 
 #ax.set_xticklabels([])
@@ -255,7 +255,7 @@ ax = fig.gca(projection='3d')
 for i in range(0,s[0]):
     for j in range(0,s[1]):
         Z[i,j] = f.calc(pfunction.c_dbl_array([X[i,j],Y[i,j]]))
-ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=plt.get_cmap('coolwarm'), linewidth=0, antialiased=False)
 
 fig = plt.figure(fignum, figsize=(8,8))
 allfig.append(fig)
@@ -265,7 +265,7 @@ ax = fig.gca(projection='3d')
 for i in range(0,s[0]):
     for j in range(0,s[1]):
         Z[i,j] = f.calc_grad(pfunction.c_dbl_array([X[i,j],Y[i,j]]),0)
-ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=plt.get_cmap('coolwarm'), linewidth=0, antialiased=False)
 
 fig = plt.figure(fignum, figsize=(8,8))
 allfig.append(fig)
@@ -275,7 +275,7 @@ ax = fig.gca(projection='3d')
 for i in range(0,s[0]):
     for j in range(0,s[1]):
         Z[i,j] = f.calc_hess(pfunction.c_dbl_array([X[i,j],Y[i,j]]),0,0)
-ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=plt.get_cmap('coolwarm'), linewidth=0, antialiased=False)
 
 f.delete()
 print "  deleted\n"
@@ -283,37 +283,38 @@ print "  deleted\n"
 
 
 #### Test PField
-body2d = pfunction.Body2D("2D.vtk")
+if os.path.isfile("2D.vtk"):
+    body2d = pfunction.Body2D("2D.vtk")
 
-X = np.arange(0.0, 1.0, 0.01)
-Y = np.arange(0.0, 1.0, 0.01)
-X, Y = np.meshgrid(X, Y)
-Z = 0.0*X
-s = X.shape
+    X = np.arange(0.0, 1.0, 0.01)
+    Y = np.arange(0.0, 1.0, 0.01)
+    X, Y = np.meshgrid(X, Y)
+    Z = 0.0*X
+    s = X.shape
 
-f = pfunction.PFunc_dsd("c", body2d)
+    f = pfunction.PFunc_dsd("c", body2d)
 
-fig = plt.figure(fignum, figsize=(8,8))
-allfig.append(fig)
-fignum += 1
-fig.suptitle('Concentration Field', fontsize=12)
-ax = fig.gca(projection='3d')
-for i in range(0,s[0]):
-    for j in range(0,s[1]):
-        Z[i,j] = f.calc(pfunction.c_dbl_array([X[i,j],Y[i,j]]))
-ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+    fig = plt.figure(fignum, figsize=(8,8))
+    allfig.append(fig)
+    fignum += 1
+    fig.suptitle('Concentration Field', fontsize=12)
+    ax = fig.gca(projection='3d')
+    for i in range(0,s[0]):
+        for j in range(0,s[1]):
+            Z[i,j] = f.calc(pfunction.c_dbl_array([X[i,j],Y[i,j]]))
+    ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=plt.get_cmap('coolwarm'), linewidth=0, antialiased=False)
 
-body2d.delete()
+    body2d.delete()
 
 
 #### Displaying/Writing Figures
 
 for i in range(0,fignum):
     plt.figure(i)
-    savefig("fig_" + str(i) + ".eps")
+    plt.savefig("fig_" + str(i) + ".eps")
 
 if "DISPLAY" in os.environ:
-    show()
+    plt.show()
 
 
 
