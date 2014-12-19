@@ -25,8 +25,6 @@ test_lib: test_lib.cpp
 	$(CXX) -c test_lib.cpp $(CPPFLAGS)
 	$(CXX) test_lib.o $(PLIB)/libpextern.so -o test_lib $(LDFLAGS)
 	./test_lib
-	$(CXX) test_lib.o $(PLIB)/PLibrary.o -o test_lib $(LDFLAGS)
-	./test_lib
 
 test_MyFunc: test_MyFunc.cpp 
 	$(CXX) -o test_MyFunc test_MyFunc.cpp $(CPPFLAGS) $(LDFLAGS)
