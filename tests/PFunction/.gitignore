@@ -2,3 +2,5 @@
 test_nolib
 test_lib
 test_MyFunc
+test_PFunction
+test_PBasisSet

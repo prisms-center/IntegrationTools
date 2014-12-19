@@ -96,7 +96,7 @@ For an example, see ``tests/testlib/MyPieceWiseFun.hh``.
 To write a PBasisSet, you must:
 
 1. Write a set of classes that inherit from ``PSimpleBase<InType, OutType>`` that evaluate the individual basis functions, and their first and second derivatives.
-    - Typically ``InType`` and ``OutType`` are ``double``
+    - Typically ``InType`` and ``OutType`` are type ``double``
 2. Write a class that inherits from ``PBasisSetBase<InType, OutType>`` implementing the PBasisSet
     - Typically this will contain the individual basis functions as a vector of PFunctions
 
@@ -109,92 +109,101 @@ Suppose you are writing a program that evaluates functions that have a known sig
 
 1. Create a PFunction library (``PLibrary.hh`` and ``libpextern.so``) as in the previous section, using dummy PFunctions that implement the desired signatures.
 
-2. Write a program that uses PFunctions that are checked out from the PLibrary by name. An example program using PFunctions is located at ``tests/PFunction/test_lib.cpp``. 
+2. Write a program that uses PFunctions that are checked out from the PLibrary by name. An example program using PFunctions is located at ``tests/PFunction/test_PFunction.cpp``. 
 
 3. Include the dummy ``PLibrary.hh`` (which needs the ``IntegrationTools`` header file library in your search path) and link ``libpextern.so``.
 
 4. Users can then update the available PFunctions using the steps in the previous section and re-run your program without re-compiling the entire thing. 
 
-The example program at ``tests/PFunction/test_lib.cpp`` prints the following output documenting the use of PFunctions:
+The example program at ``tests/PFunction/test_PFunction.cpp`` prints the following output documenting the use of PFunctions:
 
 ```
 #include "PLibrary.hh"
+#include <vector>
+#include <cstring>
 
-using namespace PRISMS;
-// ----------------------------------------------------------------------
-// Create an input variable vector, for a function of a single variable. 
-// PFunctions typically evalulate with [], so even a function of a single  
-// variable takes a container as input.                                           
-std::vector<double> var(1, 2.1);
+int main(int argc, char *argv[]) {
 
-double result;
+  using namespace PRISMS;
 
-// ----------------------------------------------------------------------
-// Construct a PFunction that takes input of type std::vector<double>
-// and returns output of type double.                    
-PFunction<std::vector<double>, double> func;       
+  // ----------------------------------------------------------------------
+  // Create an input variable vector, for a function of a single variable.
+  // PFunctions typically evalulate with [], so even a function of a single
+  // variable takes a container as input.
 
-// Checkout the Quadratic function.                             
-PLibrary::checkout("Quadratic", func);                            
+  std::vector<double> var(1, 2.1);
 
-// PFunction::operator()([x]) = 1+x+x^2
-result = func([2.1]); // = 7.51
+  double result;
 
-// PFunction::grad([x], x); //  = 1+2*x
-result = func.grad([2.1], 0); //  = 5.2
+  // ----------------------------------------------------------------------
+  // Construct a PFunction that takes input of type std::vector<double>
+  // and returns output of type double.
+  PFunction<std::vector<double>, double> func;
 
-// PFunction::hess([x], x, x); //  = 2
-result = func.hess([2.1], 0, 0); //  = 2
+  // Checkout the Quadratic function.
+  PLibrary::checkout("Quadratic", func);
 
-// After evaluation, the latest result is stored and can be accessed
-// multiple times without recalculation:
-result = func(); //  = 7.51
-result = func.grad(0); //  = 5.2
-result = func.hess(0, x); //  = 2
+  // PFunction::operator()([x]) = 1+x+x^2
+  result = func(var); // = 7.51
 
+  // PFunction::grad([x], x); //  = 1+2*x
+  result = func.grad(var, 0); //  = 5.2
 
-// Use eval_grad(var) or eval_hess(var) to evaluate 
-// the entire gradient vector or hessian matrix.                                
-func.eval_grad([2.1]);
-result = func.grad(0); //  = 5.2
+  // PFunction::hess([x], x, x); //  = 2 
+  result = func.hess(var, 0, 0); //  = 2
 
-func.eval_hess([2.1]);
-result = func.hess(0, 0); //  = 2
+  // After evaluation, the latest result is stored and can be accessed
+  // multiple times without recalculation:
+  result = func(); //  = 7.51
+  result = func.grad(0); //  = 5.2
+  result = func.hess(0, 0); //  = 2
 
-// ----------------------------------------------------------------------
-// Add another variable for a function of two variables. 
-var.push_back(3.5);
+  // Use eval_grad(var) or eval_hess(var) to evaluate 
+  // the entire gradient vector or hessian matrix.
 
-// Checkout the MyFunc function.                             
-PLibrary::checkout("MyFunc", func);                            
+  func.eval_grad(var);
+  result = func.grad(0); //  = 5.2
 
-// PFunction::operator()([x, y]) = x*y^2+y^3+x^2*y+x^3
-result = func([2.1, 3.5]); //  = 93.296
+  func.eval_hess(var);
+  result = func.hess(0, 0); //  = 2
 
-// PFunction::grad([x, y], x); //  = y^2+2*x*y+3*x^2
-result = func.grad([2.1, 3.5], 0); //  = 40.18
+  // ----------------------------------------------------------------------
+  // Add another variable for a function of two variables. 
+  var.push_back(3.5);
 
-// PFunction::hess([x, y], x, x); //  = 2*y+6*x
-result = func.hess([2.1, 3.5], 0, 0); //  = 19.6
+  // Checkout the MyFunc function.
+  PLibrary::checkout("MyFunc", func);
 
-// After evaluation, the latest result is stored and can be accessed 
-// multiple times without recalculation:
-result = func() = 93.296
-result = func.grad(0); //  = 40.18
-result = func.hess(0, x); //  = 19.6
+  // PFunction::operator()([x, y]) = x*y^2+y^3+x^2*y+x^3
+  result = func(var); //  = 93.296
 
+  // PFunction::grad([x, y], x); //  = y^2+2*x*y+3*x^2
+  result = func.grad(var, 0); //  = 40.18
 
-// Use eval_grad(var) or eval_hess(var) to evaluate 
-// the entire gradient vector or hessian matrix.                                
-func.eval_grad([2.1, 3.5]);
-result = func.grad(0); //  = 40.18
-result = func.grad(1); //  = 55.86
+  // PFunction::hess([x, y], x, x); //  = 2*y+6*x
+  result = func.hess(var, 0, 0); //  = 19.6
 
-func.eval_hess([2.1, 3.5]);
-result = func.hess(0, 0); // = 19.6
-result = func.hess(0, 1); //  = 11.2
-result = func.hess(1, 0); //  = 11.2
-result = func.hess(1, 1); //  = 25.2
+  // After evaluation, the latest result is stored and can be accessed 
+  // multiple times without recalculation:
+
+  result = func(); //  = 93.296
+  result = func.grad(0); //  = 40.18
+  result = func.hess(0, 1); //  = 3.10504e+231
+
+  // Use eval_grad(var) or eval_hess(var) to evaluate
+  // the entire gradient vector or hessian matrix.
+  func.eval_grad(var);
+  result = func.grad(0); //  = 40.18
+  result = func.grad(1); //  = 55.86
+
+  func.eval_hess(var);
+  result = func.hess(0, 0); //  = 19.6
+  result = func.hess(0, 1); //  = 11.2
+  result = func.hess(1, 0); //  = 11.2
+  result = func.hess(1, 1); //  = 25.2
+
+  return 0;
+}
 ```
 
 
@@ -211,94 +220,103 @@ See ``tests/PFields/test.cpp`` for an example.
     - A ``PField`` is templated by coordinate type (typename), field type (typename), and coordinate dimension (int)
 
 
-## Writing a program that uses PBasisSets and PSeriesFucntions ##
+## Writing a program that uses PBasisSets and PSeriesFunctions ##
 
 1. A PBasisSet can be checked out from a PLibrary just like a PFunction
-2. The API is similar, but the index of basis function to evaluate must be given along with the input value.
+2. The API is similar, but the index of the basis function to evaluate must be given along with the input value.
+
+The example program at ``tests/PFunction/test_PBasisSet.cpp`` prints the following output documenting the use of PBasisSets and PSeriesFunctions:
 
 ```
 #include "PLibrary.hh"
+#include <vector>
+#include <cstring>
 
-using namespace PRISMS;
+int main(int argc, char *argv[]) {
 
-// ----------------------------------------------------------------------
-// Construct a PBasisSet of basis fucntions that takes input of type 
-// double and return output of type double.                    
-PBasisSet<double, double> bset;       
+  using namespace PRISMS;
 
-double var = 0.8;
-double result;
-std::vector<double> result_vec;
+  // ----------------------------------------------------------------------
+  // Construct a PBasisSet of basis fucntions that takes input of type 
+  // double and return output of type double.                    
+  PBasisSet<double, double> bset;
 
-// Checkout the Monomial PBasisSet, including 30 basis functions                             
-PLibrary::checkout("Monomial", bset);                            
+  double var = 0.8;
+  double result;
+  std::vector<double> result_vec;
 
-// PBasisSet::operator()(i, x) = x^i
-result = bset(0, var); // = 1.0
-result = bset(1, var); // = 0.8
-result = bset(2, var); // = 0.64
-// ... up to i = 29
+  // Checkout the Monomial PBasisSet, including 30 basis functions
+  PLibrary::checkout("Monomial", bset, 30);
+
+  // PBasisSet::operator()(i, x) = x^i
+  result = bset(0, var); // = 1
+  result = bset(1, var); // = 0.8
+  result = bset(2, var); // = 0.64
+  // ... up to i = 29
+
+  // PBasisSet::grad(i, x) = i*x^(i-1)
+  result = bset.grad(0, var); // = 0
+  result = bset.grad(1, var); // = 1
+  result = bset.grad(2, var); // = 1.6
+  // ... up to i = 29
+
+  // PBasisSet::hess(i, x) = i*(i-1)*x^(i-2)
+  result = bset.hess(0, var); // = 0
+  result = bset.hess(1, var); // = 0
+  result = bset.hess(2, var); // = 2
+  // ... up to i = 29
 
 
-// PBasisSet::grad(i, x) = i*x^(i-1)
-result = bset.grad(0, var); // = 0.0
-result = bset.grad(1, var); // = 1.0
-result = bset.grad(2, var); // = 1.6
-// ... up to i = 29
+  // ----------------------------------------------------------------------
+  // Construct a vector of PBasisSets to be used by the PSeriesFunction 
+  std::vector<PBasisSet<double, double> > bsets;
+  bsets.push_back(bset);
+  bsets.push_back(bset);
+  
+  // Construct a vector of ints to index the tensor basis
+  std::vector<int> indices(bsets.size(), 0);
 
-// PBasisSet::hess(i, x) = i*(i-1)*x^(i-2)
-result = bset.hess(0, var); // = 0.0
-result = bset.hess(1, var); // = 0.0
-result = bset.hess(2, var); // = 2.0
-// ... up to i = 29
+  // Construct a vector of doubles giving the input variables
+  std::vector<double> vars(bsets.size(), 0.0);
 
+  // Construct a PSeriesFunction using the PBasisSets
+  // Pass in 0.0 and 1.0 to set zero and identity
+  typedef PSeriesFunction<double, double, std::vector<double>, std::vector<int> > Series;
+  Series series(0.0, 1.0, bsets);
 
-// ----------------------------------------------------------------------
-// Construct a vector of PBasisSets to be used by the PSeriesFunction 
-std::vector<PBasisSet<double, double> > bsets;
-bsets.push_back(bset);
-bsets.push_back(bset);
+  // Set the coefficients
 
-// Construct a vector of ints to index the tensor basis
-std::vector<int> indices(bsets.size(), 0);
+  // Set a constant term
+  series.coeff()(indices) = 1.0;
 
-// Construct a vector of doubles giving the input variables
-std::vector<double> vars(bsets.size(), 0.0);
+  // Set a term linear in x, constant in y
+  indices[0] = 1;
+  indices[1] = 0;
+  series.coeff()(indices) = 2.0;
 
-// Construct a PSeriesFunction using the PBasisSets
-// Pass in 0.0 and 1.0 to set zero and identity
-PSeriesFunction<double, double, std::vector<double>, std::vector<int> > series(0.0, 1.0, bsets);
+  // Set a term linear in x, quadratic in y
+  indices[0] = 1;
+  indices[1] = 2;
+  series.coeff()(indices) = 3.0;
 
-// Set the coefficients
+  // Set a term quadratic in x, cubic in y
+  indices[0] = 2;
+  indices[1] = 3;
+  series.coeff()(indices) = 4.0;
 
-// Set a constant term
-series.coeff()(indices) = 1.0;
+  // Evaluate the PSeriesFunction at (0.5, 0.7)
+  vars[0] = 0.5;
+  vars[1] = 0.7;
+  result = series(vars); // = 1.0 + 2.0*x + 3.0*x*y*y + 4.0*x*x*y*y*y = 3.078
 
-// Set a term linear in x, constant in y
-indices[0] = 1;
-indices[1] = 0;
-series.coeff()(indices) = 2.0;
+  // Evaluate the first derivative w/ x at (0.5, 0.7)
+  result = series.grad(vars, 0); // = 2.0 + 3.0*y*y + 8.0*x*y*y*y = 4.842
 
-// Set a term linear in x, quadratic in y
-indices[0] = 1;
-indices[1] = 2;
-series.coeff()(indices) = 3.0;
+  // Evaluate the second derivative w/ x, y at (0.5, 0.7)
+  result = series.hess(vars, 0, 1); // = 6.0*y + 24.0*x*y*y = 10.08
 
-// Set a term quadratic in x, cubic in y
-indices[0] = 2;
-indices[1] = 3;
-series.coeff()(indices) = 4.0;
-
-// Evaluate the PSeriesFunction at (0.5, 0.7)
-vars[0] = 0.5;
-vars[1] = 0.7;
-result = series(vars); // = 1.0 + 2.0*x + 3.0*x*y*y + 4.0*x*x*y*y*y 
-
-// Evaluate the first derivative w/ x at (0.5, 0.7)
-result = series.grad(vars, 0); // = 2.0 + 3.0*y*y + 8.0*x*y*y*y 
-
-// Evaluate the second derivative w/ x, y at (0.5, 0.7)
-result = series.hess(vars, 0, 1); // = 6.0*y + 24.0*x*y*y 
+  return 0;
+}
 
 ```
 

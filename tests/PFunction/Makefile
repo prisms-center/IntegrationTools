@@ -13,7 +13,7 @@ CPPFLAGS += -O3
 LDFLAGS  = 
 
 
-all: test_nolib test_lib test_MyFunc
+all: test_nolib test_lib test_MyFunc test_PFunction test_PBasisSet
 	
 
 test_nolib: test_nolib.cpp 
@@ -29,6 +29,18 @@ test_lib: test_lib.cpp
 test_MyFunc: test_MyFunc.cpp 
 	$(CXX) -o test_MyFunc test_MyFunc.cpp $(CPPFLAGS) $(LDFLAGS)
 	./test_MyFunc
+
+test_PFunction: test_PFunction.cpp 
+	cd $(PLIB) && $(MAKE)
+	$(CXX) -c test_PFunction.cpp $(CPPFLAGS)
+	$(CXX) test_PFunction.o $(PLIB)/libpextern.so -o test_PFunction $(LDFLAGS)
+	./test_PFunction
+
+test_PBasisSet: test_PBasisSet.cpp 
+	cd $(PLIB) && $(MAKE)
+	$(CXX) -c test_PBasisSet.cpp $(CPPFLAGS)
+	$(CXX) test_PBasisSet.o $(PLIB)/libpextern.so -o test_PBasisSet $(LDFLAGS)
+	./test_PBasisSet
 	
 clean: 
-	rm -f test_nolib test_lib test_MyFunc test_lib.o
+	rm -f test_nolib test_lib test_MyFunc test_lib.o test_PFunction test_PBasisSet
