@@ -11,7 +11,7 @@ ifeq "$(BIN)" ""
 else
 	INSTALL = $(BIN)
 endif
-VERS = "develop"
+VERS=$$(git rev-parse --abbrev-ref HEAD)
 ID=$$(git rev-parse HEAD)
 URL=$$(git config --get remote.origin.url)
 
