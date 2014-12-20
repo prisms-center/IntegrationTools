@@ -40,6 +40,44 @@ std::ostream& operator<<(std::ostream &sout, const std::vector<T> &v)
     return sout;
 }
 
+// convert int to string
+std::string itos( int i)
+{
+    std::stringstream ss;
+    ss << i;
+    return ss.str();
+}
+  
+// return current date and time as: YEAR-MM-DD HH:MM:SS
+std::string now()
+{
+    time_t t = time(0);   // get time now
+    struct tm * _now = localtime( & t );
+    std::ostringstream ss;
+    
+    std::string smin = "";
+    int min = _now->tm_min;
+    if( min < 10)
+        smin = "0" + itos(min);
+    else
+        smin = itos(min);
+    
+    std::string ssec = "";
+    int sec = _now->tm_sec;
+    if( sec < 10)
+        ssec = "0" + itos(sec);
+    else
+        ssec = itos(sec);
+    
+            
+    ss << (_now->tm_year + 1900) << '-' 
+         << (_now->tm_mon + 1) << '-'
+         <<  _now->tm_mday
+         << " " << _now->tm_hour << ":" << smin << ":" << ssec;
+    return ss.str();
+    
+}
+
 const size_t ERROR_IN_COMMAND_LINE = 1; 
 const size_t SUCCESS = 0; 
 const size_t ERROR_UNHANDLED_EXCEPTION = 2; 
@@ -536,7 +574,12 @@ void write_header( std::vector<std::string> dir, std::vector<std::string> var, s
     
     std::cout << "\n";
     c.write(std::cout);
-    
+
+sout << "// created: " << now() << "\n";
+sout << "// version: " << PRISMS::IntegrationTools_version_id() << "\n";
+sout << "// url: " << PRISMS::IntegrationTools_repo_url() << "\n";
+sout << "// commit: " << PRISMS::IntegrationTools_commit_id() << "\n\n";
+        
 sout <<    
 "#ifndef PLIBRARY_HH\n\
 #define PLIBRARY_HH\n\
@@ -716,6 +759,11 @@ void write_source( std::vector<std::string> dir, std::vector<std::string> var, s
     
     std::cout << "\n";
     c.write(std::cout);
+
+sout << "// created: " << now() << "\n";
+sout << "// version: " << PRISMS::IntegrationTools_version_id() << "\n";
+sout << "// url: " << PRISMS::IntegrationTools_repo_url() << "\n";
+sout << "// commit: " << PRISMS::IntegrationTools_commit_id() << "\n\n";
     
 sout <<    
 "#ifndef PLIBRARY_CC\n\
