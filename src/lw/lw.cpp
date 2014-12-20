@@ -29,7 +29,7 @@
 #include<algorithm>
 #include<sstream>
 
-#include "IntegrationTools/version.hh"
+#include "version.hh"
 
 
 template<typename T>

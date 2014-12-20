@@ -42,7 +42,7 @@ version.cc: #FORCE
 	@sed "s/COMMIT_ID/$(ID)/" version.tmp.0 > version.tmp.1; rm version.tmp.0
 	@sed "s|REPO_URL|$(URL)|" version.tmp.1 > version.cc; rm version.tmp.1
 
-version.o: version.cc $(TOOLS)/version.hh
+version.o: version.cc version.hh
 	$(CXX) -c version.cc $(CPPFLAGS)
 
 lw: lw.cpp version.o
