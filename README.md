@@ -34,7 +34,11 @@ Installation
         git clone https://github.com/prisms-center/IntegrationTools.git
         cd IntegrationTools
 
-2. From the root directory of the repository:
+2. Checkout the branch containing the version you wish to install. Latest is ``v1.0.0``:
+
+        git checkout v1.0.0
+
+3. From the root directory of the repository:
 
         make install
 
@@ -46,7 +50,7 @@ Installation
     	
     - PYINSTALL: This specifies where to install the Python module ``pfunction``. If not set, it uses the default distutils location.
 
-3. The directory ``include/IntegrationTools`` contains all the header files necessary. You can copy it somewhere in your default header search path, often:
+4. The directory ``include/IntegrationTools`` contains all the header files necessary. You can copy it somewhere in your default header search path, often:
 
         cp -r include/IntegrationTools /usr/local/include
 
