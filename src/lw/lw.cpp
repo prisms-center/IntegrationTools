@@ -84,12 +84,14 @@ const size_t ERROR_UNHANDLED_EXCEPTION = 2;
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
-    
-void write_header( std::vector<std::string> dir, std::vector<std::string> var, std::ofstream &sout);
 
-void write_source( std::vector<std::string> dir, std::vector<std::string> var, std::ofstream &sout);
+class Collection;
 
-void write_pextern_cc( std::ofstream &sout);
+void write_header( const Collection &c, std::vector<std::string> var, std::ofstream &sout);
+
+void write_source( const Collection &c, std::vector<std::string> var, std::ofstream &sout);
+
+void write_pextern_cc( const Collection &c, std::ofstream &sout);
 
 
 
@@ -440,10 +442,15 @@ int main(int argc, char *argv[])
 
     } 
     
+    var.push_back("double*");
+    
     std::ofstream outfile;
     fs::path fileloc;
     
+    Collection c(dir);
     
+    std::cout << "\n";
+    c.write(std::cout);
     
     // open file to write
     fileloc = location;
@@ -451,7 +458,7 @@ int main(int argc, char *argv[])
     std::cout << "Preparing to write file: " << fileloc.c_str() << "\n\n";
     outfile.open( fileloc.c_str() );
     
-    write_header( dir, var, outfile);
+    write_header( c, var, outfile);
     outfile.close();
     
     // open file to write
@@ -460,7 +467,7 @@ int main(int argc, char *argv[])
     std::cout << "Preparing to write file: " << fileloc.c_str() << "\n\n";
     outfile.open( fileloc.c_str() );
     
-    write_source( dir, var, outfile);
+    write_source( c, var, outfile);
     outfile.close();
     
     
@@ -475,7 +482,7 @@ int main(int argc, char *argv[])
       for( int i=0; i<dir.size(); i++) {
         compile_cmd += "-I" + dir[i] + " ";
       }
-      std::cout << compile_cmd << std::endl;
+      std::cout << compile_cmd << std::endl << std::endl;
       {
         FILE *fp;
         char path[PATH_MAX];
@@ -501,7 +508,8 @@ int main(int argc, char *argv[])
       fileloc /= ("PExtern.cc");
       
       fs::ofstream outfile(fileloc);
-      write_pextern_cc(outfile);
+      std::cout << "Preparing to write file: " << fileloc.c_str() << "\n\n";
+      write_pextern_cc(c, outfile);
       outfile.close();
       
       std::cout << "Compile " << fileloc.string() << ": " << std::endl;
@@ -568,12 +576,8 @@ int main(int argc, char *argv[])
 }
 
 
-void write_header( std::vector<std::string> dir, std::vector<std::string> var, std::ofstream &sout)
+void write_header( const Collection &c, std::vector<std::string> var, std::ofstream &sout)
 {
-    Collection c(dir);
-    
-    std::cout << "\n";
-    c.write(std::cout);
 
 sout << "// created: " << now() << "\n";
 sout << "// version: " << PRISMS::IntegrationTools_version_id() << "\n";
@@ -753,12 +757,8 @@ sout <<
 
 }
 
-void write_source( std::vector<std::string> dir, std::vector<std::string> var, std::ofstream &sout)
+void write_source( const Collection &c, std::vector<std::string> var, std::ofstream &sout)
 {
-    Collection c(dir);
-    
-    std::cout << "\n";
-    c.write(std::cout);
 
 sout << "// created: " << now() << "\n";
 sout << "// version: " << PRISMS::IntegrationTools_version_id() << "\n";
@@ -1009,7 +1009,36 @@ sout <<
 
 }
 
-void write_pextern_cc( std::ofstream &sout) {
+void write_pextern_cc(const Collection &c, std::ofstream &sout) {
+
+  bool write_simple = false;
+  for(int i=0; i<c.function_intype.size(); i++) {
+    for(int j=0; j<c.function_outtype.size(); j++) {
+      if( c.simplefunction[i][j].size() > 0) {
+        write_simple = true;
+      }
+    }
+  }
+  
+  bool write_func = false;
+  for(int i=0; i<c.function_intype.size(); i++) {
+    for(int j=0; j<c.function_outtype.size(); j++) {
+      if( c.function[i][j].size() > 0) {
+        write_func = true;
+      }
+    }
+  }
+  
+  bool write_bset = false;
+  for(int i=0; i<c.function_intype.size(); i++) {
+    for(int j=0; j<c.function_outtype.size(); j++) {
+      if( c.basis_set[i][j].size() > 0) {
+        write_bset = true;
+      }
+    }
+  }
+
+
   sout <<
 "#ifndef PExtern_CC\n\
 #define PExtern_CC\n\
@@ -1028,8 +1057,11 @@ void write_pextern_cc( std::ofstream &sout) {
 \n\
 \n\
 extern \"C\"\n\
-{\n\
-    // Functions for using a PSimpleBase externally (say Python or Fortran)\n\
+{\n";
+
+if(write_func) {
+sout << 
+"    // Functions for using a PSimpleBase externally (say Python or Fortran)\n\
     //   written for VarContainer=double*, OutType=double, hence 'dsd' in function names\n\
     \n\
     void PSimpleFunction_dsd_new(char* name, PRISMS::PSimpleBase<double*,double>* &f)\n\
@@ -1058,8 +1090,12 @@ extern \"C\"\n\
         val = (*f)();\n\
     }\n\
     \n\
-    \n\
-    \n\
+    \n";
+}
+
+if(write_bset) {
+sout << 
+"    \n\
     \n\
     \n\
     // Functions for using a PSimpleBase externally (say Python or Fortran)\n\
@@ -1091,8 +1127,12 @@ extern \"C\"\n\
         val = (*f)();\n\
     }\n\
     \n\
-    \n\
-    \n\
+    \n";
+}
+
+if(write_func){
+sout << 
+"    \n\
     \n\
     \n\
     // Functions for using a PFuncBase externally (say Python or Fortran)\n\
@@ -1178,8 +1218,12 @@ extern \"C\"\n\
         val = (*f).hess(di, dj);\n\
     }\n\
     \n\
-    \n\
-    \n\
+    \n";
+}
+
+if(write_bset) {
+sout << 
+"    \n\
     \n\
     \n\
     // Functions for using a PBasisSetBase externally (say Python or Fortran)\n\
@@ -1519,8 +1563,10 @@ extern \"C\"\n\
     void PSeriesFunction_dsis_get_tensor_basis_hess(PRISMS::PSeriesFunction<double,double,double*,int*>* f, int* term, int di, int dj, double &val)\n\
     {\n\
         val = (*f).basis_hess(term,di,dj);\n\
-    }\n\
-    \n\
+    }\n";
+}
+sout <<
+"    \n\
     // Functions for using constructing a 2D PRISMS::Body externally (say Python or Fortran),\n\
     //   allowing access to PFields\n\
     //   written for Coordinate=double*, OutType=double, DIM=2\n\
