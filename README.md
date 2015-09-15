@@ -42,9 +42,9 @@ Installation
         git clone https://github.com/prisms-center/IntegrationTools.git
         cd IntegrationTools
 
-2. Checkout the branch containing the version you wish to install. Latest is ``v1.0.0``:
+2. Checkout the branch containing the version you wish to install. Latest is ``v1.0.1``:
 
-        git checkout v1.0.0
+        git checkout v1.0.1
 
 3. From the root directory of the repository:
 
@@ -362,3 +362,7 @@ Release 1.0.0 will include:
 - The library writer: lw
 - PExtern for calls from C, Fortran, etc.
 - IntegrationTools wrapper for Python, 'pfunction'
+
+Release 1.0.1 includes:
+
+- Fixes an external library compilation issue when only some types of functions or basis sets are present
