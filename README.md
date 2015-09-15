@@ -1,6 +1,8 @@
 IntegrationTools
 ================
 
+[![DOI](https://zenodo.org/badge/18413/prisms-center/IntegrationTools.svg)](https://zenodo.org/badge/latestdoi/18413/prisms-center/IntegrationTools)
+
 IntegrationTools specifies an interface for easily passing functions and fields, referred to as ‘PFunctions’ and ‘PFields’, to a computer program. It mainly consists of a header file library written in C++, and the Library Writer program 'lw'. It also provides a C interface so that functions can be used across coding languages, and a Python package 'pfunction' that uses the C interface to allow access to your functions in Python.
 
 PFunctions:
@@ -16,6 +18,12 @@ PFields:
 - Currently support exists for reading fields from .vtk files using "Quad" elements in 2D and "Hexahedron" elements in 3D
 
 This code is developed by the PRedictive Integrated Structural Materials Science Center (PRISMS), at the University of Michigan, which is supported by the U.S. Department of Energy, Office of Basic Energy Sciences, Division of Materials Sciences and Engineering under Award #DE-SC0008637.
+
+**Citing IntegrationTools**
+
+IntegrationTools, v1.0.1 (2015), available from: [https://github.com/prisms-center/IntegrationTools](https://github.com/prisms-center/IntegrationTools),  doi:[10.5281/zenodo.31015](http://dx.doi.org/10.5281/zenodo.31015). 
+
+
 
 Dependencies
 ============
