@@ -1,8 +1,6 @@
 IntegrationTools
 ================
 
-[![DOI](https://zenodo.org/badge/18413/prisms-center/IntegrationTools.svg)](https://zenodo.org/badge/latestdoi/18413/prisms-center/IntegrationTools)
-
 IntegrationTools specifies an interface for easily passing functions and fields, referred to as ‘PFunctions’ and ‘PFields’, to a computer program. It mainly consists of a header file library written in C++, and the Library Writer program 'lw'. It also provides a C interface so that functions can be used across coding languages, and a Python package 'pfunction' that uses the C interface to allow access to your functions in Python.
 
 PFunctions:
@@ -21,7 +19,8 @@ This code is developed by the PRedictive Integrated Structural Materials Science
 
 **Citing IntegrationTools**
 
-IntegrationTools, v1.0.1 (2015), available from: [https://github.com/prisms-center/IntegrationTools](https://github.com/prisms-center/IntegrationTools),  doi:[10.5281/zenodo.31015](http://dx.doi.org/10.5281/zenodo.31015). 
+B. Puchala, *IntegrationTools, v1.0.1* (2015). Available from: [https://github.com/prisms-center/IntegrationTools](https://github.com/prisms-center/IntegrationTools).  doi:<[available here](https://github.com/prisms-center/IntegrationTools/wiki/DOIs)>.
+- Currently, DOIs are generated after the release is archived so they cannot be included in the README for the current release. Instead, visit the wiki page: <https://github.com/prisms-center/IntegrationTools/wiki/DOIs>. 
 
 
 
