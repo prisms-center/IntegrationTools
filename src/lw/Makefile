@@ -38,8 +38,8 @@ uninstall:
 	rm -f $(INSTALL)/lw
 
 version.cc: #FORCE
-	@sed "s/VERSION_ID/$(VERS)/" version.template.cc > version.tmp.0
-	@sed "s/COMMIT_ID/$(ID)/" version.tmp.0 > version.tmp.1; rm version.tmp.0
+	@sed "s|VERSION_ID|$(VERS)|" version.template.cc > version.tmp.0
+	@sed "s|COMMIT_ID|$(ID)|" version.tmp.0 > version.tmp.1; rm version.tmp.0
 	@sed "s|REPO_URL|$(URL)|" version.tmp.1 > version.cc; rm version.tmp.1
 
 version.o: version.cc version.hh

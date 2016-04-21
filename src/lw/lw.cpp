@@ -388,14 +388,14 @@ int main(int argc, char *argv[])
         /// Set command line options using boost program_options
         po::options_description desc("Options"); 
         desc.add_options() 
-          ("help", "Write help documentation")
+          ("help,h", "Write help documentation")
           ("version", "Write version info")
           ("compile,c", "Compile library after writing") 
           ("cxx", po::value<std::string>(&cxx)->default_value("g++"), "Compiler to use. (\"g++\" by default)") 
           ("cflags", po::value<std::string>(&cflags)->default_value("-O3 -fPIC"), "Compiler flags to use. (\"-O3 -fPIC\" by default)") 
           ("dylib", "Compile with -dynamiclib instead of -shared") 
           ("dir,d", po::value<std::vector<std::string> >(&dir)->multitoken(), "Directories to check for PSimpleFunctions, PFunctions, and PBasisSets") 
-          ("var,v", po::value<std::vector<std::string> >(&var)->multitoken()->required(), "Variable container types")
+          ("var,v", po::value<std::vector<std::string> >(&var)->multitoken()->required(), "Input variable container types to include besides \"double*\" (which is always included).")
           ("location,l", po::value<std::string>(&location)->default_value("."), "Location to write library"); 
           
         

@@ -13,7 +13,7 @@ CPPFLAGS += -O3 -fPIC
 
 
 libpextern.so:
-	lw -d . -v "std::vector<double>" "double*" -l . -c --cflags "-O3 -fPIC -I../../include"
+	lw -d . -v "std::vector<double>" -l . -c --cflags "-O3 -fPIC -I../../include"
 
 FORCE:
 
