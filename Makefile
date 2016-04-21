@@ -3,15 +3,19 @@
 SRC = src
 TEST = tests
 
+prefix = /usr/local
+includedir = $(prefix)/include
+
 all: 
 	@cd $(SRC) && $(MAKE)
 
 install: 
 	@cd $(SRC) && $(MAKE) install
+	@cp -r include/IntegrationTools $(includedir)
 
 uninstall:
 	@cd $(SRC) && $(MAKE) uninstall
-	@echo "The IntegrationTools header files directory must be removed manually if you copied it somewhere"
+	@rm -r $(includedir)/IntegrationTools
 
 test: 
 	@cd $(TEST) && $(MAKE)

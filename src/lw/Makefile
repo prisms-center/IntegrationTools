@@ -6,21 +6,21 @@ PFUNC = $(TOOLS)/pfunction
 PSYM = $(TOOLS)/psymfunction
 INCLUDE = . $(HOME)/include
 
-ifeq "$(BIN)" ""
+ifeq "$(INTEGRATIONTOOLS_PREFIX)" ""
 	INSTALL = /usr/local/bin
 else
-	INSTALL = $(BIN)
+	INSTALL = $(INTEGRATIONTOOLS_PREFIX)/bin
 endif
 VERS=$$(git rev-parse --abbrev-ref HEAD)
 ID=$$(git rev-parse HEAD)
 URL=$$(git config --get remote.origin.url)
 
-ifeq "$(BOOST)" ""
+ifeq "$(INTEGRATIONTOOLS_BOOST)" ""
 	LFLAGS = -lboost_program_options -lboost_filesystem -lboost_system -lboost_regex
 else
 	BOOSTLIB = libboost_filesystem.so libboost_program_options.so libboost_regex.so libboost_system.so
-	LFLAGS += $(foreach i, $(BOOSTLIB), $(BOOST)/lib/$(i))
-	INCLUDE += $(BOOST)/include
+	LFLAGS += $(foreach i, $(BOOSTLIB), $(INTEGRATIONTOOLS_BOOST)/lib/$(i))
+	INCLUDE += $(INTEGRATIONTOOLS_BOOST)/include
 endif
 
 

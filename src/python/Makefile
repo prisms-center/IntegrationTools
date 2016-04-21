@@ -9,10 +9,10 @@ URL=$$(git config --get remote.origin.url)
 all: setup.py
 
 install: setup.py
-ifeq "$(PYINSTALL)" ""
-	python setup.py install
+ifeq "$(INTEGRATIONTOOLS_PREFIX)" ""
+	python setup.py install --record installed.txt
 else
-	python setup.py install --prefix=$(PYINSTALL)
+	python setup.py install --prefix=$(INTEGRATIONTOOLS_PREFIX) --record installed.txt
 endif
 
 uninstall:

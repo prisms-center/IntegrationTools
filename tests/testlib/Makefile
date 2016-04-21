@@ -1,11 +1,8 @@
 # make libpextern.so from the included PFunction src files
 
 HOME = ../..
-EXTERN = $(HOME)/include/IntegrationTools/extern
-SRC = $(HOME)/src/c
 INCLUDE = . $(HOME)/include
-
-INSTALL = /usr/local/bin
+LW = $(HOME)/src/lw/lw
 
 CXX      = g++
 CPPFLAGS += $(foreach i,$(INCLUDE),-I$(i))
@@ -13,7 +10,8 @@ CPPFLAGS += -O3 -fPIC
 
 
 libpextern.so:
-	lw -d . -v "std::vector<double>" -l . -c --cflags "-O3 -fPIC -I../../include"
+	cd $(HOME) && $(MAKE)
+	$(LW) -d . -v "std::vector<double>" -l . -c --cflags "-O3 -fPIC -I../../include" --include "<vector>"
 
 FORCE:
 

@@ -87,7 +87,10 @@ namespace fs = boost::filesystem;
 
 class Collection;
 
-void write_header( const Collection &c, std::vector<std::string> var, std::ofstream &sout);
+void write_header( const Collection &c, 
+                   std::vector<std::string> var, 
+                   std::vector<std::string> include,
+                   std::ofstream &sout);
 
 void write_source( const Collection &c, std::vector<std::string> var, std::ofstream &sout);
 
@@ -378,7 +381,7 @@ int main(int argc, char *argv[])
 {
     // input variables
     std::string location;
-    std::vector< std::string> dir, var, compile_options;
+    std::vector< std::string> dir, var, compile_options, include;
     std::string cxx, cflags;
      
     po::variables_map vm; 
@@ -395,7 +398,8 @@ int main(int argc, char *argv[])
           ("cflags", po::value<std::string>(&cflags)->default_value("-O3 -fPIC"), "Compiler flags to use. (\"-O3 -fPIC\" by default)") 
           ("dylib", "Compile with -dynamiclib instead of -shared") 
           ("dir,d", po::value<std::vector<std::string> >(&dir)->multitoken(), "Directories to check for PSimpleFunctions, PFunctions, and PBasisSets") 
-          ("var,v", po::value<std::vector<std::string> >(&var)->multitoken()->required(), "Input variable container types to include besides \"double*\" (which is always included).")
+          ("var,v", po::value<std::vector<std::string> >(&var)->multitoken(), "Input variable container types to include besides \"double*\" (which is always included).")
+          ("include", po::value<std::vector<std::string> >(&include)->multitoken(), "Additional include statements for PLibrary.hh")
           ("location,l", po::value<std::string>(&location)->default_value("."), "Location to write library"); 
           
         
@@ -458,7 +462,7 @@ int main(int argc, char *argv[])
     std::cout << "Preparing to write file: " << fileloc.c_str() << "\n\n";
     outfile.open( fileloc.c_str() );
     
-    write_header( c, var, outfile);
+    write_header( c, var, include, outfile);
     outfile.close();
     
     // open file to write
@@ -576,7 +580,10 @@ int main(int argc, char *argv[])
 }
 
 
-void write_header( const Collection &c, std::vector<std::string> var, std::ofstream &sout)
+void write_header( const Collection &c, 
+                   std::vector<std::string> var, 
+                   std::vector<std::string> include, 
+                   std::ofstream &sout)
 {
 
 sout << "// created: " << now() << "\n";
@@ -589,10 +596,15 @@ sout <<
 #define PLIBRARY_HH\n\
 \n\
 #include<cstring>\n\
-#include<vector>\n\
 #include \"IntegrationTools/PFunction.hh\"\n\
-#include \"IntegrationTools/PPieceWise.hh\"\n\
-\n\
+#include \"IntegrationTools/PPieceWise.hh\"\n";
+
+  for(int i=0; i<include.size(); ++i) {
+    sout << "#include " << include[i] << "\n";
+  }
+
+sout <<
+"\n\
 namespace PRISMS\n\
 {\n\
 \n\
@@ -770,8 +782,7 @@ sout <<
 #define PLIBRARY_CC\n\
 \n\
 #include<cstring>\n\
-#include<stdexcept>\n\
-#include<vector>\n";    // < -- edit this
+#include<stdexcept>\n";
 
     for( int i=0; i<c.filename.size(); i++)
     {

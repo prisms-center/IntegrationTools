@@ -2,7 +2,6 @@
 
 HOME = ../..
 SRC = $(HOME)/src/c++
-CPLIB = Library
 INCLUDE = . $(HOME)/include
 
 CXX      = g++
