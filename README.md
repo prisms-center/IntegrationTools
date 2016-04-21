@@ -44,15 +44,9 @@ Installation
 
     You might need to set the following environment variables:
     	
-    - BIN: This specifies where ``lw`` will be installed. If not set, the default location is ``/usr/local/bin``
+    - INTEGRATIONTOOLS_PREFIX: This specifies where headers, the ``lw`` program, and the python module ``pfunction`` will be installed. If not set, the default location is ``/usr/local``. The headers are installed to $(INTEGRATIONTOOLS_PREFIX)/include/IntegrationTools. The ``lw`` program to $(INTEGRATIONTOOLS_PREFIX)/bin/lw. $(INTEGRATIONTOOLS_PREFIX) is passed to the ``--prefix`` option of the python ``setup.py`` installation script.
     	
-    - BOOST: This specifies where the Boost libraries are located. If not set, the default compiler search path is used.
-    	
-    - PYINSTALL: This specifies where to install the Python module ``pfunction``. If not set, it uses the default distutils location.
-
-4. The directory ``include/IntegrationTools`` contains all the header files necessary. You can copy it somewhere in your default header search path, often:
-
-        cp -r include/IntegrationTools /usr/local/include
+    - INTEGRATIONTOOLS_BOOST: This specifies where the Boost libraries are located. If not set, the default compiler search path is used.
 
 
 
