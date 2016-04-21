@@ -399,7 +399,7 @@ int main(int argc, char *argv[])
           ("dylib", "Compile with -dynamiclib instead of -shared") 
           ("dir,d", po::value<std::vector<std::string> >(&dir)->multitoken(), "Directories to check for PSimpleFunctions, PFunctions, and PBasisSets") 
           ("var,v", po::value<std::vector<std::string> >(&var)->multitoken(), "Input variable container types to include besides \"double*\" (which is always included).")
-          ("include", po::value<std::vector<std::string> >(&include)->multitoken(), "Additional include statements for PLibrary.hh")
+          ("include", po::value<std::vector<std::string> >(&include)->multitoken(), "Additional include statements for PLibrary.hh. Ex: '--include \"<vector>\"'")
           ("location,l", po::value<std::string>(&location)->default_value("."), "Location to write library"); 
           
         
