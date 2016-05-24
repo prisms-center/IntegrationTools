@@ -15,14 +15,13 @@ VERS=$$(git rev-parse --abbrev-ref HEAD)
 ID=$$(git rev-parse HEAD)
 URL=$$(git config --get remote.origin.url)
 
-ifeq "$(INTEGRATIONTOOLS_BOOST)" ""
-	LFLAGS = -lboost_program_options -lboost_filesystem -lboost_system -lboost_regex
-else
-	BOOSTLIB = libboost_filesystem.so libboost_program_options.so libboost_regex.so libboost_system.so
-	LFLAGS += $(foreach i, $(BOOSTLIB), $(INTEGRATIONTOOLS_BOOST)/lib/$(i))
+
+ifneq "$(INTEGRATIONTOOLS_BOOST)" ""
+	LFLAGS += -L$(INTEGRATIONTOOLS_BOOST)/lib
 	INCLUDE += $(INTEGRATIONTOOLS_BOOST)/include
 endif
 
+LFLAGS += -lboost_program_options -lboost_filesystem -lboost_system -lboost_regex
 
 CXX      = g++
 CPPFLAGS += $(foreach i,$(INCLUDE),-I$(i))
