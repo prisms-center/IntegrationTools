@@ -6,22 +6,21 @@ TEST = tests
 prefix = /usr/local
 includedir = $(prefix)/include
 
-all: 
+all:
 	@cd $(SRC) && $(MAKE)
 
-install: 
+install:
 	@cd $(SRC) && $(MAKE) install
 	@cp -r include/IntegrationTools $(includedir)
 
 uninstall:
 	@cd $(SRC) && $(MAKE) uninstall
-	@rm -r $(includedir)/IntegrationTools
+	@rm -rf $(includedir)/IntegrationTools
 
-test: 
+test:
 	@cd $(TEST) && $(MAKE)
 
-clean: 
+clean:
 	@cd $(SRC) && $(MAKE) clean
 	@cd $(TEST) && $(MAKE) clean
 	rm -rf .cache .matplotlib
-	

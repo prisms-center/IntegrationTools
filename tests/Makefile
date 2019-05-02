@@ -2,10 +2,10 @@
 
 test:
 	cd PFunction && $(MAKE)
-	@#cd PField && $(MAKE)
-	@#cd python && $(MAKE)
+	cd PField && $(MAKE)
+	cd python && $(MAKE)
 
-clean: 
+clean:
 	cd PFunction && $(MAKE) clean
 	cd PField && $(MAKE) clean
 	cd python && $(MAKE) clean

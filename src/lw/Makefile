@@ -18,6 +18,10 @@ URL=$$(git config --get remote.origin.url)
 
 ifneq "$(INTEGRATIONTOOLS_BOOST)" ""
 	LFLAGS += -L$(INTEGRATIONTOOLS_BOOST)/lib
+	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S),Darwin)
+		LFLAGS += -Wl,-rpath,$(INTEGRATIONTOOLS_BOOST)/lib
+	endif
 	INCLUDE += $(INTEGRATIONTOOLS_BOOST)/include
 endif
 
@@ -25,7 +29,7 @@ LFLAGS += -lboost_program_options -lboost_filesystem -lboost_system -lboost_rege
 
 CXX      = g++
 CPPFLAGS += $(foreach i,$(INCLUDE),-I$(i))
-CPPFLAGS += -O3 
+CPPFLAGS += -O3
 
 
 all : lw
@@ -47,6 +51,5 @@ version.o: version.cc version.hh
 lw: lw.cpp version.o
 	$(CXX) version.o -o lw lw.cpp $(CPPFLAGS) $(LFLAGS)
 
-clean: 
+clean:
 	rm -f *.o lw version.cc
-

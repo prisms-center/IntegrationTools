@@ -14,10 +14,8 @@ install:
 
 uninstall:
 	@cd $(LWSRC) && make uninstall
-	@#cd $(PYTHONSRC) && make uninstall
-	@echo "python module 'pfunction' must be uninstalled manually"
+	@cd $(PYTHONSRC) && make uninstall
 
 clean:
 	@cd $(LWSRC); make clean
 	@cd $(PYTHONSRC); make clean
-

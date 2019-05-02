@@ -3,8 +3,14 @@
 HOME = ../..
 PLIB = $(HOME)/tests/testlib
 
+ifeq "$(INTEGRATIONTOOLS_PYTHON)" ""
+	PYTHON = python
+else
+	PYTHON = $(INTEGRATIONTOOLS_PYTHON)
+endif
+
 test: $(PLIB)/libpextern.so
-	python py_test.py
+	$(PYTHON) py_test.py
 
 $(PLIB)/libpextern.so:
 	cd $(PLIB); make
